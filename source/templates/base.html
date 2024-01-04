@@ -1,28 +1,39 @@
 {% load static %}
+
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="author" content="Martín Arcos Vargas ('https://www.linkedin.com/in/martin-arcos/)">
-    <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/carlos-lucero-programador/)">
+    <meta name="author" content="Martín Arcos Vargas ('https://www.linkedin.com/in/martin-arcos/)" />
+    <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/carlos-lucero-programador/)" />
+    <link href="{% static 'Libs/css/normalize.css' %}" rel="stylesheet" />
+    <link href="{% static 'Libs/bootstrap-5.3.1-dist/css/bootstrap.min.css' %}" rel="stylesheet" />
+    <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/all.min.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/brands.css' %}" rel="stylesheet" type="text/css" />
+    <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/solid.css' %}" rel="stylesheet" />
+    <title>
+      {% block title %}
+        Mutuales | DGC
+      {% endblock %}
+    </title>
 
-    <title>{% block title %}Mutuales | DGC {% endblock %}</title>
-
-    {% block extracss %}
+    {% block extra_css %}
 
     {% endblock %}
   </head>
 
   <body>
-    <!-- Contenido principal de la página que se puede sobrescribir en plantillas secundarias -->
-    {% block container %}
+    {% block content %}
 
     {% endblock %}
 
-    <!-- Scripts JavaScript adicionales que se pueden sobrescribir en plantillas secundarias -->
-    {% block extrajs %}
-
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{% static 'Libs/bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'Libs/js/jquery.min.js' %}"></script>
+    <script src="{% static 'Libs/js/popper.min.js' %}"></script>
+    <script src="{% static 'Libs/js/main.js' %}"></script>
+    {% block extra_js %}
     {% endblock %}
   </body>
 </html>
