@@ -12,9 +12,9 @@ El siguiente proyecto tiene como objetivo migrar código de Java a Python. Este 
 
 ## Elementos
 
-python 3.10.7
+- Python 3.10.7
 
-Django versión 5.0.1
+- Django versión 5.0.1
 
 ##### Páginas de ayuda:
 
