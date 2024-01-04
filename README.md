@@ -1,9 +1,9 @@
 # Mutuales en sistema web
 
-### Descripción
+## Descripción
 El siguiente proyecto tiene como objetivo migrar código de Java a Python. Este proyecto surge de la necesidad de aprovechar las ventajas y la popularidad del lenguaje de programación Python, así como la demanda de convertir un sistema existente escrito en Java.
 
-### Autores
+## Autores
 - Arcos Vargas Martín
 - Lucero Carlos
 
@@ -12,9 +12,9 @@ El siguiente proyecto tiene como objetivo migrar código de Java a Python. Este 
 
 ## Elementos
 
-python 3.10.7
+- Python 3.10.7
 
-Django versión 5.0.1
+- Django versión 5.0.1
 
 ##### Páginas de ayuda:
 
@@ -29,6 +29,8 @@ python -m venv <venv>
 source <venv>/Scripts/activate
   
 cd MutualesWeb_DjangoPython/
+
+cd source/
   
 pip install -r requirements.txt
 
