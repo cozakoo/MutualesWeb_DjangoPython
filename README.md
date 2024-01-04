@@ -13,7 +13,8 @@ El siguiente proyecto tiene como objetivo migrar código de Java a Python. Este 
 ## Elementos
 
 python 3.10.7
-Django versión 4.1.1
+
+Django versión 5.0.1
 
 ##### Páginas de ayuda:
 
@@ -24,7 +25,7 @@ Django versión 4.1.1
 ```bash
 git clone --branch develop https://github.com/cozakoo/MutualesWeb_DjangoPython.git
 
-python3 -m venv <venv>
+python -m venv <venv>
 source <venv>/Scripts/activate
   
 cd MutualesWeb_DjangoPython/
