@@ -1,0 +1,28 @@
+{% load static %}
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Martín Arcos Vargas ('https://www.linkedin.com/in/martin-arcos/)">
+    <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/carlos-lucero-programador/)">
+
+    <title>{% block title %}Mutuales | DGC {% endblock %}</title>
+
+    {% block extracss %}
+
+    {% endblock %}
+  </head>
+
+  <body>
+    <!-- Contenido principal de la página que se puede sobrescribir en plantillas secundarias -->
+    {% block container %}
+
+    {% endblock %}
+
+    <!-- Scripts JavaScript adicionales que se pueden sobrescribir en plantillas secundarias -->
+    {% block extrajs %}
+
+    {% endblock %}
+  </body>
+</html>
