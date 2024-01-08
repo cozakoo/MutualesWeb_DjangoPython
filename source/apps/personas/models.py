@@ -32,3 +32,7 @@ class Rol(models.Model):
     TIPOS = []
     persona = models.ForeignKey(Persona, related_name="roles", on_delete=models.CASCADE)
     tipo = models.PositiveSmallIntegerField(choices=TIPOS)
+    
+    @classmethod
+    def register(cls, Klass):
+        cls.TIPOS.append((Klass.TIPO, Klass.__name__.lower()))
