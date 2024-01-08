@@ -6,8 +6,25 @@
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <label for="{{ form.confirmar_clave.id_for_label }}">Confirmar Contraseña:</label>
-    {{ form.confirmar_clave }}
-    <button type="submit">Guardar</button>
+    <button type="submit" id="submitBtn">Guardar</button>
   </form>
+
+  <!-- Muestra el mensaje de éxito y el enlace simulado de redirección -->
+  {% if messages %}
+    <div class="alert alert-success" role="alert">
+      {{ messages|first }}
+      <a href="#" onclick="simularRedireccion()">Haz clic aquí para simular la redirección</a>
+    </div>
+  {% endif %}
+
+  <!-- Script para simular la redirección con un delay de 2 segundos -->
+  <script>
+    function simularRedireccion() {
+      setTimeout(function () {
+        // Simula la redirección a otra página o muestra un mensaje adicional
+        alert('Se ha simulado la redirección. Ingrese el número de validación.')
+        // Puedes redirigir a otra página con window.location.href si es necesario
+      }, 2000)
+    }
+  </script>
 {% endblock %}
