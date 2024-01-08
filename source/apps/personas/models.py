@@ -8,6 +8,8 @@ class Persona(models.Model):
     nombre = models.CharField(max_length=50, validators=[alpha_validator])
     apellido = models.CharField(max_length=50, validators=[alpha_validator])
     clave = models.CharField(max_length=50)
+     # Utilizado para la confirmacion de contraseña
+    confirmar_clave = models.CharField(max_length=50, default='')
     telefono = models.CharField(max_length=15, validators=[telefono_validator])
     correo = models.EmailField()
     es_empleado_publico = models.BooleanField(default=False)
@@ -15,17 +17,17 @@ class Persona(models.Model):
     
     def clean(self):
         super().clean()
-
         # Validar campos alfabéticos
         for field in ['nombre', 'apellido']:
             value = getattr(self, field)
             if not re.match(self.alpha_regex, value):
                 raise ValidationError(f'{field.capitalize()} no cumple con el formato permitido.')
-
         # Validar número de teléfono
         if not re.match(self.telefono_regex, self.telefono):
             raise ValidationError('Número de teléfono no válido.')
-
+        # Validar la confirmación de contraseña
+        if self.clave != self.confirmar_clave:
+            raise ValidationError('Las contraseñas no coinciden.')
 
 class Rol(models.Model):
     TIPO = 0

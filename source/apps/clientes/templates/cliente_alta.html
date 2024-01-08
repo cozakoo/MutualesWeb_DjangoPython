@@ -1,8 +1,13 @@
 {% extends 'base.html' %}
-{% load crispy_forms_tags %}
 {% load static %}
 
-
 {% block content %}
-<h1>SOY CLIENTE_ALTA</h1>
+  <h2>Formulario para el cliente</h2>
+  <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label for="{{ form.confirmar_clave.id_for_label }}">Confirmar Contraseña:</label>
+    {{ form.confirmar_clave }}
+    <button type="submit">Guardar</button>
+  </form>
 {% endblock %}
