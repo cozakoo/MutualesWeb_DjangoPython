@@ -19,7 +19,7 @@ class Mutual(models.Model):
 
     nombre = models.CharField(max_length=100)
     cuit = models.CharField(max_length=30)
-    estado = models.BooleanField()
+    activo = models.BooleanField()
     fecha_subida = models.DateField(auto_now_add=True, blank=True)
     detalle = models.ManyToManyField(DetalleMutual) 
    

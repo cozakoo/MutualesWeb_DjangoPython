@@ -30,5 +30,6 @@ urlpatterns = [
 
     #APLICACIONES
     path('dashboard/clientes/', include('apps.clientes.urls')),
+    path('dashboard/mutual/', include('apps.mutual.urls')),
 
 ]
