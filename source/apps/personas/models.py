@@ -7,9 +7,10 @@ from django.core.exceptions import ValidationError
 class Persona(models.Model):
     nombre = models.CharField(max_length=50, validators=[alpha_validator])
     apellido = models.CharField(max_length=50, validators=[alpha_validator])
+    username = models.CharField(max_length=50, validators=[alpha_validator])
     clave = models.CharField(max_length=50)
     telefono = models.CharField(max_length=15, validators=[telefono_validator])
-    correo = models.EmailField()
+    correo = models.EmailField(help_text="Ingrese un correo electrónico válido.")
     es_empleado_publico = models.BooleanField(default=False)
     es_cliente = models.BooleanField(default=False)
     
