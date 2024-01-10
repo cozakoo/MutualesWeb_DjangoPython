@@ -18,18 +18,13 @@ class MutualCreateView(CreateView):
     template_name = 'Mutual_alta.html'
     success_url = reverse_lazy('mutual:mutual_exito')
     
+       
     
-    def form_valid(self, form):
-        campo_existente = form.cleaned_data['cuit']
+    
+    def form_invalid(self, form):
+        form.error.clear()
+        return super().form_invalid(form)
         
-        # Verifica si ya existe un objeto con el mismo valor en campo_existente
-        if Mutual.objects.filter(cuit = campo_existente).exists():
-            form.add_error('cuit', 'el cuit ya existe')
-            return self.form_invalid(form)
-        else:
-            # Si no existe, guarda el objeto y realiza las acciones necesarias
-            return super().form_valid(form)
-    
     
     
     
@@ -57,8 +52,16 @@ class MutualCreateView(CreateView):
     
     def form_valid(self, form, d_reclamo, d_prestam):
             
-            
-       
+            campo_existente = form.cleaned_data['cuit']
+            if Mutual.objects.filter(cuit = campo_existente).exists():
+                form.add_error('cuit', 'el cuit ya existe')
+                print("EXISTEEEE")
+                return self.render_to_response(self.get_context_data(form=form))
+        
+        
+ 
+            # Si no existe, guarda el objeto y realiza las acciones necesarias
+      
             m = Mutual(nombre=form.cleaned_data["nombre"],
                       cuit=form.cleaned_data["cuit"],
                       activo = True,
