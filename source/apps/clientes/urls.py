@@ -7,5 +7,4 @@ app_name = "clientes"
 urlpatterns = [
     path('crear/',ClienteCreateView.as_view(), name="cliente_crear"),
     path('confirmacion/', confirmacion_cliente, name='confirmacion_cliente'),
-
 ]
