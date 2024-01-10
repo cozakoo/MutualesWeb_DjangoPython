@@ -6,7 +6,9 @@
   
   <div class = 'container'>
     <h2>Formulario Mutual </h2>
-  <form method="post">{% csrf_token %}
+  <form method="post" autocomplete="off">
+    
+    {% csrf_token %}
     <div class="form-group">
     {{ form.as_p }}
     <div/>
