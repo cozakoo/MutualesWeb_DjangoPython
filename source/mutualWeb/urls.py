@@ -23,7 +23,7 @@ from .views import *
 
 urlpatterns = [
     #PRIINCIPALES
-    path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
+    path('', RedirectView.as_view(url='dashboard/', permanent=False), name='index'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('admin/', admin.site.urls),
     path('dashboard/', dashboard, name='dashboard'),
@@ -31,5 +31,4 @@ urlpatterns = [
     #APLICACIONES
     path('dashboard/clientes/', include('apps.clientes.urls')),
     path('dashboard/mutual/', include('apps.mutual.urls')),
-
 ]
