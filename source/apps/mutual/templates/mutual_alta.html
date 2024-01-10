@@ -2,45 +2,68 @@
 {% load static %}
 
 {% block content %}
-  <div>
-  <h2>Formulario Mutual </h2>
-  <form method="post">{% csrf_token %}
-    {{ form.as_p }}
 
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  
+  <div class = 'container'>
+    <h2>Formulario Mutual </h2>
+  <form method="post">{% csrf_token %}
+    <div class="form-group">
+    {{ form.as_p }}
+    <div/>
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detallePrestamo">
         Crear Detalle Prestamo
     </button>
 
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#crearRelacionadoModal">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detalleReclamo">
         Crear Detalle Reclamo
     </button>
-
+    
       <br>
       <br>
- 
+      <button type="submit" class="btn btn-success"> Crear Mutual</button>
+    </form>
+    
+ <div/>
 
-    <input type="submit" value="Save">
-</form>
+   
 
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<div class="modal fade" id="detalleReclamo" tabindex="1" aria-labelledby="detalleReclamo" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="exampleModalLabel">Detalle Reclamo</h5>
+          <h5 class="modal-title" id="detalleReclamo">Detalle Reclamo</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          ...
+          {{ detalle_reclamo.as_p }}
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">completado</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="modal fade" id="detallePrestamo" tabindex="-1" aria-labelledby="detallePrestamo" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detallePrestamo">Detalle prestamo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          {{ detalle_prestamo.as_p }}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">completado</button>
+          
         </div>
       </div>
     </div>
   </div>
 
-</div>
+
 
   
 {% endblock %}
