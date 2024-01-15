@@ -23,7 +23,8 @@ from .views import *
 
 urlpatterns = [
     #PRIINCIPALES
-    path('', RedirectView.as_view(url='dashboard/', permanent=False), name='index'),
+    path('', bienvenida , name='index'),
+    # path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
     path('login/', CustomLoginView.as_view(), name='login'),
     path('admin/', admin.site.urls),
     path('dashboard/', dashboard, name='dashboard'),

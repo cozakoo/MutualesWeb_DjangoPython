@@ -4,7 +4,7 @@
 {% block content %}
   <h1>Bienvenido {{ user }}</h1>
 
-  <button type="button" class="btn btn-light"><a href="{% url 'clientes:cliente_crear' %}">Crear Cliente</a> </button>
+  {% comment %} <button type="button" class="btn btn-light"><a href="{% url 'clientes:cliente_crear' %}">Crear Cliente</a> </button> {% endcomment %}
   <br>
   <button type="button" class="btn btn-light">    <a href="{% url 'mutual:mutual_crear' %}">Crear Mutual</a></button>
 {% endblock %}
