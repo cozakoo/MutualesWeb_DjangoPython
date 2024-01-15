@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'apps.mutual',
     'apps.clientes',
     'apps.personas',
+    'apps.core',
 ]
 
 MIDDLEWARE = [
