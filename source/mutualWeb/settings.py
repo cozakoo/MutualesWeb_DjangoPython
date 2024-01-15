@@ -51,7 +51,11 @@ INSTALLED_APPS = [
     'apps.clientes',
     'apps.personas',
     'apps.core',
+    'sass_processor',
 ]
+
+SASS_PROCESSOR_ENABLED = True
+SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, 'static')
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

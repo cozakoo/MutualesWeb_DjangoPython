@@ -11,7 +11,10 @@ from django.contrib import messages
 
 
     
-    
+def tu_vista(request):
+    data = Mutual.objects.all()
+    return render(request, 'tu_vista.html', {'data': data})
+  
 class DeclaracionJuradaCreateView(CreateView):
     model = DeclaracionJurada
     template_name = "dj_alta.html"

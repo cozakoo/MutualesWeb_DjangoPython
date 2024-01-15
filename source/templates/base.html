@@ -7,13 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="Martín Arcos Vargas ('https://www.linkedin.com/in/martin-arcos/)" />
     <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/carlos-lucero-programador/)" />
-
+    <link href="https://cdn.datatables.net/v/bs5/datatables.min.css" rel="stylesheet" /> 
     <link href="{% static 'Libs/bootstrap-5.3.1-dist/css/bootstrap.min.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/all.min.css' %}" rel="stylesheet" type="text/css" />
     <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/brands.css' %}" rel="stylesheet" type="text/css" />
     <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/solid.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/css/normalize.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/css/base.css' %}" rel="stylesheet" />
+    {% comment %} <link src="{% static 'Libs/DataTables/DataTables-1.13.8/css/jquery.dataTables.css' %}" rel="stylesheet" /> {% endcomment %}
+   
     
     <title>
       {% block title %}
@@ -39,6 +41,9 @@
     <script src="{% static 'Libs/js/jquery.min.js' %}"></script>
     <script src="{% static 'Libs/js/popper.min.js' %}"></script>
     <script src="{% static 'Libs/js/main.js' %}"></script>
+    {% comment %} <script src="{% static 'Libs/DataTables/DataTables-1.13.8/js/jquery.dataTables.js' %}"></script> {% endcomment %}
+    <script src="https://cdn.datatables.net/v/bs5/datatables.min.js"></script>
+   
     {% block extra_js %}
 
     {% endblock %}
