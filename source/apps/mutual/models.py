@@ -25,7 +25,7 @@ class Mutual(models.Model):
    
     
     def __str__(self):
-        return self.name
+        return self.nombre
     
         
 
@@ -40,5 +40,6 @@ class DeclaracionJurada(models.Model):
     fecha_subida = models.DateField()
     fecha_rectificacion = models.DateField()
     periodo_declarado = models.DateField()
+    archivo = models.FileField(upload_to='documentos/')
     
 

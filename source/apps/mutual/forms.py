@@ -1,5 +1,5 @@
 from django import forms
-from apps.mutual.models import Mutual
+from apps.mutual.models import Mutual , DeclaracionJurada
 
 
 class FormDetalle(forms.Form):
@@ -20,3 +20,7 @@ class FormularioMutual(forms.ModelForm):
         }
         
        
+class FormularioDJ(forms.ModelForm):
+    class Meta:
+        model = DeclaracionJurada
+        fields = '__all__'

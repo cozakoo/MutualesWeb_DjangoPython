@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.views.generic.edit import CreateView
-from .models import Mutual , DetalleMutual
+from .models import Mutual , DetalleMutual , DeclaracionJurada
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -12,15 +12,17 @@ from django.contrib import messages
 
     
     
-    
+class DeclaracionJuradaCreateView(CreateView):
+    model = DeclaracionJurada
+    template_name = "dj_alta.html"
+    form_class = FormularioDJ
+    success_url = reverse_lazy('mutual:mutual_exito')
+
 class MutualCreateView(CreateView):
     model = Mutual
     form_class = FormularioMutual
     template_name = 'Mutual_alta.html'
     success_url = reverse_lazy('mutual:mutual_exito')
-    
-       
-    
     
     def form_invalid(self, form):
         form.error.clear()
@@ -55,8 +57,7 @@ class MutualCreateView(CreateView):
             
             campo_existente = form.cleaned_data['cuit']
             if Mutual.objects.filter(cuit = campo_existente).exists():
-                form.add_error('cuit', 'el cuit ya existe')
-                print("EXISTEEEE")
+                messages.error(self.request,"El cuit ya existe")
                 return self.render_to_response(self.get_context_data(form=form))
         
         
@@ -85,7 +86,7 @@ class MutualCreateView(CreateView):
                 concepto_2 = d_reclamo.cleaned_data['concep2'],
             )
         
-           
+            
             return super().form_valid(form)
    
 def mutual_exito(request):
