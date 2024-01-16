@@ -24,3 +24,4 @@ class FormularioDJ(forms.ModelForm):
     class Meta:
         model = DeclaracionJurada
         fields = '__all__'
+        exclude = ['fecha_subida', 'fecha_rectificacion']

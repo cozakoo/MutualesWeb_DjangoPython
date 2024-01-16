@@ -1,9 +1,11 @@
+from django.forms import ValidationError
 from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from .models import Mutual , DetalleMutual , DeclaracionJurada
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
+
 
 
 
@@ -15,11 +17,56 @@ def tu_vista(request):
     data = Mutual.objects.all()
     return render(request, 'tu_vista.html', {'data': data})
   
+
+
 class DeclaracionJuradaCreateView(CreateView):
     model = DeclaracionJurada
-    template_name = "dj_alta.html"
     form_class = FormularioDJ
+    template_name = "dj_alta.html"
     success_url = reverse_lazy('mutual:mutual_exito')
+
+    def form_valid(self, form):
+        tipo = form.cleaned_data['tipo']
+        print("TIPO")
+        print(tipo)
+        # Asigna valores a los campos de fecha antes de guardar
+        # Procesar el archivo aquí
+        archivo = form.cleaned_data['archivo']
+        if tipo == 'P':
+            self.validar_prestamo(form, archivo)
+        else:
+            self.validar_reclamo(form, archivo)
+        # Guardar el formulario
+        response = super().form_valid(form)
+        # Puedes realizar acciones adicionales después de guardar el formulario si es necesario
+        return response
+
+    def validar_prestamo(self, form, archivo):
+        # print("Validando préstamo")
+        # try:
+            # Imprimir contenido del archivo
+        print("ESTOY LEYENDO EL ARCHIVO:")
+            # with archivo.open() as file:
+                # content = file.read()
+                # print(content)
+            # Agregar lógica de validación del archivo aquí
+            # Por ejemplo, verifica el formato, tamaño, contenido, etc.
+            # Devuelve True si el archivo es válido
+            # return True
+        # except Exception as e:
+            # Si ocurre algún error al intentar leer el archivo
+            # print(f"Error al leer el archivo: {e}")
+            # raise ValidationError("Error al procesar el archivo.")
+        # Puedes acceder a otros campos del formulario si es necesario
+        # monto = form.cleaned_data['monto']
+        # Realiza la validación según tus necesidades
+
+    def validar_reclamo(self, form, archivo):
+        # Agrega lógica de validación específica para tipo distinto de 'P' aquí
+        print("Validando reclamo")
+        # Puedes acceder a otros campos del formulario si es necesario
+        # motivo = form.cleaned_data['motivo']
+        # Realiza la validación según tus necesidades
 
 class MutualCreateView(CreateView):
     model = Mutual
@@ -30,9 +77,6 @@ class MutualCreateView(CreateView):
     def form_invalid(self, form):
         form.error.clear()
         return super().form_invalid(form)
-        
-    
-    
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -99,6 +143,3 @@ def mutual_exito(request):
     #     context = super().get_context_data(**kwargs)
     #     context['titulo'] = "Alta de cliente"
     #     return context
-
-
-    

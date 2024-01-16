@@ -2,23 +2,9 @@
 {% load static %}
 
 {% block content %}
-
-  
-  <div class = 'container'>
-    <h2>Formulario DJ </h2>
-  <form method="post" autocomplete="off">
-    
+  <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
-    
     {{ form.as_p }}
-
-    
-      <button type="submit" class="btn btn-success"> Cargar declaracion jurada</button>
-    </form>
-    
- <div/>
-
-
-
-  
+    <button type="submit">Guardar</button>
+  </form>
 {% endblock %}
