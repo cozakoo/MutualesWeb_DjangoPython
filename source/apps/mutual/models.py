@@ -20,7 +20,7 @@ class Mutual(models.Model):
     nombre = models.CharField(max_length=100)
     cuit = models.BigIntegerField()
     activo = models.BooleanField(default=True)
-    fecha_subida = models.DateField(auto_now_add=True, blank=True)
+    # fecha_subida = models.DateField(auto_now_add=True, blank=True)
     detalle = models.ManyToManyField(DetalleMutual) 
    
     
@@ -48,11 +48,11 @@ class DeclaracionJurada(models.Model):
         ('11', 'Noviembre'),
         ('12', 'Diciembre'),
     ]
-
+# si no fue leida, podes rectificarla
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
     tipo = models.CharField(max_length=1, choices=TIPO_DECLARACION)
-    fecha_subida = models.DateField()
-    fecha_rectificacion = models.DateField()
+    # fecha_subida = models.DateField()
+    # fecha_rectificacion = models.DateField()
     periodo_mes = models.CharField(max_length=2, choices=MESES_CHOICES)
-    periodo_anio = models.IntegerField()  # Puedes usar un IntegerField para el año
+    # periodo_anio = models.IntegerField()  # Puedes usar un IntegerField para el año
     archivo = models.FileField(upload_to='documentos/')
