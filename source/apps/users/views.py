@@ -6,8 +6,10 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from .views import LoginView
 from ..clientes.models import Cliente
-from ..personas.models import Persona, Rol
+from ..personas.models import Persona
 from ..mutual.models import Mutual
+from .models import UserRol
+from django.contrib.auth.models import User
 
 
 
@@ -29,6 +31,7 @@ class RegisterUserMutalView(CreateView):
                 return self.form_invalid()
             else:
                 return self.form_valid(form)
+          
             
     def form_valid(self,form):
          print("SOOOOY EL FORM ")
@@ -36,9 +39,9 @@ class RegisterUserMutalView(CreateView):
          print("SOY username")
          print(form.cleaned_data["username"])
          
+        
+         
          p = Persona(
-              username=form.cleaned_data["username"],
-              clave=form.cleaned_data["password1"],
               correo = form.cleaned_data["email"],
               es_cliente = True
          )
@@ -57,7 +60,8 @@ class RegisterUserMutalView(CreateView):
          
          c.register
          c.save()
-         
+         user = User.objects.create_user(username = form.cleaned_data["username"], password=form.cleaned_data["password1"])
+         UserRol.objects.create(user = user , rol = c)
          return super().form_valid(form)
          
          
