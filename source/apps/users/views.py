@@ -6,8 +6,9 @@ from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
 from .views import LoginView
 from ..clientes.models import Cliente
-from ..personas.models import Persona
+from ..personas.models import Persona, Rol
 from ..mutual.models import Mutual
+
 
 
 # Create your views here.
@@ -50,8 +51,11 @@ class RegisterUserMutalView(CreateView):
          
          c = Cliente (
              persona = p,
-             mutual = e
+             mutual = e,
+             tipo = Cliente.TIPO
            )
+         
+         c.register
          c.save()
          
          return super().form_valid(form)

@@ -39,7 +39,7 @@ class Migration(migrations.Migration):
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('tipo', models.CharField(choices=[('R', 'reclamo'), ('P', 'prestamo')], max_length=1)),
                 ('periodo_mes', models.CharField(choices=[('01', 'Enero'), ('02', 'Febrero'), ('03', 'Marzo'), ('04', 'Abril'), ('05', 'Mayo'), ('06', 'Junio'), ('07', 'Julio'), ('08', 'Agosto'), ('09', 'Septiembre'), ('10', 'Octubre'), ('11', 'Noviembre'), ('12', 'Diciembre')], max_length=2)),
-                ('archivo', models.FileField(upload_to='documentos/')),
+                ('archivo_sub', models.FileField(upload_to='documentos/')),
                 ('mutual', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='mutual.Mutual')),
             ],
         ),
