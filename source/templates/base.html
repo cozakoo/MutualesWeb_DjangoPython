@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="Martín Arcos Vargas ('https://www.linkedin.com/in/martin-arcos/)" />
     <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/carlos-lucero-programador/)" />
+
+    <link href="{% static 'images/escudo.ico' %}" rel='shortcut icon' type='image/png' />
+ 
+    <link href="/staticd/images/escudo.ico" rel='shortcut icon' type='image/png' />
     <link href="https://cdn.datatables.net/v/bs5/datatables.min.css" rel="stylesheet" /> 
     <link href="{% static 'Libs/bootstrap-5.3.1-dist/css/bootstrap.min.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/fontawesome-free-6.4.2-web/fontawesome-free-6.4.2-web/css/all.min.css' %}" rel="stylesheet" type="text/css" />
@@ -15,7 +19,7 @@
     <link href="{% static 'Libs/css/normalize.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/css/base.css' %}" rel="stylesheet" />
     {% comment %} <link src="{% static 'Libs/DataTables/DataTables-1.13.8/css/jquery.dataTables.css' %}" rel="stylesheet" /> {% endcomment %}
-   
+   ''
     
     <title>
       {% block title %}
@@ -29,12 +33,12 @@
   </head>
 
   <body>
-    {% include 'message.html' %}
 
     <!-- Contenido de tu página -->
     {% block content %}
 
     {% endblock %}
+    {% include 'message.html' %}
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="{% static 'Libs/bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>

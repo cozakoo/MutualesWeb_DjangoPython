@@ -5,6 +5,11 @@ from .models import Mutual , DetalleMutual , DeclaracionJurada
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.db import transaction
+
+import linecache
+import sys
+import re
 
 
 
@@ -18,56 +23,175 @@ def tu_vista(request):
     return render(request, 'tu_vista.html', {'data': data})
   
 
+from datetime import datetime
+from timezonefinder import TimezoneFinder
+import pytz
+from django.utils.translation import gettext as _
+
 
 class DeclaracionJuradaCreateView(CreateView):
     model = DeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
     success_url = reverse_lazy('mutual:mutual_exito')
+    LONGITUD_RECLAMO = 57
+    LONGITUD_PRESTAMO = 54
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Encontrar la zona horaria basada en la ubicación
+        tz_finder = TimezoneFinder()
+        ubicacion = tz_finder.timezone_at(lng=-64.1428, lat=-31.4201)  # Coordenadas de Buenos Aires
+
+        # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
+        zona_horaria_argentina = pytz.timezone(ubicacion)
+        fecha_hora_actual = datetime.now(zona_horaria_argentina)
+        
+        # Obtener el mes actual de forma dinámica en español
+        mes_actual = fecha_hora_actual.strftime('%B')
+        mes_actual = _(mes_actual)  # Traducir el nombre del mes
+        
+        # Asignar el título al contexto
+        context['titulo'] = f'Cargar Declaración Jurada para el mes {mes_actual}'
+
+        return context
+    
+    def es_numerico(self, cadena):
+        """Verifica si una cadena está compuesta solo por dígitos."""
+        return bool(re.match("^\d+$", cadena))
 
     def form_valid(self, form):
+        """Maneja la validación del formulario antes de guardarlo."""
         tipo = form.cleaned_data['tipo']
-        print("TIPO")
-        print(tipo)
-        # Asigna valores a los campos de fecha antes de guardar
-        # Procesar el archivo aquí
         archivo = form.cleaned_data['archivo']
-        if tipo == 'P':
-            self.validar_prestamo(form, archivo)
-        else:
-            self.validar_reclamo(form, archivo)
-        # Guardar el formulario
-        response = super().form_valid(form)
-        # Puedes realizar acciones adicionales después de guardar el formulario si es necesario
-        return response
 
-    def validar_prestamo(self, form, archivo):
-        # print("Validando préstamo")
-        # try:
-            # Imprimir contenido del archivo
-        print("ESTOY LEYENDO EL ARCHIVO:")
-            # with archivo.open() as file:
-                # content = file.read()
-                # print(content)
-            # Agregar lógica de validación del archivo aquí
-            # Por ejemplo, verifica el formato, tamaño, contenido, etc.
-            # Devuelve True si el archivo es válido
-            # return True
-        # except Exception as e:
-            # Si ocurre algún error al intentar leer el archivo
-            # print(f"Error al leer el archivo: {e}")
-            # raise ValidationError("Error al procesar el archivo.")
-        # Puedes acceder a otros campos del formulario si es necesario
-        # monto = form.cleaned_data['monto']
-        # Realiza la validación según tus necesidades
+        try:
+            with transaction.atomic():
+                if tipo == 'P':
+                    contenido_archivo = self.validar_prestamo(form, archivo)
+                else:
+                    contenido_archivo = self.validar_reclamo(form, archivo)
+                return super().form_valid(form)
+        except Exception as e:
+            messages.error(self.request, f"Error al procesar el formulario: {e}")
+            return self.form_invalid(form)
 
     def validar_reclamo(self, form, archivo):
-        # Agrega lógica de validación específica para tipo distinto de 'P' aquí
-        print("Validando reclamo")
-        # Puedes acceder a otros campos del formulario si es necesario
-        # motivo = form.cleaned_data['motivo']
-        # Realiza la validación según tus necesidades
+        """Valida el contenido del archivo de RECLAMO."""
+        print("-----  VALIDANDO  RECLAMO  -------")
+        print("")
+        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
+        
+        try:
+            with archivo.open() as file:
+                for line_number, line_content_bytes in enumerate(file, start=1):
+                    line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
+                    print(f"Línea {line_number}: {line_content}")
+                    
+                    # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
+                    if len(line_content) != self.LONGITUD_RECLAMO:
+                        todas_las_lineas_validas = False
+                        break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
+                    else:
+                        self.validar_numero(line_content, line_number, 3, 16, "DOCUMENTO")
+                        self.validar_numero(line_content, line_number, 16, 20, "CONCEPTO")
+                        self.validar_numero(line_content, line_number, 20, 31, "IMPORTE")
+                        self.validar_fecha(line_content, line_number, 31, 39, "FECHA INICIO")
+                        self.validar_fecha(line_content, line_number, 39, 47, "FECHA FIN")
+                        self.validar_numero(line_content, line_number, 47, 54, "CUPON")
+                        self.validar_numero(line_content, line_number, 54, 57, "CUOTA")
+                    print("")
+            
+            # Después de procesar todas las líneas, mostrar el mensaje correspondiente
+            if todas_las_lineas_validas:
+                mensaje_error = "Reclamo cargado correctamente"
+                messages.success(self.request, mensaje_error)
+            else:
+                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
+                messages.warning(self.request, mensaje_error)
 
+            return False
+        except Exception as e:
+            messages.error(self.request, f"Error al leer el archivo: {e}")
+            return False
+        
+
+    def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
+        """Valida un número en una línea."""
+        numero = line_content[inicio:fin]
+        mensaje = f"{tipo_numero}: {numero}"
+        print(mensaje)
+
+        if not self.es_numerico(numero):
+            mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
+            messages.warning(self.request, mensaje_error)
+
+    def validar_fecha(self, line_content, line_number, inicio, fin, tipo_fecha):
+        fecha_str = line_content[inicio:fin]
+        mensaje = f"{tipo_fecha}: {fecha_str}"
+        print(mensaje)
+
+        try:
+            # Convertir la cadena de fecha a un objeto de fecha
+            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
+            print(fecha_obj)
+
+            # Obtener la fecha actual
+            fecha_actual = date.today()
+
+            # Obtener el mes y el año de la fecha de la línea
+            mes_fecha = fecha_obj.month
+            anio_fecha = fecha_obj.year
+
+            # Comparar si la fecha de la línea está dentro del mismo mes que la fecha actual
+            if fecha_obj.month != fecha_actual.month or fecha_obj.year != fecha_actual.year:
+                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} no está dentro del mes actual. Línea: {line_content}"
+                messages.warning(self.request, mensaje_error)
+
+        except ValueError:
+            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
+            messages.warning(self.request, mensaje_error)
+
+
+    def validar_prestamo(self, form, archivo):
+        """Valida el contenido del archivo de PRESTAMO."""
+        print("-----  VALIDANDO  PRESTAMO  -------")
+        print("")
+        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
+
+        try:
+            with archivo.open() as file:
+                for line_number, line_content_bytes in enumerate(file, start=1):
+                    line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
+                    print(f"Línea {line_number}: {line_content}")
+                    
+                    # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
+                    if len(line_content) != self.LONGITUD_PRESTAMO:
+                        todas_las_lineas_validas = False
+                        break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
+                    else:
+                        self.validar_numero(line_content, line_number, 3, 16, "DOCUMENTO")
+                        self.validar_numero(line_content, line_number, 16, 20, "CONCEPTO")
+                        self.validar_numero(line_content, line_number, 20, 31, "IMPORTE")
+                        self.validar_fecha(line_content, line_number, 31, 39, "FECHA INICIO")
+                        self.validar_fecha(line_content, line_number, 39, 47, "FECHA FIN")
+                        self.validar_numero(line_content, line_number, 47, 54, "CUPON")
+                    print("")
+            
+            # Después de procesar todas las líneas, mostrar el mensaje correspondiente
+            if todas_las_lineas_validas:
+                mensaje_error = "Prestamo cargado correctamente"
+                messages.success(self.request, mensaje_error)
+            else:
+                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
+                messages.warning(self.request, mensaje_error)
+
+            return False
+        except Exception as e:
+            messages.error(self.request, f"Error al leer el archivo: {e}")
+            return False
+        
 class MutualCreateView(CreateView):
     model = Mutual
     form_class = FormularioMutual
