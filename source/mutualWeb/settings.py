@@ -50,6 +50,8 @@ INSTALLED_APPS = [
     'apps.mutual',
     'apps.clientes',
     'apps.personas',
+    'apps.administradores',
+    'apps.users',
 ]
 
 SASS_PROCESSOR_ENABLED = True

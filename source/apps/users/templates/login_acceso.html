@@ -2,7 +2,7 @@
 
 {% block title %}
   Iniciar Sesión | Mutuales
-{% endblock %}
+{% endblock %} 
 
 {% block extra_css %}
   {% load static %}
@@ -59,7 +59,7 @@
     <button onclick="showLoginForm()">Iniciar Sesión</button>
   </div>
   
-  <form id="login-form" method="post" action="{% url 'login' %}">
+  <form id="login-form" method="post">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Iniciar Sesión</button>

@@ -25,11 +25,13 @@ urlpatterns = [
     #PRIINCIPALES
     path('', bienvenida , name='index'),
     # path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
-    path('login/', CustomLoginView.as_view(), name='login'),
+    # path('login/', CustomLoginView.as_view(), name='login'),
     path('admin/', admin.site.urls),
     path('dashboard/', dashboard, name='dashboard'),
 
     #APLICACIONES
     path('dashboard/clientes/', include('apps.clientes.urls')),
     path('dashboard/mutual/', include('apps.mutual.urls')),
+    path('dashboard/personas/', include('apps.personas.urls')),
+    path('', include('apps.users.urls'))
 ]

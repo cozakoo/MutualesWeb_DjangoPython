@@ -115,7 +115,7 @@ class MutualCreateView(CreateView):
                       cuit=form.cleaned_data["cuit"],
                       activo = True,
                       )
-            m.save()
+            m.save()         
             m.detalle.create(
                 tipo = "P",
                 origen = d_prestam.cleaned_data['origen'],
