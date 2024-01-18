@@ -27,6 +27,7 @@ from datetime import datetime
 from timezonefinder import TimezoneFinder
 import pytz
 from django.utils.translation import gettext as _
+from datetime import date
 
 
 class DeclaracionJuradaCreateView(CreateView):
@@ -37,9 +38,11 @@ class DeclaracionJuradaCreateView(CreateView):
     LONGITUD_RECLAMO = 57
     LONGITUD_PRESTAMO = 54
     
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
+    def get_success_url(self):
+        # Obtener la URL a la que se debe redirigir después del éxito
+        return reverse_lazy('dashboard')
+
+    def obtener_mes_y_anio_actual(self):
         # Encontrar la zona horaria basada en la ubicación
         tz_finder = TimezoneFinder()
         ubicacion = tz_finder.timezone_at(lng=-64.1428, lat=-31.4201)  # Coordenadas de Buenos Aires
@@ -47,16 +50,21 @@ class DeclaracionJuradaCreateView(CreateView):
         # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
         zona_horaria_argentina = pytz.timezone(ubicacion)
         fecha_hora_actual = datetime.now(zona_horaria_argentina)
-        
-        # Obtener el mes actual de forma dinámica en español
+
+        # Obtener el mes y el año actual de forma dinámica en español
         mes_actual = fecha_hora_actual.strftime('%B')
         mes_actual = _(mes_actual)  # Traducir el nombre del mes
+        año_actual = fecha_hora_actual.strftime('%Y')
         
-        # Asignar el título al contexto
-        context['titulo'] = f'Cargar Declaración Jurada para el mes {mes_actual}'
+        # Devolver el mes y el año en un solo string
+        return f'{mes_actual} del {año_actual}'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        mes_y_anio_actual = self.obtener_mes_y_anio_actual()
+        context['titulo'] = f'Cargar Declaración Jurada para {mes_y_anio_actual}'
         return context
-    
+
     def es_numerico(self, cadena):
         """Verifica si una cadena está compuesta solo por dígitos."""
         return bool(re.match("^\d+$", cadena))
@@ -69,10 +77,25 @@ class DeclaracionJuradaCreateView(CreateView):
         try:
             with transaction.atomic():
                 if tipo == 'P':
-                    contenido_archivo = self.validar_prestamo(form, archivo)
+                    archivo_valido = self.validar_prestamo(form, archivo)
                 else:
-                    contenido_archivo = self.validar_reclamo(form, archivo)
-                return super().form_valid(form)
+                    archivo_valido = self.validar_reclamo(form, archivo)
+
+                if archivo_valido:
+                    print("MI ARCHIVO ES VALIDO")
+                    # Obtener el mes y el año actual
+                    mes_actual = self.obtener_mes_y_anio_actual()
+
+                    # Establecer el valor del campo periodo (Ejemplo: "Enero del 2024")
+                    form.instance.periodo = f"{mes_actual} "
+
+                    # Establecer la fecha de subida
+                    form.instance.fecha_subida = date.today()
+
+                    return super().form_valid(form)
+                else:
+                    return super().form_valid(form)
+                    
         except Exception as e:
             messages.error(self.request, f"Error al procesar el formulario: {e}")
             return self.form_invalid(form)
@@ -183,11 +206,12 @@ class DeclaracionJuradaCreateView(CreateView):
             if todas_las_lineas_validas:
                 mensaje_error = "Prestamo cargado correctamente"
                 messages.success(self.request, mensaje_error)
+                return True
             else:
                 mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
                 messages.warning(self.request, mensaje_error)
+                return False
 
-            return False
         except Exception as e:
             messages.error(self.request, f"Error al leer el archivo: {e}")
             return False

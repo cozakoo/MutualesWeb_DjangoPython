@@ -23,5 +23,4 @@ class FormularioMutual(forms.ModelForm):
 class FormularioDJ(forms.ModelForm):
     class Meta:
         model = DeclaracionJurada
-        fields = '__all__'
-        exclude = ['fecha_rectificacion', 'periodo_mes','mutual']
+        fields = ['tipo', 'archivo']
