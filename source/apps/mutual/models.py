@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.validators import MaxValueValidator
 
 # Create your models here.
 
@@ -18,7 +19,8 @@ class DetalleMutual(models.Model):
 class Mutual(models.Model):
 
     nombre = models.CharField(max_length=100)
-    cuit = models.BigIntegerField()
+    
+    cuit = models.CharField(max_length=11, validators=[MaxValueValidator(99999999999)])
     activo = models.BooleanField(default=True)
     # fecha_subida = models.DateField(auto_now_add=True, blank=True)
     detalle = models.ManyToManyField(DetalleMutual) 
