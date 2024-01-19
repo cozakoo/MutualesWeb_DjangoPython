@@ -1,0 +1,43 @@
+
+body {
+    background: url("{% static 'tu_imagen_de_fondo.jpg' %}") center center fixed;
+    background-size: cover;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+
+
+body,
+html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden;
+    /* Evita el desbordamiento de la página */
+}
+
+body {
+    padding-top: 0px;
+    /* Ajusta la altura según la altura de tu barra de navegación */
+}
+
+.center-container {
+    display: flex;
+    flex-direction: column;
+    /* Coloca los elementos uno encima del otro */
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 50px);
+    /* Ajusta la altura restando la altura de la barra de navegación */
+    overflow: auto;
+    /* Permite el desplazamiento dentro del contenedor si el contenido es más grande */
+}
+
+.center-text {
+    text-align: center;
+}

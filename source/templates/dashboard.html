@@ -2,12 +2,81 @@
 {% load static %}
 
 {% block content %}
-  <h1>Bienvenido {{ user }}</h1>
 
-  {% comment %} <button type="button" class="btn btn-light"><a href="{% url 'clientes:cliente_crear' %}">Crear Cliente</a> </button> {% endcomment %}
-  <br>
-  <button type="button" class="btn btn-light"><a href="{% url 'mutual:mutual_crear' %}">Crear Mutual</a></button>
-  <button type="button" class="btn btn-light"><a href="{% url 'mutual:dj_crear' %}">Crear declaracion Jurada</a></button>
+{% include "navbar.html" %}
+
+{% block contenedor %}
+
+<div id="welcome-message">
+  <h1>¡Bienvenido Martin!</h1>
+  <h5>Mutual asociada: "nombre_mutual" </h5>
+  <h5>Ultima conexion: "ultima_conexion" </h5>
+</div>
+
+{% endblock %}
+
+<style>
+
+  body{
+    background: url("{% static 'montaña.jpg' %}") center center fixed;
+    background-size: cover;
+  }
+
+  body::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* Colocar el pseudo-elemento detrás del contenido principal */
+    background: url("{% static 'montaña.jpg' %}") center center fixed;
+    background-size: cover;
+    filter: blur(10px); /* Ajusta el valor de blur según sea necesario */
+  }
+
+  body, html {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Evita el desbordamiento de la página */
+  }
+
+  body {
+    padding-top: 0px; /* Ajusta la altura según la altura de tu barra de navegación */
+  }
+
+  .center-container {
+    display: flex;
+    flex-direction: column; /* Coloca los elementos uno encima del otro */
+    align-items: center;
+    justify-content: center;
+    height: calc(100% - 50px); /* Ajusta la altura restando la altura de la barra de navegación */
+    overflow: auto; /* Permite el desplazamiento dentro del contenedor si el contenido es más grande */
+    
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    transition: opacity 0.5s ease-in-out;
+
+  }
+
+  #welcome-message {
+    opacity: 1;
+    background-color: rgba(255, 255, 255, 0.4);
+    border-radius: 10px;
+    padding: 20px;
+    width: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: opacity 0.5s ease-in-out;
+    text-align: center;
+  }
+
+
+</style>
+
 {% endblock %}
 
 {% block extrajs %}

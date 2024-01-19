@@ -1,0 +1,47 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-lg bg-body-tertiary" style="background-color: #e3f2fd;">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="{% url 'dashboard' %}">
+        <img src = "{% static 'images/escudo.ico' %}" alt="Logo" width="23" height="25" class="d-inline-block align-text-top">
+        DGC
+      </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Mutual</a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{% url 'mutual:mutual_crear' %}">Crear Mutual</a>
+            </li>
+          </ul>
+        </li>
+        
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Declaración Jurada</a>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="{% url 'mutual:dj_crear' %}">Crear Declaración Jurada</a>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <div class="btn-group">
+        <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
+          Usuario:  Martin Arcos
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
+          <li><button class="dropdown-item" type="button">Ver perfil</button></li>
+          <li><button class="dropdown-item" type="button">Editar perfil</button></li>
+          <li><button class="dropdown-item" type="button">Cerrar Sesión</button></li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</nav>
