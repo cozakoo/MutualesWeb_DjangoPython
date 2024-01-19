@@ -91,7 +91,8 @@ class DeclaracionJuradaCreateView(CreateView):
 
                     # Establecer la fecha de subida
                     form.instance.fecha_subida = date.today()
-
+                    primera_mutual = Mutual.objects.first()
+                    form.instance.mutual = primera_mutual
                     return super().form_valid(form)
                 else:
                     return super().form_valid(form)

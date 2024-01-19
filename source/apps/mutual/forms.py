@@ -21,6 +21,8 @@ class FormularioMutual(forms.ModelForm):
         
        
 class FormularioDJ(forms.ModelForm):
+    archivo = forms.FileField()
+
     class Meta:
         model = DeclaracionJurada
         fields = ['tipo', 'archivo']

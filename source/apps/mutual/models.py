@@ -38,6 +38,8 @@ class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
     tipo = models.CharField(max_length=1, choices=TIPO_DECLARACION)
     fecha_subida = models.DateField()
-    periodo_mes = models.CharField(max_length=25)
-    archivo = models.FileField(upload_to='documentos/')
+    periodo = models.CharField(max_length=25)
+    # archivo = models.FileField(upload_to='documentos/')
+    archivos = models.CharField(max_length=25)
+    
     # fecha_rectificacion = models.DateField()
