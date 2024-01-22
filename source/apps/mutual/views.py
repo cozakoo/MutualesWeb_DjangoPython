@@ -6,6 +6,7 @@ from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db import transaction
+from django.core.files.base import ContentFile
 
 import linecache
 import sys
@@ -93,9 +94,15 @@ class DeclaracionJuradaCreateView(CreateView):
                     form.instance.fecha_subida = date.today()
                     primera_mutual = Mutual.objects.first()
                     form.instance.mutual = primera_mutual
-                    return super().form_valid(form)
+                    
+                    form.instance.archivo = form.cleaned_data['archivos']
+                    
+                    
+                    return super().form_valid(form)                    
+                                            
                 else:
-                    return super().form_valid(form)
+                     print("es invalido")
+                     return super().form_invalid(form)
                     
         except Exception as e:
             messages.error(self.request, f"Error al procesar el formulario: {e}")
@@ -108,7 +115,7 @@ class DeclaracionJuradaCreateView(CreateView):
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
         
         try:
-            with archivo.open() as file:
+                file = archivo.open()
                 for line_number, line_content_bytes in enumerate(file, start=1):
                     line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
                     print(f"Línea {line_number}: {line_content}")
@@ -127,18 +134,18 @@ class DeclaracionJuradaCreateView(CreateView):
                         self.validar_numero(line_content, line_number, 54, 57, "CUOTA")
                     print("")
             
-            # Después de procesar todas las líneas, mostrar el mensaje correspondiente
-            if todas_las_lineas_validas:
-                mensaje_error = "Reclamo cargado correctamente"
-                messages.success(self.request, mensaje_error)
-            else:
-                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
-                messages.warning(self.request, mensaje_error)
-
-            return False
+             # Después de procesar todas las líneas, mostrar el mensaje correspondiente
+                if todas_las_lineas_validas:
+                    mensaje_error = "Reclamo cargado correctamente"
+                    messages.success(self.request, mensaje_error)
+                else:
+                    mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
+                    messages.warning(self.request, mensaje_error)
+                    return False
+        
         except Exception as e:
-            messages.error(self.request, f"Error al leer el archivo: {e}")
-            return False
+          messages.error(self.request, f"Error al leer el archivo: {e}")
+          return False
         
 
     def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
@@ -185,7 +192,7 @@ class DeclaracionJuradaCreateView(CreateView):
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
 
         try:
-            with archivo.open() as file:
+                file = archivo.open() 
                 for line_number, line_content_bytes in enumerate(file, start=1):
                     line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
                     print(f"Línea {line_number}: {line_content}")
@@ -204,18 +211,18 @@ class DeclaracionJuradaCreateView(CreateView):
                     print("")
             
             # Después de procesar todas las líneas, mostrar el mensaje correspondiente
-            if todas_las_lineas_validas:
-                mensaje_error = "Prestamo cargado correctamente"
-                messages.success(self.request, mensaje_error)
-                return True
-            else:
-                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
-                messages.warning(self.request, mensaje_error)
-                return False
+                    if todas_las_lineas_validas:
+                        mensaje_error = "Prestamo cargado correctamente"
+                        messages.success(self.request, mensaje_error)
+                        return True
+                    else:
+                        mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
+                        messages.warning(self.request, mensaje_error)
+                        return False
 
         except Exception as e:
-            messages.error(self.request, f"Error al leer el archivo: {e}")
-            return False
+                    messages.error(self.request, f"Error al leer el archivo: {e}")
+                    return False
         
 class MutualCreateView(CreateView):
     model = Mutual
