@@ -1,71 +1,37 @@
 {% extends 'dashboard.html' %}
 {% load static %}
 
-{% block contenedor %}
-
-  
-  <div class = 'container'>
-    <h2>Formulario Mutual </h2>
-  <form method="post" autocomplete="off">
-    
-    {% csrf_token %}
-    <div class="form-group">
-    {{ form.as_p }}
-    <div/>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detallePrestamo">
-        Crear Detalle Prestamo
-    </button>
-
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detalleReclamo">
-        Crear Detalle Reclamo
-    </button>
-    
-      <br>
-      <br>
-      <button type="submit" class="btn btn-success"> Crear Mutual</button>
-    </form>
-    
- <div/>
-
-   
-
-<div class="modal fade" id="detalleReclamo" tabindex="1" aria-labelledby="detalleReclamo" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="detalleReclamo">Detalle Reclamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {{ detalle_reclamo.as_p }}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">completado</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-  <div class="modal fade" id="detallePrestamo" tabindex="-1" aria-labelledby="detallePrestamo" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="detallePrestamo">Detalle prestamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          {{ detalle_prestamo.as_p }}
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">completado</button>
-          
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-
-  
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
 {% endblock %}
+
+{% block contenedor %}
+  <div class="container cuadrado-background-a">
+    <h2 class="text-center">{{ titulo }}</h2>
+    <form method="post" autocomplete="off">
+      {% csrf_token %}
+      <div class="form-group">
+        {{ form.as_p }}
+        
+        <div class="row">
+          <div class="col">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detallePrestamoModal">Det. Prést.</button>
+          </div>
+
+          <div class="col">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detalleReclamoModal">Det. Recl.</button>
+          </div>
+        </div>
+        
+        <br />
+        <button type="submit" class="btn btn-success">Crear Mutual</button>
+      
+      </div>
+    </form>
+    <div />
+  </div>
+  
+  {% include "modal_detalle_prestamo.html" %}
+  {% include "modal_detalle_reclamo.html" %}
+
+  {% endblock %}

@@ -233,7 +233,7 @@ class DeclaracionJuradaCreateView(CreateView):
 class MutualCreateView(CreateView):
     model = Mutual
     form_class = FormularioMutual
-    template_name = 'Mutual_alta.html'
+    template_name = 'mutual_alta.html'
     success_url = reverse_lazy('mutual:mutual_exito')
     
     def form_invalid(self, form):
@@ -242,12 +242,16 @@ class MutualCreateView(CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
-        context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')    
-        return context 
-    
-   
-   
+        
+        if self.request.method == 'POST':
+            context['detalle_prestamo'] = FormDetalle(self.request.POST, prefix='d_prestamo')
+            context['detalle_reclamo'] = FormDetalle(self.request.POST, prefix='d_reclamo')
+        else:
+            context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
+            context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')
+
+        context['titulo'] = 'Alta de Mutual'
+        return context
     def post(self, request, *args, **kwargs):
             self.object = None
             form_class = self.get_form_class()
