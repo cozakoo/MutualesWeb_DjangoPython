@@ -72,7 +72,7 @@ class DeclaracionJuradaCreateView(CreateView):
     def form_valid(self, form):
         """Maneja la validación del formulario antes de guardarlo."""
         tipo = form.cleaned_data['tipo']
-        archivo = form.cleaned_data['archivo']
+        archivo = form.cleaned_data['archivos']
 
         try:
             with transaction.atomic():

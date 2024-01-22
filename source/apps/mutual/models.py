@@ -14,23 +14,17 @@ class DetalleMutual(models.Model):
     concepto_1 = models.IntegerField()
     concepto_2 = models.IntegerField()
 
-
-
 class Mutual(models.Model):
 
     nombre = models.CharField(max_length=100)
-    
     cuit = models.CharField(max_length=11, validators=[MaxValueValidator(99999999999)])
     activo = models.BooleanField(default=True)
     # fecha_subida = models.DateField(auto_now_add=True, blank=True)
     detalle = models.ManyToManyField(DetalleMutual) 
-   
-    
+
     def __str__(self):
         return self.nombre
     
-        
-
 class DeclaracionJurada(models.Model):
     TIPO_DECLARACION = [
         ('R', 'reclamo'),
@@ -42,6 +36,5 @@ class DeclaracionJurada(models.Model):
     fecha_subida = models.DateField()
     periodo = models.CharField(max_length=25)
     # archivo = models.FileField(upload_to='documentos/')
-    archivos = models.CharField(max_length=25)
-    
+    archivos = models.FileField(upload_to='documentos/')  # Cambiado a FileField
     # fecha_rectificacion = models.DateField()
