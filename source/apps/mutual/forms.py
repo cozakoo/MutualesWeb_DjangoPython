@@ -3,11 +3,22 @@ from apps.mutual.models import Mutual , DeclaracionJurada
 
 
 class FormDetalle(forms.Form):
-    origen = forms.CharField(max_length=100)
-    destino = forms.CharField(max_length=100)
-    concep1= forms.IntegerField()
-    concep2= forms.IntegerField()
+    origen = forms.CharField(max_length=100, initial='')
+    destino = forms.CharField(max_length=100, initial='')
+    concep1 = forms.IntegerField()
+    concep2 = forms.IntegerField()
 
+    def clean_concep1(self):
+        concep1 = self.cleaned_data.get('concep1')
+        if concep1 is not None and concep1 <= 0:
+            raise forms.ValidationError("El valor debe ser mayor que 0.")
+        return concep1
+
+    def clean_concep2(self):
+        concep2 = self.cleaned_data.get('concep2')
+        if concep2 is not None and concep2 <= 0:
+            raise forms.ValidationError("El valor debe ser mayor que 0.")
+        return concep2
 
 class FormularioMutual(forms.ModelForm):
     class Meta:
