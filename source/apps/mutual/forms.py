@@ -19,6 +19,11 @@ class FormularioMutual(forms.ModelForm):
             'cuit': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         
+    def clean_cuit(self):
+        cuit = self.cleaned_data['cuit']
+        if len(cuit) != 11 or not cuit.isdigit():
+            raise forms.ValidationError('El CUIT debe tener 11 dígitos numéricos.')
+        return cuit
        
 class FormularioDJ(forms.ModelForm):
     archivo = forms.FileField()
