@@ -1,4 +1,6 @@
+from typing import Any
 from django.forms import ValidationError
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
 from django.views.generic.edit import CreateView
 from .models import Mutual , DetalleMutual , DeclaracionJurada
@@ -42,7 +44,11 @@ class DeclaracionJuradaCreateView(CreateView):
     def get_success_url(self):
         # Obtener la URL a la que se debe redirigir después del éxito
         return reverse_lazy('dashboard')
-
+    
+    # def post(self, request, *args, **kwargs):
+    #     return form_valid(self, form)
+          
+        
     def obtener_mes_y_anio_actual(self):
         # Encontrar la zona horaria basada en la ubicación
         tz_finder = TimezoneFinder()
