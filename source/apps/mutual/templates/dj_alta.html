@@ -5,9 +5,11 @@
 {% block contenedor %}
 
 <h1> {{titulo}} </h1>
+<div id="welcome-message">
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
     <button type="submit">Guardar</button>
   </form>
+</div>
 {% endblock %}
