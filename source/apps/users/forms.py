@@ -11,6 +11,14 @@ class CustomLoginForm(AuthenticationForm):
 class RegisterUserMutualForm(UserCreationForm):
     email = forms.EmailField(required=True)
     mutual = forms.ModelChoiceField(queryset=Mutual.objects.all(), required=True, help_text="seleccione la mutual que gestionara")
+    
     class Meta:
         model = User  
         fields = UserCreationForm.Meta.fields + ('email',)
+        
+    def clean_email(self):
+        # Validar que el correo electrónico sea único
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo electrónico ya está en uso. Por favor, elige otro.")
+        return email

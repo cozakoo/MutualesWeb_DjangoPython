@@ -14,11 +14,11 @@ class Persona(models.Model):
     def clean(self):
         super().clean()
         
-        # Validar campos alfabéticos
-        for field in ['nombre', 'apellido']:
-            value = getattr(self, field)
-            if not re.match(alpha_validator.regex, value):
-                raise ValidationError(f'{field.capitalize()} no cumple con el formato permitido.')
+        # # Validar campos alfabéticos
+        # for field in ['nombre', 'apellido']:
+        #     value = getattr(self, field)
+        #     if not re.match(alpha_validator.regex, value):
+        #         raise ValidationError(f'{field.capitalize()} no cumple con el formato permitido.')
 
 
 

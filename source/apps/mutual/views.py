@@ -9,6 +9,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db import transaction
 from django.core.files.base import ContentFile
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 import linecache
 import sys
@@ -33,7 +34,10 @@ from django.utils.translation import gettext as _
 from datetime import date
 
 
-class DeclaracionJuradaCreateView(CreateView):
+class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
+    login_url = '/login/'  # Puedes personalizar la URL de inicio de sesión
+    # permission_required = 'nombre_app.puede_realizar_accion'
+    permission_required = 'mutual.add'
     model = DeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
