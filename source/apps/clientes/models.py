@@ -8,6 +8,6 @@ class Cliente(Rol):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.persona.username} {self.mutual.cuit}"
+        return f"{self.id} {self.mutual.cuit}"
 
 Rol.register(Cliente)

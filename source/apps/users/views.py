@@ -9,7 +9,8 @@ from ..clientes.models import Cliente
 from ..personas.models import Persona
 from ..mutual.models import Mutual
 from .models import UserRol
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,Permission
+from django.db import transaction
 
 
 
@@ -22,47 +23,67 @@ class CustomLoginView(LoginView):
 class RegisterUserMutalView(CreateView):
     template_name ='registrar_usuario_mutual.html'
     form_class = RegisterUserMutualForm
+    success_url = reverse_lazy('users:register_userM_exito')
     
     def post(self, request, *args, **kwargs):
             self.object = None
             form_class = self.get_form_class()
             form = self.get_form(form_class)
-            if not form.is_valid:
-                return self.form_invalid()
+            if not form.is_valid():
+                return self.form_invalid(form)
             else:
                 return self.form_valid(form)
           
             
     def form_valid(self,form):
-         print("SOOOOY EL FORM ")
-         print(form)
-         print("SOY username")
-         print(form.cleaned_data["username"])
+            print("SOOOOY EL FORM ")
+            print(form)
+            print("SOY username")
+            print(form.cleaned_data["username"])
          
+            correo = form.cleaned_data["email"]
+        #  with transaction.atomic(): 
+            p = Persona(
+                correo = correo,
+                es_cliente = True
+            )
+            
+            p.save()
+            
+            nombre = form.cleaned_data["mutual"]
+            e = Mutual.objects.get(nombre = nombre)
+            
+            
+            c = Cliente (
+                persona = p,
+                mutual = e,
+                tipo = Cliente.TIPO
+            )
+            
+            c.register
+            c.save()
+            
+            permiso, creado = Permission.objects.get_or_create(
+                                                                codename='add_declaracionjurada',
+                                                                name='Can add declaracion jurada',
+                                                              )
+            
+            
+            form.save() 
+            
+            user = User.objects.get(username=form.cleaned_data["username"])
+            
+            # user.user_permissions.add(permiso)
+            
+            UserRol.objects.create(user = user , rol = c)
+             
+            
+            print("pude añadir permiso")
+            return super().form_valid(form)
         
-         
-         p = Persona(
-              correo = form.cleaned_data["email"],
-              es_cliente = True
-         )
-         
-         p.save()
         
-         nombre = form.cleaned_data["mutual"]
-         e = Mutual.objects.get(nombre = nombre)
-        
-         
-         c = Cliente (
-             persona = p,
-             mutual = e,
-             tipo = Cliente.TIPO
-           )
-         
-         c.register
-         c.save()
-         user = User.objects.create_user(username = form.cleaned_data["username"], password=form.cleaned_data["password1"])
-         UserRol.objects.create(user = user , rol = c)
-         return super().form_valid(form)
+def register_user_mutual_exito(request):
+    return render(request,'registrar_usuario_mutual_exito.html')
          
          
          
