@@ -25,25 +25,27 @@
     <br>
     
     <label for="{{ form.email.id_for_label }}">Correo electrónico:</label>
-    <input type="text" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" class="form-control" value="{{ form.email.value }}" required>
+    <input type="text" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" class="form-control"  required>
 
     <br>
+    
+    
+    
+    <label for="{{ form.password1.id_for_label }}">Contraseña:</label>
+    {{ form.password1 }}
+    <br>
+    
+    <label for="{{ form.password2.id_for_label }}">Confirmar contraseña:</label>
+    {{ form.password2 }}
+    <br>
+    
+    
+    <h1>antiguo form</h1>
+    {{form.as_p}}
     
     <label for="{{ form.mutual.id_for_label }}">Mutual:</label>
     {{ form.mutual }}
     <br>
-
-    <label for="{{ form.password1.id_for_label }}">Contraseña:</label>
-    {{ form.password1 }}
-    <br>
-
-    <label for="{{ form.password2.id_for_label }}">Confirmar contraseña:</label>
-    {{ form.password2 }}
-    <br>
-
-
-    <h1>antiguo form</h1>
-    {{form.as_p}}
     
     <button type="submit">Registrar</button>
   </form>
