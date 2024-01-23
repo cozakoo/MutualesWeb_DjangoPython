@@ -23,6 +23,11 @@ class RegisterUserMutalView(CreateView):
     template_name ='registrar_usuario_mutual.html'
     form_class = RegisterUserMutualForm
     
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Registro Usuario Mutual'
+        return context
+    
     def post(self, request, *args, **kwargs):
             self.object = None
             form_class = self.get_form_class()

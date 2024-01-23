@@ -252,6 +252,7 @@ class MutualCreateView(CreateView):
 
         context['titulo'] = 'Alta de Mutual'
         return context
+
     def post(self, request, *args, **kwargs):
             self.object = None
             form_class = self.get_form_class()

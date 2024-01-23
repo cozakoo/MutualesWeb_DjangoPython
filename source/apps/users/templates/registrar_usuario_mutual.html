@@ -1,64 +1,53 @@
-{% extends 'base.html' %}
+{% extends 'dashboard.html' %}
 
 {% block title %}
-  Registro Usuario Mutales
+  Registro Usuarios | DGC
 {% endblock %} 
 
-{% block extra_css %}
+{% block extra_css_nivel %}
   {% load static %}
-  <style>
-    body {
-      background: url("{% static 'tu_imagen_de_fondo.jpg' %}") center center fixed;
-      background-size: cover;
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-    }
-
-    #welcome-message,
-    #login-form , #form-register{
-      opacity: 1;
-      background-color: rgba(255, 255, 255, 0.8);
-      border-radius: 10px;
-      padding: 20px;
-      width: 500px;
-      
-      transition: opacity 0.5s ease-in-out;
-    }
-    
-
-
-    #welcome-message, #login-form {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
-
-    button {
-      margin-top: 10px;
-    }
-  </style>
+  
 {% endblock %}
 
-{% block content %}
-  
-  <div id = 'form-register' class='container'>
-   <h1>Registro Usuario Mutual</h1>
-    <form id="register-form" method="post">
-    {% csrf_token %}
-    <div class="form-group"> 
- 
-      {{form.as_p}}
 
-    </div>
-    <button type="submit">Registrar</button>
+
+{% block contenedor %}
+<div class="container cuadrado-background">
+  <h2 class="text-center">{{ titulo }}</h2>
+  <form method="post" autocomplete="off">
+    {% csrf_token %}
+
     
+    <label for="{{ form.username.id_for_label }}">Usuario:</label>
+    <input type="text" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" class="form-control" required>
+
+
+    <br>
+    
+    <label for="{{ form.email.id_for_label }}">Correo electrónico:</label>
+    <input type="text" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}" class="form-control" value="{{ form.email.value }}" required>
+
+    <br>
+    
+    <label for="{{ form.mutual.id_for_label }}">Mutual:</label>
+    {{ form.mutual }}
+    <br>
+
+    <label for="{{ form.password1.id_for_label }}">Contraseña:</label>
+    {{ form.password1 }}
+    <br>
+
+    <label for="{{ form.password2.id_for_label }}">Confirmar contraseña:</label>
+    {{ form.password2 }}
+    <br>
+
+
+    <h1>antiguo form</h1>
+    {{form.as_p}}
+    
+    <button type="submit">Registrar</button>
   </form>
+
 </div>
 
 {% endblock %}
