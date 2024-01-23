@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from ..mutual.models import Mutual
 
 class CustomLoginForm(AuthenticationForm):
-    username = forms.CharField(label='username', widget=forms.TextInput(attrs={'autofocus': True}))
+    username = forms.CharField(label='Usuario', widget=forms.TextInput(attrs={'autofocus': True}))
     password = forms.CharField(label='Contraseña', widget=forms.PasswordInput)
 
 

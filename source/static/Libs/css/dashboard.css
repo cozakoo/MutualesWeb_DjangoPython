@@ -1,5 +1,5 @@
 body{
-    background: url("montaña.jpg") center center fixed;
+    background: url("../../images/montaña.jpg") center center fixed;
     background-size: cover;
   }
 
@@ -11,7 +11,7 @@ body{
     width: 100%;
     height: 100%;
     z-index: -1; /* Colocar el pseudo-elemento detrás del contenido principal */
-    background: url("montaña.jpg") center center fixed;
+    background: url("../../images/montaña.jpg") center center fixed;
     background-size: cover;
     filter: blur(10px); /* Ajusta el valor de blur según sea necesario */
   }

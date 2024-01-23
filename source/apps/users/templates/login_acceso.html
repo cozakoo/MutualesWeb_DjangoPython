@@ -7,40 +7,48 @@
 {% block extra_css %}
   {% load static %}
   <style>
-    body {
-      background: url("{% static 'tu_imagen_de_fondo.jpg' %}") center center fixed;
+
+    #background-container {
+      position: relative;
+      height: 100vh;
+      overflow: hidden;
+      background: url("{% static 'images/montaña.jpg' %}") no-repeat center center fixed;
       background-size: cover;
-      margin: 0;
-      padding: 0;
+      transition: filter 0.5s ease-in-out, background 0.5s ease-in-out;
+    }
+
+    #background-container.blur-background::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
       height: 100%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      background: url("{% static 'images/montaña.jpg' %}") no-repeat center center fixed;
+      background-size: cover;
+      filter: blur(10px); /* Ajusta el valor según sea necesario */
     }
 
     #welcome-message,
     #login-form {
       opacity: 1;
-      background-color: rgba(255, 255, 255, 0.8);
       border-radius: 10px;
       padding: 20px;
-      width: 300px;
-
       transition: opacity 0.5s ease-in-out;
     }
 
     #login-form {
       opacity: 0;
       pointer-events: none; /* Desactiva eventos del mouse cuando está oculto */
-      background-color: rgba(255, 255, 255, 0.8);
+      background-color: rgba(255, 255, 255, 0.4);
       padding: 20px;
       border-radius: 10px;
       width: 300px;
       text-align: center;
     }
 
-    #welcome-message, #login-form {
+    #welcome-message, 
+    #login-form {
       position: absolute;
       top: 50%;
       left: 50%;
@@ -50,29 +58,103 @@
     button {
       margin-top: 10px;
     }
+
+    label{
+      margin-top: 5%;
+    }
+
+    #welcome-message{
+      background-color: rgba(236, 240, 241, 0.9);
+      width: 30%;
+      text-align: center;
+      padding-top: 35px;
+      padding-bottom: 35px;
+    }
+
+
+    h1{
+      margin-top: 0;
+      margin-bottom: 0;
+    }
+
+    img{
+      margin-top: 8%;
+      margin-bottom: 8%;
+    }
+    p{
+      margin-bottom: 0px;
+    }
+
+    #iniciar-session{
+      margin-bottom: 10px;
+    }
+
   </style>
 {% endblock %}
-
 {% block content %}
-  <div id="welcome-message">
-    <h1>Bienvenido</h1>
-    <button onclick="showLoginForm()">Iniciar Sesión</button>
+<div id="background-container">
+  
+  <div id="welcome-message" style="text-align: center;">
+
+    <h1 class="text-center">¡Bienvenido al Sistema de Gestión de Mutuales!</h1>
+  
+  
+      <img src="{% static 'images/escudo.ico' %}" alt="Descripción de la imagen" style="width: 30%;">
+  
+        <p>Si eres un empleado público o estás vinculado a una mutual, inicia sesión para acceder a tus servicios.</p>
+  
+  
+  <button class="btn btn-primary" onclick="showLoginForm()" style="margin-top: 20px; background-color: #00a0e3;">Iniciar Sesión</button>  
   </div>
   
+
   <form id="login-form" method="post">
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Iniciar Sesión</button>
+    <h1 id="iniciar-session"> Iniciar Sessión </h1>
+    <input type="{{ form.username.widget.type }}" name="{{ form.username.name }}" placeholder="{{ form.username.label }}" {% if form.username.value %}value="{{ form.username.value }}"{% endif %} class="form-control text-center" required>
+    <br>
+    <div class="password-input-container">
+      <input type="password" 
+             name="{{ form.password.name }}" 
+             placeholder="{{ form.password.label }}" 
+             {% if form.password.value %}value="{{ form.password.value }}"{% endif %}
+             class="form-control text-center password-input" required>
+      <label class="password-toggle" onclick="togglePassword()">
+        <i id="password-icon" class="fa-solid fa-eye"></i>
+      </label>
+    </div>
+    <button type="submit" class="btn btn-primary " onclick="applyBlur()" style="margin-top: 20px; background-color: #00a0e3;"> Iniciar Sesión</button>
   </form>
+</div>
 
   <script>
     function showLoginForm() {
       var welcomeMessage = document.getElementById("welcome-message");
       var loginForm = document.getElementById("login-form");
+      var backgroundContainer = document.getElementById("background-container");
 
       welcomeMessage.style.opacity = "0";
       loginForm.style.opacity = "1";
       loginForm.style.pointerEvents = "auto";
+      backgroundContainer.classList.add('blur-background');
+    }
+
+    function togglePassword() {
+      var passwordInput = document.querySelector(".password-input");
+      passwordInput.type = passwordInput.type === "password" ? "text" : "password";
+    }
+
+    function togglePassword() {
+      var passwordInput = document.querySelector(".password-input");
+      var passwordIcon = document.getElementById("password-icon");
+  
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        passwordIcon.className = "fa-solid fa-eye-slash";
+      } else {
+        passwordInput.type = "password";
+        passwordIcon.className = "fa-solid fa-eye";
+      }
     }
   </script>
 {% endblock %}
