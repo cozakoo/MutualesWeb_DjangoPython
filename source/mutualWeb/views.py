@@ -12,7 +12,7 @@ def dashboard(request):
     userRol = UserRol.objects.get(user = request.user )
     contexto = {
         'rol': userRol.rol,
-        'ultimaSession':request.user.date_joined,
+        'ultimaSession':request.user.last_login,
     }
      
     if  userRol.rol.persona.es_cliente: 
