@@ -9,16 +9,27 @@ class CustomLoginForm(AuthenticationForm):
 
 
 class RegisterUserMutualForm(UserCreationForm):
-    email = forms.EmailField(required=True)
-    mutual = forms.ModelChoiceField(queryset=Mutual.objects.all(), required=True, help_text="seleccione la mutual que gestionara")
+    email = forms.EmailField(required=True, help_text="Debe incluir un signo @ en la dirección de correo electrónico.")
+    mutual = forms.ModelChoiceField(
+        queryset=Mutual.objects.all(),
+        required=True,
+        help_text="Seleccione la mutual que gestionará",
+        widget=forms.Select(attrs={'class': 'form-select'})
+    ) 
     
     class Meta:
         model = User  
         fields = UserCreationForm.Meta.fields + ('email',)
         
     def clean_email(self):
-        # Validar que el correo electrónico sea único
         email = self.cleaned_data.get('email')
+        print("asdasd")
+        # Validar que el correo electrónico sea único
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("Este correo electrónico ya está en uso. Por favor, elige otro.")
+        
+        # Validar que el correo electrónico incluya un signo @
+        if '@' not in email:
+            raise forms.ValidationError("El correo electrónico debe incluir un signo @.")
+        
         return email
