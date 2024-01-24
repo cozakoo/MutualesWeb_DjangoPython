@@ -78,7 +78,7 @@ class RegisterUserMutalView(CreateView):
             
             user = User.objects.get(username=form.cleaned_data["username"])
             
-            # user.user_permissions.add(permiso)
+            user.user_permissions.add(permiso)
             
             UserRol.objects.create(user = user , rol = c)
              

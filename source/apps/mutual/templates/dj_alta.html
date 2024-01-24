@@ -1,8 +1,13 @@
-{% extends 'dashboard.html' %}
+{% extends 'dashboardCliente.html' %}
 {% load static %}
-{% load i18n %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+{% endblock %}
+
 
 {% block contenedor %}
+
 <div class="container cuadrado-background-a">
 <h1> {{titulo}} </h1>
   <form method="post" enctype="multipart/form-data">

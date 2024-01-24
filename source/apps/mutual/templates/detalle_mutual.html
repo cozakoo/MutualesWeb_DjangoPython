@@ -1,0 +1,39 @@
+{% extends 'dashboardCliente.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block contenedor %}
+  <div class="container cuadrado-background-a">
+    <h2 class="text-center text-white-55">Mi mutual</H2> </br>
+    
+        <style>
+            .custom-container {
+              min-width: 0;
+            }
+          </style>
+          
+          <div class="row">
+          {% comment %} <div class="col"> {% endcomment %}
+            <div class="custom-container shadow p-3 mb-4 bg-light rounded d-inline-block">Nombre: {{mimutual.nombre}}</div>
+          {% comment %} </div> {% endcomment %}
+
+          {% comment %} <div class="col"> {% endcomment %}
+            <div class="shadow p-3 mb-4 bg-body rounded">Cuit: {{mimutual.cuit}}</div>
+          </div>
+
+          {% comment %} <div class="col"> {% endcomment %}
+            <div class="custom-container shadow p-3 mb-4 bg-white rounded"> Estado: 
+                {% if mimutual.activo %} Activo {% else %} Inactivo {% endif %}
+            </div>
+          {% comment %} </div> {% endcomment %}
+
+        </div>
+      
+      </div>
+  </div>
+  
+  {% endblock %}
+

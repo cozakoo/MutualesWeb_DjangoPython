@@ -1,11 +1,13 @@
-{% extends 'dashboard.html' %}
+{% extends 'dashboardCliente.html' %}
 {% load static %}
 
 {% block extra_css_nivel %}
   <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
 {% endblock %}
 
+
 {% block contenedor %}
+<div class= "d-flex justify-content-center">
   <div class="container cuadrado-background-a">
     <h2 class="text-center">{{ titulo }}</h2>
     <form method="post" autocomplete="off">
@@ -30,8 +32,11 @@
     </form>
     <div />
   </div>
-  
+</div>
+
   {% include "modal_detalle_prestamo.html" %}
   {% include "modal_detalle_reclamo.html" %}
 
   {% endblock %}
+
+  

@@ -2,7 +2,8 @@ from typing import Any
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView 
+from django.views.generic import DetailView
 from .models import Mutual , DetalleMutual , DeclaracionJurada
 from .forms import *
 from django.urls import reverse_lazy
@@ -10,7 +11,8 @@ from django.contrib import messages
 from django.db import transaction
 from django.core.files.base import ContentFile
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-
+from django.contrib.auth.models import User
+from ..users.models import UserRol
 import linecache
 import sys
 import re
@@ -37,7 +39,7 @@ from datetime import date
 class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'  # Puedes personalizar la URL de inicio de sesión
     # permission_required = 'nombre_app.puede_realizar_accion'
-    permission_required = 'mutual.add'
+    permission_required = 'mutual.add_declaracionjurada'
     model = DeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
@@ -233,6 +235,16 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         except Exception as e:
                     messages.error(self.request, f"Error al leer el archivo: {e}")
                     return False
+
+class DetalleMutualView(DetailView):
+    model = Mutual
+    template_name = 'detalle_mutual.html'
+    context_object_name = 'mimutual'
+    
+    def get_object(self, queryset=None):  
+      userRol = UserRol.objects.get(user = self.request.user )
+      id = userRol.rol.cliente.mutual.id
+      return Mutual.objects.get(id = id)
         
 class MutualCreateView(CreateView):
     model = Mutual

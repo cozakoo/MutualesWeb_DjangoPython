@@ -6,21 +6,15 @@
 {% endblock %}
 
 {% block content %}
-
-  {% if rol.persona.es_cliente %}
     {% include 'navbarCliente.html' %}
-  {% endif %}
-
   {% block extra_css_nivel %}
   {% endblock %}
   {% block contenedor %}
     <div class="cuadrado-background">
       <h1>¡Bienvenido {{ user }}!</h1>
-      <h1>¡Bienvenido {{ rol.persona.id }}!</h1>
       <h5>Mutual asociada: {{ rol.cliente.mutual }}</h5>
       <h5>Ultima conexion: {{ ultimaSession }}</h5>
     </div>
   {% endblock %}
 
 {% endblock %}
-

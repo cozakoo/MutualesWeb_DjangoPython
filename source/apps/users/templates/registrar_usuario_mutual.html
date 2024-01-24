@@ -17,7 +17,7 @@
   <form method="post" autocomplete="off">
     {% csrf_token %}
 
-    
+{% comment %}     
     <label for="{{ form.username.id_for_label }}">Usuario:</label>
     <input type="text" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" class="form-control" required>
 
@@ -40,12 +40,12 @@
     <br>
     
     
-    <h1>antiguo form</h1>
+    <h1>antiguo form</h1> {% endcomment %}
     {{form.as_p}}
     
-    <label for="{{ form.mutual.id_for_label }}">Mutual:</label>
+    {% comment %} <label for="{{ form.mutual.id_for_label }}">Mutual:</label>
     {{ form.mutual }}
-    <br>
+    <br> {% endcomment %}
     
     <button type="submit">Registrar</button>
   </form>
