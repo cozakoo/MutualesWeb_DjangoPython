@@ -1,3 +1,4 @@
+from pyexpat.errors import messages
 from django.shortcuts import render
 from django.contrib.auth.views import LoginView
 from .forms import CustomLoginForm, RegisterUserMutualForm
@@ -11,10 +12,6 @@ from ..mutual.models import Mutual
 from .models import UserRol
 from django.contrib.auth.models import User,Permission
 from django.db import transaction
-
-
-
-# Create your views here.
 
 class CustomLoginView(LoginView):
     template_name = 'login_acceso.html'
@@ -31,16 +28,20 @@ class RegisterUserMutalView(CreateView):
         return context
     
     def post(self, request, *args, **kwargs):
-            self.object = None
-            form_class = self.get_form_class()
-            form = self.get_form(form_class)
-            if not form.is_valid():
-                return self.form_invalid(form)
-            else:
-                return self.form_valid(form)
+        self.object = None
+        form_class = self.get_form_class()
+        form = self.get_form(form_class)
+        if not form.is_valid():
+            return self.form_invalid(form)
+        else:
+            return self.form_valid(form)
           
-            
     def form_valid(self,form):
+        # Verifica si el correo electrónico no contiene el símbolo "@"
+        if 'email' in form.errors and 'El correo electrónico debe incluir un signo @.' in form.errors['email']:
+            messages.error(self.request, 'El correo electrónico debe incluir un signo @.')
+            return super().form_invalid(form)
+        else:
             print("SOOOOY EL FORM ")
             print(form)
             print("SOY username")
@@ -86,7 +87,10 @@ class RegisterUserMutalView(CreateView):
             print("pude añadir permiso")
             return super().form_valid(form)
         
-        
+    def form_invalid(self, form):
+        print("Errores del formulario en form_invalid:", form.errors)
+        return super().form_invalid(form)
+    
 def register_user_mutual_exito(request):
     return render(request,'registrar_usuario_mutual_exito.html')
          
