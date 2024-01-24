@@ -74,8 +74,10 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        u= UserRol.objects.get(user = self.request.user)
+        mutual = u.rol.cliente.mutual.nombre
         mes_y_anio_actual = self.obtener_mes_y_anio_actual()
-        context['titulo'] = f'Cargar Declaración Jurada {mes_y_anio_actual}'
+        context['titulo'] = f'Declaración Jurada, mutual: {mutual} Periodo:{mes_y_anio_actual}'
         return context
 
     def es_numerico(self, cadena):
