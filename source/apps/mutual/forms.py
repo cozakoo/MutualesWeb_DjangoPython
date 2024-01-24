@@ -37,6 +37,10 @@ class FormularioMutual(forms.ModelForm):
         return cuit
        
 class FormularioDJ(forms.ModelForm):
+    tipo = forms.ChoiceField(
+        choices=[('', '-----------')] + list(DeclaracionJurada.TIPO_DECLARACION),
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
     class Meta:
         model = DeclaracionJurada
         fields = ['tipo', 'archivos']  # Cambiado de 'archivo' a 'archivos'

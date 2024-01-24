@@ -70,12 +70,12 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         año_actual = fecha_hora_actual.strftime('%Y')
         
         # Devolver el mes y el año en un solo string
-        return f'{mes_actual} del {año_actual}'
+        return f'{mes_actual} - {año_actual}'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         mes_y_anio_actual = self.obtener_mes_y_anio_actual()
-        context['titulo'] = f'Cargar Declaración Jurada para {mes_y_anio_actual}'
+        context['titulo'] = f'Cargar Declaración Jurada {mes_y_anio_actual}'
         return context
 
     def es_numerico(self, cadena):
