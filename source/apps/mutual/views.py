@@ -85,8 +85,8 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
         context['periodo'] = obtener_mes_y_anio_actual()
 
         periodo = obtener_mes_y_anio_actual()
-        # Verificar si la mutual ya ha cargado algún préstamo
 
+        # Verificar si la mutual ya ha cargado algún préstamo
         mutual = get_object_or_404(Mutual, nombre=context['mutual'])
 
         # Realizar una única consulta para verificar la existencia de préstamos y préstamos leídos en el periodo actual
@@ -112,6 +112,16 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
                     form.instance.archivo = form.cleaned_data['archivos']
                     form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
                     mensaje_error = "Prestamo cargado correctamente"
+
+                    mutual = get_object_or_404(Mutual, nombre=obtenerMutualVinculada(self).nombre)
+                    print(mutual)
+
+                    prestamo_en_periodo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=obtener_mes_y_anio_actual()).first()
+                    print(prestamo_en_periodo)
+                    # Eliminar el objeto prestamo_en_periodo de la base de datos
+                    if prestamo_en_periodo:
+                        prestamo_en_periodo.delete()
+
                     messages.success(self.request, mensaje_error)
                     return super().form_valid(form)                    
                 else:

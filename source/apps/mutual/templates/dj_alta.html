@@ -3,37 +3,55 @@
 
 {% block extra_css_nivel %}
   <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-
 {% endblock %}
 
 {% block contenedor %}
   {% comment %}Preguinto si ya existe un prestamo previamente{% endcomment %}
   {% if existe_prestamo %}
-    <p>YA EXISTE UN PRESTAMO</p>
     {% if prestamo_leido %}
       <p> Y ESE PRESTAMO HA SIDO LEIDO</p>
-    {% else %}
-      <p> Y ESE PRESTAMO NO HA SIDO LEIDO</p>
     {% endif %}
   {% endif %}
   
 
-  
-<!-- Modal -->
-<div class="modal fade" id="miModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
+  <!-- Modal para prestamo no leído -->
+  {% comment %} [implementado] {% endcomment %}
+  <div class="modal fade" id="modalNoLeido" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Información</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Ya se ha generado un archivo de prestamo previamente. ¿Desea reemplazar dicho archivo?
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'dashboard' %}" class="btn btn-primary">Salir</a>
+          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Reemplazar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  {% comment %} FALTA CONFITURAR {% endcomment %}
+<!-- Modal para prestamo leído -->
+<div class="modal" id="modalLeido" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h1 class="modal-title fs-5" id="exampleModalLabel">Ya existe un prestamo</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <h5 class="modal-title">Información</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <div class="modal-body">
-        Usted ya ha generado un prestamo que no ha sido leido aun. ¿Desea reemplazar el prestamo existente?
+        <p>Y ESE PRESTAMO HA SIDO LEÍDO</p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <!-- Puedes agregar botones adicionales o acciones aquí si es necesario -->
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
       </div>
     </div>
   </div>
@@ -51,30 +69,48 @@
       {{ periodo }}
     </p>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post" enctype="multipart/form-data" id="declaracionForm">
       {% csrf_token %}
-
+  
       <div class="mb-3">
-        <label for="{{ form.archivos.id_for_label }}" class="form-label">Archivo</label>
-        <input class="form-control" type="file" id="{{ form.archivos.id_for_label }}" name="{{ form.archivos.name }}" />
+          <label for="{{ form.archivos.id_for_label }}" class="form-label">Archivo</label>
+          <input class="form-control" type="file" id="{{ form.archivos.id_for_label }}" name="{{ form.archivos.name }}" />
       </div>
       <br />
       <div class="text-center">
-        <button type="submit" class="btn btn-primary">Declarar</button>
+          <button type="submit" class="btn btn-success" id="declararBtn" disabled>Declarar</button>
       </div>
-    </form>
+  </form>
   </div>
 
 
-  <!-- Script jQuery -->
-<script>
-  $(document).ready(function() {
-    {% if existe_prestamo and not prestamo_leido %}
-      // Abre el modal si existe un préstamo y no ha sido leído
-      $('#miModal').modal('show');
-    {% endif %}
-  });
-</script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  
+  <script>
+    // Activa el modal correspondiente según las condiciones
+    $(document).ready(function() {
+      {% if existe_prestamo %}
+        {% if prestamo_leido %}
+          $('#modalLeido').modal('show');
+        {% else %}
+          $('#modalNoLeido').modal('show');
+        {% endif %}
+      {% endif %}
 
+        // Habilitar o deshabilitar el botón según si se ha cargado un archivo
+        $('#{{ form.archivos.id_for_label }}').on('change', function() {
+          var fileInput = $(this);
+          var declararBtn = $('#declararBtn');
+
+          if (fileInput.val()) {
+              declararBtn.prop('disabled', false);
+          } else {
+              declararBtn.prop('disabled', true);
+          }
+      });
+
+    });
+  </script>
 
 {% endblock %}
