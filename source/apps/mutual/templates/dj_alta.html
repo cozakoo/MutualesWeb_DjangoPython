@@ -7,10 +7,12 @@
 
 {% block contenedor %}
 
-{% if ha_cargado_prestamo %}
-    <p>La mutual ya ha cargado un préstamo anteriormente.</p>
+{% if existe_prestamo_leido %}
+    <p>La mutual ya tiene una declaración que ha sido leida
+      BOTON DE SALIR
+    </p>
 {% else %}
-    <p>La mutual no ha cargado ningún préstamo anteriormente.</p>
+    <p>La mutual ya tiene una declaración existente. Desea reemplazarla? </p>
 {% endif %}
 
   <div class="container cuadrado-background">
