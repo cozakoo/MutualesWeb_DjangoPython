@@ -24,26 +24,13 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Declaración Jurada</a>
           <ul class="dropdown-menu">
-            
-            <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  Menú Principal
-                </a>
-                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                  <a class="dropdown-item" href="#">Opción 1</a>
-                  <a class="dropdown-item" href="#">Opción 2</a>
-        
-                  <!-- Dropdown anidado -->
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Dropdown Anidado</a>
-                  <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="#">Opción A</a>
-                    <a class="dropdown-item" href="#">Opción B</a>
-                  </div>
-                  <!-- Fin Dropdown anidado -->
-        
-                </div>
-                
+
+            <li>
+              <a class="dropdown-item" href="{% url 'mutual:declarar_prestamo' %}">Declarar Prestamo</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="{% url 'mutual:declarar_prestamo' %}">Declarar Reclamo</a>
+
             </li>
 
             <li>
@@ -55,12 +42,14 @@
 
       <div class="btn-group">
         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-          Usuario:  {{user}}
+          <span class="bi bi-person"></span> Hola, {{user}}
         </button>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-          <li><button class="dropdown-item" type="button">Ver perfil</button></li>
-          <li><button class="dropdown-item" type="button">Editar perfil</button></li>
-          <li><button class="dropdown-item" href='{% users:cerrar_session % }' type="button">Cerrar Sesión</button></li>
+
+          <li><a class="dropdown-item" href="#">Ver perfil</a></li>
+          <li><a class="dropdown-item" href="#">Editar perfil</a></li>
+          <li><a class="dropdown-item" href="{% url 'users:cerrar_session' %}" >Cerrar Sesión</a></li>
+
         </ul>
       </div>
 

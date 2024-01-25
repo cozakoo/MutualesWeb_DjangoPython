@@ -7,8 +7,8 @@ from django.contrib.auth.models import User
 
 
 
-# # @login_required(login_url='login')
-# @login_required
+@login_required(login_url='users:login')
+
 # @permission_required(".add_choice", raise_exception=True)
 def dashboard(request):
     userRol = UserRol.objects.get(user = request.user )

@@ -20,12 +20,13 @@ from django.contrib.auth import logout
 def cerrar_session(request):
     logout(request)
     
-    return redirect('login')
+    return redirect('users:login')
 
 
 class CustomLoginView(LoginView):
     template_name = 'login_acceso.html'
     form_class = CustomLoginForm
+    success_url = reverse_lazy('mutualWeb:dashboard')
     
 class RegisterUserMutalView(CreateView):
     template_name ='registrar_usuario_mutual.html'

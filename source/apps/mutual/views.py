@@ -1,7 +1,7 @@
 from typing import Any
 from django.forms import ValidationError
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 from django.views.generic.edit import CreateView 
 from django.views.generic import DetailView
 from .models import Mutual , DetalleMutual , DeclaracionJurada
@@ -17,13 +17,6 @@ import linecache
 import sys
 import re
 
-
-
-
-# Create your views here.
-
-
-    
 def tu_vista(request):
     data = Mutual.objects.all()
     return render(request, 'tu_vista.html', {'data': data})
@@ -35,7 +28,163 @@ import pytz
 from django.utils.translation import gettext as _
 from datetime import date
 
+def obtener_mes_y_anio_actual():
+        # Encontrar la zona horaria basada en la ubicación
+        tz_finder = TimezoneFinder()
+        ubicacion = tz_finder.timezone_at(lng=-64.1428, lat=-31.4201)  # Coordenadas de Buenos Aires
 
+        # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
+        zona_horaria_argentina = pytz.timezone(ubicacion)
+        fecha_hora_actual = datetime.now(zona_horaria_argentina)
+
+        # Obtener el mes y el año actual de forma dinámica en español
+        mes_actual = fecha_hora_actual.strftime('%B')
+        mes_actual = _(mes_actual)  # Traducir el nombre del mes
+        año_actual = fecha_hora_actual.strftime('%Y')
+        
+        # Devolver el mes y el año en un solo string
+        return f'{mes_actual} del {año_actual}'
+
+def es_numerico(cadena):
+        """Verifica si una cadena está compuesta solo por dígitos."""
+        return bool(re.match("^\d+$", cadena))
+
+def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
+        """Valida un número en una línea."""
+        numero = line_content[inicio:fin]
+        mensaje = f"{tipo_numero}: {numero}"
+        print(mensaje)
+
+        if not es_numerico(numero):
+            mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
+            messages.warning(self.request, mensaje_error)
+
+def validar_fecha(self, line_content, line_number, inicio, fin, tipo_fecha):
+        fecha_str = line_content[inicio:fin]
+        mensaje = f"{tipo_fecha}: {fecha_str}"
+        print(mensaje)
+
+        try:
+            # Convertir la cadena de fecha a un objeto de fecha
+            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
+            print(fecha_obj)
+
+            # Obtener la fecha actual
+            fecha_actual = date.today()
+
+            # Obtener el mes y el año de la fecha de la línea
+            mes_fecha = fecha_obj.month
+            anio_fecha = fecha_obj.year
+
+            # Comparar si la fecha de la línea está dentro del mismo mes que la fecha actual
+            if fecha_obj.month != fecha_actual.month or fecha_obj.year != fecha_actual.year:
+                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} no está dentro del mes actual. Línea: {line_content}"
+                messages.warning(self.request, mensaje_error)
+
+        except ValueError:
+            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
+            messages.warning(self.request, mensaje_error)
+
+
+def obtenerMutualVinculada(self):
+    userRol = UserRol.objects.get(user=self.request.user)
+    mutual = userRol.rol.cliente.mutual
+    return mutual
+    
+class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
+    login_url = '/login/' 
+    permission_required = 'mutual.add_declaracionjurada'
+    model = DeclaracionJurada
+    form_class = FormularioDJ
+    template_name = "dj_alta.html"
+    LONGITUD = 54
+    
+    def get_success_url(self):
+        return reverse_lazy('dashboard')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # u = UserRol.objects.get(user=self.request.user)
+        context['titulo'] = f'Declaración Jurada'
+        context['mutual'] = obtenerMutualVinculada(self).nombre
+        context['periodo'] = obtener_mes_y_anio_actual()
+
+        # Verificar si la mutual ya ha cargado algún préstamo
+        mutual = get_object_or_404(Mutual, nombre=context['mutual'])
+        ha_cargado_prestamo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P').exists()
+        context['ha_cargado_prestamo'] = ha_cargado_prestamo
+
+        return context
+
+    def form_valid(self, form):
+        archivo = form.cleaned_data['archivos']
+
+        try:
+            with transaction.atomic():
+                archivo_valido = self.validar_prestamo(form, archivo)
+                
+                if archivo_valido:
+                    form.instance.periodo = f"{obtener_mes_y_anio_actual()} "
+                    # Establecer la fecha de subida
+                    form.instance.fecha_subida = date.today()
+                    form.instance.mutual = Mutual.objects.first()
+                    form.instance.archivo = form.cleaned_data['archivos']
+                    form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
+                    return super().form_valid(form)                    
+                else:
+                     print("es invalido")
+                     return super().form_invalid(form)
+        except Exception as e:
+            messages.error(self.request, f"Error al procesar el formulario: {e}")
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        print("Formulario no válido. Corrige los errores marcados.")
+        
+        for field, errors in form.errors.items():
+            print(f"Error en el campo {field}: {', '.join(errors)}")
+
+        messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
+        return super().form_invalid(form)
+    
+    def validar_prestamo(self, form, archivo):
+        """Valida el contenido del archivo de PRESTAMO."""
+        print("-----  VALIDANDO  PRESTAMO  -------")
+        print("")
+        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
+
+        try:
+                file = archivo.open() 
+                for line_number, line_content_bytes in enumerate(file, start=1):
+                    line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
+                    print(f"Línea {line_number}: {line_content}")
+                    
+                    # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
+                    if len(line_content) != self.LONGITUD:
+                        todas_las_lineas_validas = False
+                        break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
+                    else:
+                        validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
+                        validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
+                        validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
+                        validar_fecha(self, line_content, line_number, 31, 39, "FECHA INICIO")
+                        validar_fecha(self, line_content, line_number, 39, 47, "FECHA FIN")
+                        validar_numero(self, line_content, line_number, 47, 54, "CUPON")
+                    print("")
+            
+                    if todas_las_lineas_validas:
+                        mensaje_error = "Prestamo cargado correctamente"
+                        messages.success(self.request, mensaje_error)
+                        return True
+                    else:
+                        mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
+                        messages.warning(self.request, mensaje_error)
+                        return False
+
+        except Exception as e:
+                    messages.error(self.request, f"Error al leer el archivo: {e}")
+                    return False
+        
 class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'  # Puedes personalizar la URL de inicio de sesión
     # permission_required = 'nombre_app.puede_realizar_accion'
@@ -77,7 +226,9 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         u= UserRol.objects.get(user = self.request.user)
         mutual = u.rol.cliente.mutual.nombre
         mes_y_anio_actual = self.obtener_mes_y_anio_actual()
-        context['titulo'] = f'Declaración Jurada, mutual: {mutual} Periodo:{mes_y_anio_actual}'
+        context['titulo'] = f'Declaración Jurada'
+        context['mutual'] = f'Mutual Asociada:' + u.rol.cliente.mutual.nombre
+        context['periodo'] = f'Periodo:{mes_y_anio_actual}'
         return context
 
     def es_numerico(self, cadena):
@@ -216,12 +367,12 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                         todas_las_lineas_validas = False
                         break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                     else:
-                        self.validar_numero(line_content, line_number, 3, 16, "DOCUMENTO")
-                        self.validar_numero(line_content, line_number, 16, 20, "CONCEPTO")
-                        self.validar_numero(line_content, line_number, 20, 31, "IMPORTE")
-                        self.validar_fecha(line_content, line_number, 31, 39, "FECHA INICIO")
-                        self.validar_fecha(line_content, line_number, 39, 47, "FECHA FIN")
-                        self.validar_numero(line_content, line_number, 47, 54, "CUPON")
+                        validar_numero(line_content, line_number, 3, 16, "DOCUMENTO")
+                        validar_numero(line_content, line_number, 16, 20, "CONCEPTO")
+                        validar_numero(line_content, line_number, 20, 31, "IMPORTE")
+                        validar_fecha(line_content, line_number, 31, 39, "FECHA INICIO")
+                        validar_fecha(line_content, line_number, 39, 47, "FECHA FIN")
+                        validar_numero(line_content, line_number, 47, 54, "CUPON")
                     print("")
             
             # Después de procesar todas las líneas, mostrar el mensaje correspondiente
