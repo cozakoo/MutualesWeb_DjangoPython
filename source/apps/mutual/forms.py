@@ -44,5 +44,5 @@ class FormularioDJ(forms.ModelForm):
 
     archivos = forms.FileField(
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
-        required=False  # Hacer el campo opcional
+        required=True  # Hacer el campo opcional
     )

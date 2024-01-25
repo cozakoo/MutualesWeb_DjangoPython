@@ -118,11 +118,14 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
                      print("es invalido")
                      return super().form_invalid(form)
         except Exception as e:
-            messages.error(self.request, f"Error al procesar el formulario: {e}")
+            if isinstance(e ,Exception.NoneType):
+              messages.error(self.request, f"cargue un archivo")
+            else:    
+               messages.error(self.request, f"Error al procesar el formulario: {e}")
             return self.form_invalid(form)
 
     def form_invalid(self, form):
-        print("Formulario no válido. Corrige los errores marcados.")
+        print("complete la carga de archivos")
         
         for field, errors in form.errors.items():
             print(f"Error en el campo {field}: {', '.join(errors)}")
@@ -232,7 +235,7 @@ class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, Creat
                     form.instance.periodo = obtener_mes_y_anio_actual()
                     # Establecer la fecha de subida
                     form.instance.fecha_subida = date.today()
-                    form.instance.mutual = obtenerMutualVinculada(self)
+                    form.instance.mutual = Mutual.objects.first()
                     form.instance.archivo = form.cleaned_data['archivos']
                     form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[0][0]  # Asigna 'R' a tipo (reclamo)
                     mensaje_error = "Reclamo cargado correctamente"
