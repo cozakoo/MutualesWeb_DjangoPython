@@ -59,32 +59,6 @@ def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
             mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
 
-def validar_fecha(self, line_content, line_number, inicio, fin, tipo_fecha):
-        fecha_str = line_content[inicio:fin]
-        mensaje = f"{tipo_fecha}: {fecha_str}"
-        print(mensaje)
-
-        try:
-            # Convertir la cadena de fecha a un objeto de fecha
-            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
-            print(fecha_obj)
-
-            # Obtener la fecha actual
-            fecha_actual = date.today()
-
-            # Obtener el mes y el año de la fecha de la línea
-            mes_fecha = fecha_obj.month
-            anio_fecha = fecha_obj.year
-
-            # Comparar si la fecha de la línea está dentro del mismo mes que la fecha actual
-            if fecha_obj.month != fecha_actual.month or fecha_obj.year != fecha_actual.year:
-                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} no está dentro del mes actual. Línea: {line_content}"
-                messages.warning(self.request, mensaje_error)
-
-        except ValueError:
-            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
-            messages.warning(self.request, mensaje_error)
-
 class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/' 
     permission_required = 'mutual.add_declaracionjurada'
@@ -99,15 +73,17 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         u = UserRol.objects.get(user=self.request.user)
-        context['titulo'] = f'Declaración Jurada'
+        context['titulo'] = 'Declaración Jurada (Prestamo)'
         context['mutual'] = u.rol.cliente.mutual.nombre
-        context['periodo'] = obtener_mes_y_anio_actual()
+        periodo = obtener_mes_y_anio_actual()
+        context['periodo'] = periodo
 
         # Verificar si la mutual ya ha cargado algún préstamo
         mutual = get_object_or_404(Mutual, nombre=context['mutual'])
-        ha_cargado_prestamo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P').exists()
-        context['ha_cargado_prestamo'] = ha_cargado_prestamo
 
+        existe_prestamo_leido = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=periodo, leida=True).exists()
+        print(existe_prestamo_leido)
+        context['ha_cargado_prestamo'] = existe_prestamo_leido
         return context
 
     def form_valid(self, form):
@@ -118,12 +94,14 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
                 archivo_valido = self.validar_prestamo(form, archivo)
                 
                 if archivo_valido:
-                    form.instance.periodo = f"{obtener_mes_y_anio_actual()} "
+                    form.instance.periodo = obtener_mes_y_anio_actual()
                     # Establecer la fecha de subida
                     form.instance.fecha_subida = date.today()
                     form.instance.mutual = Mutual.objects.first()
                     form.instance.archivo = form.cleaned_data['archivos']
                     form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
+                    mensaje_error = "Prestamo cargado correctamente"
+                    messages.success(self.request, mensaje_error)
                     return super().form_valid(form)                    
                 else:
                      print("es invalido")
@@ -161,163 +139,22 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
                         validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
                         validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
                         validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
-                        validar_fecha(self, line_content, line_number, 31, 39, "FECHA INICIO")
-                        validar_fecha(self, line_content, line_number, 39, 47, "FECHA FIN")
+                        self.validar_fecha_prestamo(line_content, line_number, 31, 39, "FECHA INICIO")
+                        self.validar_fecha_prestamo(line_content, line_number, 39, 47, "FECHA FIN")
                         validar_numero(self, line_content, line_number, 47, 54, "CUPON")
                     print("")
             
-                    if todas_las_lineas_validas:
-                        mensaje_error = "Prestamo cargado correctamente"
-                        messages.success(self.request, mensaje_error)
-                        return True
-                    else:
-                        mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
-                        messages.warning(self.request, mensaje_error)
-                        return False
+                if not todas_las_lineas_validas:
+                    mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
+                    messages.warning(self.request, mensaje_error)
+                    return False
+                return True
 
         except Exception as e:
                     messages.error(self.request, f"Error al leer el archivo: {e}")
                     return False
         
-class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
-    login_url = '/login/'  # Puedes personalizar la URL de inicio de sesión
-    # permission_required = 'nombre_app.puede_realizar_accion'
-    permission_required = 'mutual.add_declaracionjurada'
-    model = DeclaracionJurada
-    form_class = FormularioDJ
-    template_name = "dj_alta.html"
-    success_url = reverse_lazy('mutual:mutual_exito')
-    LONGITUD_RECLAMO = 57
-    LONGITUD_PRESTAMO = 54
-    
-    def get_success_url(self):
-        # Obtener la URL a la que se debe redirigir después del éxito
-        return reverse_lazy('dashboard')
-    
-    # def post(self, request, *args, **kwargs):
-    #     return form_valid(self, form)
-          
-        
-    def obtener_mes_y_anio_actual(self):
-        # Encontrar la zona horaria basada en la ubicación
-        tz_finder = TimezoneFinder()
-        ubicacion = tz_finder.timezone_at(lng=-64.1428, lat=-31.4201)  # Coordenadas de Buenos Aires
-
-        # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
-        zona_horaria_argentina = pytz.timezone(ubicacion)
-        fecha_hora_actual = datetime.now(zona_horaria_argentina)
-
-        # Obtener el mes y el año actual de forma dinámica en español
-        mes_actual = fecha_hora_actual.strftime('%B')
-        mes_actual = _(mes_actual)  # Traducir el nombre del mes
-        año_actual = fecha_hora_actual.strftime('%Y')
-        
-        # Devolver el mes y el año en un solo string
-        return f'{mes_actual} - {año_actual}'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        u= UserRol.objects.get(user = self.request.user)
-        mutual = u.rol.cliente.mutual.nombre
-        mes_y_anio_actual = self.obtener_mes_y_anio_actual()
-        context['titulo'] = f'Declaración Jurada'
-        context['mutual'] = f'Mutual Asociada:' + u.rol.cliente.mutual.nombre
-        context['periodo'] = f'Periodo:{mes_y_anio_actual}'
-        return context
-
-    def es_numerico(self, cadena):
-        """Verifica si una cadena está compuesta solo por dígitos."""
-        return bool(re.match("^\d+$", cadena))
-
-    def form_valid(self, form):
-        """Maneja la validación del formulario antes de guardarlo."""
-        tipo = form.cleaned_data['tipo']
-        archivo = form.cleaned_data['archivos']
-
-        try:
-            with transaction.atomic():
-                if tipo == 'P':
-                    archivo_valido = self.validar_prestamo(form, archivo)
-                else:
-                    archivo_valido = self.validar_reclamo(form, archivo)
-
-                if archivo_valido:
-                    print("MI ARCHIVO ES VALIDO")
-                    # Obtener el mes y el año actual
-                    mes_actual = self.obtener_mes_y_anio_actual()
-
-                    # Establecer el valor del campo periodo (Ejemplo: "Enero del 2024")
-                    form.instance.periodo = f"{mes_actual} "
-
-                    # Establecer la fecha de subida
-                    form.instance.fecha_subida = date.today()
-                    primera_mutual = Mutual.objects.first()
-                    form.instance.mutual = primera_mutual
-                    
-                    form.instance.archivo = form.cleaned_data['archivos']
-                    
-                    
-                    return super().form_valid(form)                    
-                                            
-                else:
-                     print("es invalido")
-                     return super().form_invalid(form)
-                    
-        except Exception as e:
-            messages.error(self.request, f"Error al procesar el formulario: {e}")
-            return self.form_invalid(form)
-
-    def validar_reclamo(self, form, archivo):
-        """Valida el contenido del archivo de RECLAMO."""
-        print("-----  VALIDANDO  RECLAMO  -------")
-        print("")
-        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
-        
-        try:
-                file = archivo.open()
-                for line_number, line_content_bytes in enumerate(file, start=1):
-                    line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
-                    print(f"Línea {line_number}: {line_content}")
-                    
-                    # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                    if len(line_content) != self.LONGITUD_RECLAMO:
-                        todas_las_lineas_validas = False
-                        break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
-                    else:
-                        self.validar_numero(line_content, line_number, 3, 16, "DOCUMENTO")
-                        self.validar_numero(line_content, line_number, 16, 20, "CONCEPTO")
-                        self.validar_numero(line_content, line_number, 20, 31, "IMPORTE")
-                        self.validar_fecha(line_content, line_number, 31, 39, "FECHA INICIO")
-                        self.validar_fecha(line_content, line_number, 39, 47, "FECHA FIN")
-                        self.validar_numero(line_content, line_number, 47, 54, "CUPON")
-                        self.validar_numero(line_content, line_number, 54, 57, "CUOTA")
-                    print("")
-            
-             # Después de procesar todas las líneas, mostrar el mensaje correspondiente
-                if todas_las_lineas_validas:
-                    mensaje_error = "Reclamo cargado correctamente"
-                    messages.success(self.request, mensaje_error)
-                else:
-                    mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
-                    messages.warning(self.request, mensaje_error)
-                    return False
-        
-        except Exception as e:
-          messages.error(self.request, f"Error al leer el archivo: {e}")
-          return False
-        
-
-    def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
-        """Valida un número en una línea."""
-        numero = line_content[inicio:fin]
-        mensaje = f"{tipo_numero}: {numero}"
-        print(mensaje)
-
-        if not self.es_numerico(numero):
-            mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
-            messages.warning(self.request, mensaje_error)
-
-    def validar_fecha(self, line_content, line_number, inicio, fin, tipo_fecha):
+    def validar_fecha_prestamo(self, line_content, line_number, inicio, fin, tipo_fecha):
         fecha_str = line_content[inicio:fin]
         mensaje = f"{tipo_fecha}: {fecha_str}"
         print(mensaje)
@@ -343,45 +180,130 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
 
+class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
+    login_url = '/login/'  # Puedes personalizar la URL de inicio de sesión
+    # permission_required = 'nombre_app.puede_realizar_accion'
+    permission_required = 'mutual.add_declaracionjurada'
+    model = DeclaracionJurada
+    form_class = FormularioDJ
+    template_name = "dj_alta.html"
+    LONGITUD = 57
 
-    def validar_prestamo(self, form, archivo):
-        """Valida el contenido del archivo de PRESTAMO."""
-        print("-----  VALIDANDO  PRESTAMO  -------")
-        print("")
-        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
+    def get_success_url(self):
+        return reverse_lazy('dashboard')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        u= UserRol.objects.get(user = self.request.user)
+        context['titulo'] = 'Declaración Jurada (Reclamo)'
+        context['mutual'] =  u.rol.cliente.mutual.nombre
+        periodo = obtener_mes_y_anio_actual()
+        context['periodo'] = periodo
+
+        #[FALTA IMPLEMENTAR]
+        # Verificar si la mutual ya ha cargado algún préstamo
+        mutual = get_object_or_404(Mutual, nombre=context['mutual'])
+
+        existe_reclamo_leido = DeclaracionJurada.objects.filter(mutual=mutual, tipo='R', periodo=periodo, leida=True).exists()
+        print(existe_reclamo_leido)
+
+        context['existe_reclamo_leido'] = False
+        return context
+
+    def form_valid(self, form):
+        archivo = form.cleaned_data['archivos']
 
         try:
-                file = archivo.open() 
-                for line_number, line_content_bytes in enumerate(file, start=1):
-                    line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
-                    print(f"Línea {line_number}: {line_content}")
-                    
-                    # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                    if len(line_content) != self.LONGITUD_PRESTAMO:
-                        todas_las_lineas_validas = False
-                        break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
-                    else:
-                        validar_numero(line_content, line_number, 3, 16, "DOCUMENTO")
-                        validar_numero(line_content, line_number, 16, 20, "CONCEPTO")
-                        validar_numero(line_content, line_number, 20, 31, "IMPORTE")
-                        validar_fecha(line_content, line_number, 31, 39, "FECHA INICIO")
-                        validar_fecha(line_content, line_number, 39, 47, "FECHA FIN")
-                        validar_numero(line_content, line_number, 47, 54, "CUPON")
-                    print("")
-            
-            # Después de procesar todas las líneas, mostrar el mensaje correspondiente
-                    if todas_las_lineas_validas:
-                        mensaje_error = "Prestamo cargado correctamente"
-                        messages.success(self.request, mensaje_error)
-                        return True
-                    else:
-                        mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD_RECLAMO} caracteres."
-                        messages.warning(self.request, mensaje_error)
-                        return False
+            with transaction.atomic():
+                archivo_valido = self.validar_reclamo(form, archivo)
+
+                if archivo_valido:
+                    form.instance.periodo = obtener_mes_y_anio_actual()
+                    # Establecer la fecha de subida
+                    form.instance.fecha_subida = date.today()
+                    form.instance.mutual = Mutual.objects.first()
+                    form.instance.archivo = form.cleaned_data['archivos']
+                    form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[0][0]  # Asigna 'R' a tipo (reclamo)
+                    mensaje_error = "Reclamo cargado correctamente"
+                    messages.success(self.request, mensaje_error)
+                    return super().form_valid(form)                    
+                else:
+                     print("es invalido")
+                     return super().form_invalid(form)
 
         except Exception as e:
-                    messages.error(self.request, f"Error al leer el archivo: {e}")
-                    return False
+            messages.error(self.request, f"Error al procesar el formulario: {e}")
+            return self.form_invalid(form)
+
+    def form_invalid(self, form):
+        print("Formulario no válido. Corrige los errores marcados.")
+        
+        for field, errors in form.errors.items():
+            print(f"Error en el campo {field}: {', '.join(errors)}")
+
+        messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
+        return super().form_invalid(form)
+    
+    def validar_reclamo(self, form, archivo):
+        """Valida el contenido del archivo de RECLAMO."""
+        print("-----  VALIDANDO  RECLAMO  -------")
+        print("")
+        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
+        
+        try:
+            file = archivo.open()
+            for line_number, line_content_bytes in enumerate(file, start=1):
+                line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
+                print(f"Línea {line_number}: {line_content}")
+                
+                # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
+                if len(line_content) != self.LONGITUD:
+                    print("ATRAPADAAAAAA")
+                    todas_las_lineas_validas = False
+                    break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
+                else:
+                    validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
+                    validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
+                    validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
+                    self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO")
+                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN")
+                    validar_numero(self, line_content, line_number, 47, 54, "CUPON")
+                    validar_numero(self,line_content, line_number, 54, 57, "CUOTA")
+                print("")
+
+            #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
+            if not todas_las_lineas_validas:
+                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
+                messages.warning(self.request, mensaje_error)
+                return False
+            return True
+
+        except Exception as e:
+          messages.error(self.request, f"Error al leer el archivo: {e}")
+          return False
+
+    def validar_fecha_reclamo(self, line_content, line_number, inicio, fin, tipo_fecha):
+        fecha_str = line_content[inicio:fin]
+        mensaje = f"{tipo_fecha}: {fecha_str}"
+        print(mensaje)
+
+        try:
+            # Convertir la cadena de fecha a un objeto de fecha
+            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
+            print(fecha_obj)
+
+            # Obtener la fecha actual
+            fecha_actual = date.today()
+
+            # Comparar si la fecha de la línea está después de la fecha actual
+            if fecha_obj > fecha_actual:
+                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} es posterior a la fecha actual. Línea: {line_content}"
+                messages.warning(self.request, mensaje_error)
+
+        except ValueError:
+            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
+            messages.warning(self.request, mensaje_error)
+
 
 class DetalleMutualView(DetailView):
     model = Mutual
