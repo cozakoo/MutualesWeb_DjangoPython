@@ -24,12 +24,14 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Declaración Jurada</a>
           <ul class="dropdown-menu">
+
             <li>
               <a class="dropdown-item" href="{% url 'mutual:declarar_prestamo' %}">Declarar Prestamo</a>
             </li>
             <li>
               <a class="dropdown-item" href="{% url 'mutual:declarar_reclamo' %}">Declarar Reclamo</a>
             </li>
+
             <li>
                 <a class="dropdown-item" href="#">Historico</a>
               </li>
@@ -42,9 +44,11 @@
           <span class="bi bi-person"></span> Hola, {{user}}
         </button>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
+
           <li><a class="dropdown-item" href="#">Ver perfil</a></li>
           <li><a class="dropdown-item" href="#">Editar perfil</a></li>
-          <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
+          <li><a class="dropdown-item" href="{% url 'users:cerrar_session' %}" >Cerrar Sesión</a></li>
+
         </ul>
       </div>
 

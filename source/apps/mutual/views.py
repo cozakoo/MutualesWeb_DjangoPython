@@ -59,6 +59,13 @@ def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
             mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
 
+
+def obtenerMutualVinculada(self):
+    userRol = UserRol.objects.get(user=self.request.user)
+    mutual = userRol.rol.cliente.mutual
+    return mutual
+    
+
 class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/' 
     permission_required = 'mutual.add_declaracionjurada'
@@ -69,14 +76,16 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
     
     def get_success_url(self):
         return reverse_lazy('dashboard')
-
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        u = UserRol.objects.get(user=self.request.user)
+
         context['titulo'] = 'Declaración Jurada (Prestamo)'
-        context['mutual'] = u.rol.cliente.mutual.nombre
+        context['mutual'] = obtenerMutualVinculada(self).nombre
+        context['periodo'] = obtener_mes_y_anio_actual()
+
         periodo = obtener_mes_y_anio_actual()
-        context['periodo'] = periodo
+        # Verificar si la mutual ya ha cargado algún préstamo
 
         mutual = get_object_or_404(Mutual, nombre=context['mutual'])
 
@@ -196,9 +205,8 @@ class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, Creat
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        u= UserRol.objects.get(user = self.request.user)
         context['titulo'] = 'Declaración Jurada (Reclamo)'
-        context['mutual'] =  u.rol.cliente.mutual.nombre
+        context['mutual'] = obtenerMutualVinculada(self).nombre
         periodo = obtener_mes_y_anio_actual()
         context['periodo'] = periodo
 

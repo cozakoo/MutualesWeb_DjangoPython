@@ -1,7 +1,13 @@
 from django.db import models
 from django.core.validators import MaxValueValidator
+import uuid
 
 # Create your models here.
+
+
+# class AcuseRecibo(models.Model):
+#     codigo = codigo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+    
 
 class DetalleMutual(models.Model):
     TIPO_DECLARACION = [
@@ -37,4 +43,6 @@ class DeclaracionJurada(models.Model):
     periodo = models.CharField(max_length=25)
     archivos = models.FileField(upload_to='documentos/')  # Cambiado a FileField
     leida = models.BooleanField(default=False)  # Campo leida por defecto False
-    # fecha_rectificacion = models.DateField()
+    rectificativa = models.IntegerField(default=0) #si el valor de la rectificativa es 0 es la orignal
+    codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
+ 
