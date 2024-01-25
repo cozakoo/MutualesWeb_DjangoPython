@@ -78,12 +78,14 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
         periodo = obtener_mes_y_anio_actual()
         context['periodo'] = periodo
 
-        # Verificar si la mutual ya ha cargado algún préstamo
         mutual = get_object_or_404(Mutual, nombre=context['mutual'])
 
-        existe_prestamo_leido = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=periodo, leida=True).exists()
-        print(existe_prestamo_leido)
-        context['ha_cargado_prestamo'] = existe_prestamo_leido
+        # Realizar una única consulta para verificar la existencia de préstamos y préstamos leídos en el periodo actual
+        prestamos_en_periodo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=periodo)
+        
+        context['existe_prestamo'] = prestamos_en_periodo.exists()
+        context['prestamo_leido'] = prestamos_en_periodo.filter(leida=True).exists()
+
         return context
 
     def form_valid(self, form):

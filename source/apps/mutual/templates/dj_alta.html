@@ -3,45 +3,78 @@
 
 {% block extra_css_nivel %}
   <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 {% endblock %}
 
 {% block contenedor %}
+  {% comment %}Preguinto si ya existe un prestamo previamente{% endcomment %}
+  {% if existe_prestamo %}
+    <p>YA EXISTE UN PRESTAMO</p>
+    {% if prestamo_leido %}
+      <p> Y ESE PRESTAMO HA SIDO LEIDO</p>
+    {% else %}
+      <p> Y ESE PRESTAMO NO HA SIDO LEIDO</p>
+    {% endif %}
+  {% endif %}
+  
 
-{% if existe_prestamo_leido %}
-    <p>La mutual ya tiene una declaración que ha sido leida
-      BOTON DE SALIR
-    </p>
-{% else %}
-    <p>La mutual ya tiene una declaración existente. Desea reemplazarla? </p>
-{% endif %}
+  
+<!-- Modal -->
+<div class="modal fade" id="miModal" data-bs-backdrop="static" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Ya existe un prestamo</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        Usted ya ha generado un prestamo que no ha sido leido aun. ¿Desea reemplazar el prestamo existente?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
 
   <div class="container cuadrado-background">
     <h1 class="text-center">{{ titulo }}</h1>
-    <p> 
-      <strong>
-        Mutual: 
-      </strong>
+    <p>
+      <strong>Mutual:</strong>
       {{ mutual }}
     </p>
 
-    <p> 
-      <strong>
-        Periodo: 
-      </strong>
+    <p>
+      <strong>Periodo:</strong>
       {{ periodo }}
     </p>
 
     <form method="post" enctype="multipart/form-data">
       {% csrf_token %}
-      
+
       <div class="mb-3">
         <label for="{{ form.archivos.id_for_label }}" class="form-label">Archivo</label>
-        <input class="form-control" type="file" id="{{ form.archivos.id_for_label }}" name="{{ form.archivos.name }}">
+        <input class="form-control" type="file" id="{{ form.archivos.id_for_label }}" name="{{ form.archivos.name }}" />
       </div>
-      <br>
+      <br />
       <div class="text-center">
         <button type="submit" class="btn btn-primary">Declarar</button>
       </div>
     </form>
   </div>
+
+
+  <!-- Script jQuery -->
+<script>
+  $(document).ready(function() {
+    {% if existe_prestamo and not prestamo_leido %}
+      // Abre el modal si existe un préstamo y no ha sido leído
+      $('#miModal').modal('show');
+    {% endif %}
+  });
+</script>
+
+
 {% endblock %}
