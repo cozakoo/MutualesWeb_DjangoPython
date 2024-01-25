@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from apps.users.models import UserRol
 from django.contrib.auth.models import User
 
+
+
 # # @login_required(login_url='login')
 # @login_required
 # @permission_required(".add_choice", raise_exception=True)
@@ -17,6 +19,9 @@ def dashboard(request):
      
     if  userRol.rol.persona.es_cliente: 
      return render(request, 'dashboardCliente.html',contexto)
+
+
+
 
 
 # class CustomLoginView(LoginView):

@@ -24,9 +24,28 @@
         <li class="nav-item dropdown">
           <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Declaración Jurada</a>
           <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" href="{% url 'mutual:dj_crear' %}">Crear Declaración Jurada</a>
+            
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  Menú Principal
+                </a>
+                <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="#">Opción 1</a>
+                  <a class="dropdown-item" href="#">Opción 2</a>
+        
+                  <!-- Dropdown anidado -->
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">Dropdown Anidado</a>
+                  <div class="dropdown-menu dropdown-menu-right">
+                    <a class="dropdown-item" href="#">Opción A</a>
+                    <a class="dropdown-item" href="#">Opción B</a>
+                  </div>
+                  <!-- Fin Dropdown anidado -->
+        
+                </div>
+                
             </li>
+
             <li>
                 <a class="dropdown-item" href="{% url 'mutual:dj_crear' %}">Historico Declaración Jurada</a>
               </li>
@@ -41,7 +60,7 @@
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
           <li><button class="dropdown-item" type="button">Ver perfil</button></li>
           <li><button class="dropdown-item" type="button">Editar perfil</button></li>
-          <li><button class="dropdown-item" type="button">Cerrar Sesión</button></li>
+          <li><button class="dropdown-item" href='{% users:cerrar_session % }' type="button">Cerrar Sesión</button></li>
         </ul>
       </div>
 
