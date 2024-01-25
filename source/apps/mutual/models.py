@@ -35,6 +35,6 @@ class DeclaracionJurada(models.Model):
     tipo = models.CharField(max_length=1, choices=TIPO_DECLARACION)
     fecha_subida = models.DateField()
     periodo = models.CharField(max_length=25)
-    # archivo = models.FileField(upload_to='documentos/')
     archivos = models.FileField(upload_to='documentos/')  # Cambiado a FileField
+    leida = models.BooleanField(default=False)  # Campo leida por defecto False
     # fecha_rectificacion = models.DateField()

@@ -26,6 +26,7 @@
           <ul class="dropdown-menu">
             <li>
               <a class="dropdown-item" href="{% url 'mutual:dj_crear' %}">Crear Declaración Jurada</a>
+              
             </li>
             
           </ul>
@@ -46,12 +47,12 @@
 
       <div class="btn-group">
         <button type="button" class="btn btn-secondary dropdown-toggle" data-bs-toggle="dropdown" data-bs-display="static" aria-expanded="false">
-          Usuario:  {{user}}
+          <span class="bi bi-person"></span> Hola, {{user}}
         </button>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
-          <li><button class="dropdown-item" type="button">Ver perfil</button></li>
-          <li><button class="dropdown-item" type="button">Editar perfil</button></li>
-          <li><button class="dropdown-item" type="button">Cerrar Sesión</button></li>
+          <li><a class="dropdown-item" href="#">Ver perfil</a></li>
+          <li><a class="dropdown-item" href="#">Editar perfil</a></li>
+          <li><a class="dropdown-item" href="#">Cerrar Sesión</a></li>
         </ul>
       </div>
 
