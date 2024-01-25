@@ -108,7 +108,7 @@ class DeclaracionJuradaPrestamo(LoginRequiredMixin,PermissionRequiredMixin, Crea
                     form.instance.periodo = obtener_mes_y_anio_actual()
                     # Establecer la fecha de subida
                     form.instance.fecha_subida = date.today()
-                    form.instance.mutual = Mutual.objects.first()
+                    form.instance.mutual = obtenerMutualVinculada(self)
                     form.instance.archivo = form.cleaned_data['archivos']
                     form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
                     mensaje_error = "Prestamo cargado correctamente"
@@ -199,6 +199,7 @@ class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, Creat
     form_class = FormularioDJ
     template_name = "dj_alta.html"
     LONGITUD = 57
+    
 
     def get_success_url(self):
         return reverse_lazy('dashboard')
@@ -231,7 +232,7 @@ class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, Creat
                     form.instance.periodo = obtener_mes_y_anio_actual()
                     # Establecer la fecha de subida
                     form.instance.fecha_subida = date.today()
-                    form.instance.mutual = Mutual.objects.first()
+                    form.instance.mutual = obtenerMutualVinculada(self)
                     form.instance.archivo = form.cleaned_data['archivos']
                     form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[0][0]  # Asigna 'R' a tipo (reclamo)
                     mensaje_error = "Reclamo cargado correctamente"
