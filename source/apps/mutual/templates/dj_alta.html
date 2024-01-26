@@ -63,54 +63,71 @@
       <strong>Mutual:</strong>
       {{ mutual }}
     </p>
-
-    <p>
-      <strong>Periodo:</strong>
-      {{ periodo }}
-    </p>
-
+    
     <form method="post" enctype="multipart/form-data" id="declaracionForm">
       {% csrf_token %}
+
+      <div class="row">
+        <div class="col">
+        <p>
+      <strong>Mes:</strong>
+      {{ form.mes }}
+    </p>
+        </div>
+        <div class="col">
+
+    <p>
+      <strong>Año:</strong>
+      {{ form.anio }}
+    </p>
+        </div></div>
+      
+      <div class="mb-3">
+          <h5> Prestamo</h5>
+          <input class="form-control" type="file" name="{{ form.archivo_p.name }}" id="{{ form.archivo_p.id_for_label }}" />
+        </div>
   
       <div class="mb-3">
-          <label for="{{ form.archivos.id_for_label }}" class="form-label">Archivo</label>
-          <input class="form-control" type="file" id="{{ form.archivos.id_for_label }}" name="{{ form.archivos.name }}" />
-      </div>
+          <h5>Reclamo</h5>
+          <input class="form-control" type="file" name="{{ form.archivo_r.name }}" id="{{ form.archivo_r.id_for_label }}" />
+        </div>
+  
       <br />
-      <div class="text-center">
+      <div class="text-center"> 
           <button type="submit" class="btn btn-success" id="declararBtn" disabled>Declarar</button>
       </div>
   </form>
-  </div>
-
-
+  
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  
+    
   <script>
-    // Activa el modal correspondiente según las condiciones
-    $(document).ready(function() {
-      {% if existe_prestamo %}
-        {% if prestamo_leido %}
-          $('#modalLeido').modal('show');
-        {% else %}
-          $('#modalNoLeido').modal('show');
-        {% endif %}
-      {% endif %}
+    // Activar el botón cuando se carguen ambos archivos
+// Activar el botón cuando se carguen ambos archivos
+$(document).ready(function() {
+  $('#{{ form.archivo_p.id_for_label }}').on('change', function() {
+      var archivoP = $(this);
+      var archivoR = $('#{{ form.archivo_r.id_for_label }}');
+      var declararBtn = $('#declararBtn');
 
-        // Habilitar o deshabilitar el botón según si se ha cargado un archivo
-        $('#{{ form.archivos.id_for_label }}').on('change', function() {
-          var fileInput = $(this);
-          var declararBtn = $('#declararBtn');
+      if (archivoP.val() && archivoR.val()) {
+          declararBtn.prop('disabled', false);
+      } else {
+          declararBtn.prop('disabled', true);
+      }
+  });
 
-          if (fileInput.val()) {
-              declararBtn.prop('disabled', false);
-          } else {
-              declararBtn.prop('disabled', true);
-          }
-      });
+  $('#{{ form.archivo_r.id_for_label }}').on('change', function() {
+      var archivoP = $('#{{ form.archivo_p.id_for_label }}');
+      var archivoR = $(this);
+      var declararBtn = $('#declararBtn');
 
-    });
+      if (archivoP.val() && archivoR.val()) {
+          declararBtn.prop('disabled', false);
+      } else {
+          declararBtn.prop('disabled', true);
+      }
+  });
+});
   </script>
-
-{% endblock %}
+  {% endblock %}

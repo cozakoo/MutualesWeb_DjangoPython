@@ -31,18 +31,24 @@ class Mutual(models.Model):
     def __str__(self):
         return self.nombre
     
+
+##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DeclaracionJurada(models.Model):
-    TIPO_DECLARACION = [
-        ('R', 'reclamo'),
-        ('P', 'prestamo'),
-    ]
-    # si no fue leida, podes rectificarla
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
-    tipo = models.CharField(max_length=1, choices=TIPO_DECLARACION)
     fecha_subida = models.DateField()
-    periodo = models.CharField(max_length=25)
-    archivos = models.FileField(upload_to='documentos/')  # Cambiado a FileField
-    leida = models.BooleanField(default=False)  # Campo leida por defecto False
-    rectificativa = models.IntegerField(default=0) #si el valor de la rectificativa es 0 es la orignal
+    periodo = models.DateField()
+    rectificativa = models.IntegerField(default=0)
     codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
- 
+    leida = models.BooleanField(default=False)
+
+class DetalleDeclaracionJurada(models.Model):
+    TIPO = [
+        ('P', 'prestamo'),
+        ('R', 'reclamo'),
+    ]
+    declaracion_jurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=1, choices=TIPO)
+    importe = models.DecimalField(max_digits=10, decimal_places=2)
+    archivo = models.FileField(upload_to='documentos/')
+    total_registros= models.IntegerField(default=0)  # Nuevo campo
+##-----------------------------------------------------------------------
