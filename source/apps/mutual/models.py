@@ -23,13 +23,32 @@ class DetalleMutual(models.Model):
 class Mutual(models.Model):
 
     nombre = models.CharField(max_length=100)
-    cuit = models.CharField(max_length=11, validators=[MaxValueValidator(99999999999)])
+    cuit = models.CharField(max_length=11)
     activo = models.BooleanField(default=True)
     # fecha_subida = models.DateField(auto_now_add=True, blank=True)
     detalle = models.ManyToManyField(DetalleMutual) 
 
     def __str__(self):
         return self.nombre
+    
+    
+    
+
+    
+    
+class DetalleDeclaracionJurada(models.Model):
+    
+    TIPO = [
+        ('P', 'prestamo'),
+        ('R', 'reclamo'),
+    ]
+    
+    tipo = models.CharField(max_length=1, choices=TIPO)
+    importe = models.DecimalField(max_digits=10, decimal_places=2)
+    archivo = models.FileField(upload_to='documentos/')
+    total_registros= models.IntegerField(default=0)  # Nuevo campo
+
+        
     
 
 ##-------------------- DECLARACION JURADA Y DETALLE ---------------------
@@ -40,15 +59,11 @@ class DeclaracionJurada(models.Model):
     rectificativa = models.IntegerField(default=0)
     codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     leida = models.BooleanField(default=False)
+    detalles = models.ManyToManyField(DetalleDeclaracionJurada,related_name='detalles', blank=True, through = "DeclaracionJuradaDetalles")
 
-class DetalleDeclaracionJurada(models.Model):
-    TIPO = [
-        ('P', 'prestamo'),
-        ('R', 'reclamo'),
-    ]
-    declaracion_jurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
-    tipo = models.CharField(max_length=1, choices=TIPO)
-    importe = models.DecimalField(max_digits=10, decimal_places=2)
-    archivo = models.FileField(upload_to='documentos/')
-    total_registros= models.IntegerField(default=0)  # Nuevo campo
-##-----------------------------------------------------------------------
+
+
+
+class DeclaracionJuradaDetalles(models.Model):
+    declaracionJurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
+    detalleDeclaracionJurada = models.ForeignKey(DetalleDeclaracionJurada, on_delete=models.CASCADE)

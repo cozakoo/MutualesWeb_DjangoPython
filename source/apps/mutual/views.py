@@ -16,13 +16,21 @@ from ..users.models import UserRol
 import linecache
 import sys
 import re
-
+import locale
+from dateutil.relativedelta import relativedelta
+from django.core.exceptions import ObjectDoesNotExist
+    
+    
+    
+    
+    
 def tu_vista(request):
     data = Mutual.objects.all()
     return render(request, 'tu_vista.html', {'data': data})
   
 
 from datetime import datetime
+import calendar
 from timezonefinder import TimezoneFinder
 import pytz
 from django.utils.translation import gettext as _
@@ -35,15 +43,21 @@ def obtener_mes_y_anio_actual():
 
         # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
         zona_horaria_argentina = pytz.timezone(ubicacion)
-        fecha_hora_actual = datetime.now(zona_horaria_argentina)
+        fecha_hora_actual = datetime.today()
+        
+        
 
         # Obtener el mes y el año actual de forma dinámica en español
-        mes_actual = fecha_hora_actual.strftime('%B')
-        mes_actual = _(mes_actual)  # Traducir el nombre del mes
-        año_actual = fecha_hora_actual.strftime('%Y')
+        mes_actual = fecha_hora_actual.month
+        año_actual = fecha_hora_actual.year
         
+        print(año_actual)
+        
+        periodo = datetime(año_actual, mes_actual, 1).date()
+       
+        print(periodo)
         # Devolver el mes y el año en un solo string
-        return f'{mes_actual} {año_actual}'
+        return periodo
 
 def es_numerico(cadena):
         """Verifica si una cadena está compuesta solo por dígitos."""
@@ -64,7 +78,29 @@ def obtenerMutualVinculada(self):
     userRol = UserRol.objects.get(user=self.request.user)
     mutual = userRol.rol.cliente.mutual
     return mutual
+
+def obtenerPeriodoVigente():
+  try:
+        periodoActual = obtener_mes_y_anio_actual()
+        
     
+        if(DeclaracionJurada.objects.get(periodo = periodoActual)):
+                dj = DeclaracionJurada.objects.get(periodo = periodoActual)
+                if(dj.leida):
+                    mesSiguiente = periodoActual + relativedelta(months=1)
+                    print(mesSiguiente)
+                    return mesSiguiente
+                else:
+                    return periodoActual
+        
+  except ObjectDoesNotExist: 
+         return periodoActual
+
+  return periodoActual
+       
+          
+    # # DeclaracionJurada.objects.get()
+    # return  obtener_mes_y_anio_actual()
 
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'
@@ -81,7 +117,14 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Declaración Jurada'
         mutual = obtenerMutualVinculada(self)
-
+        
+        periodo = obtenerPeriodoVigente()
+        
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
+        context['periodo'] =  periodoText
+        
+       
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
 
@@ -145,8 +188,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             try:
                 with transaction.atomic():
                     archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-
-                    return super().form_invalid(form)
+                    
+                    # form.instance.
+                    return super().form_valid(form)
             except Exception as e:
                 messages.error(self.request, f"Error al procesar el formulario: {e}")
                 return self.form_invalid(form)
@@ -336,7 +380,7 @@ class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, Creat
         context['titulo'] = 'Declaración Jurada (Reclamo)'
         context['mutual'] = obtenerMutualVinculada(self).nombre
         periodo = obtener_mes_y_anio_actual()
-        context['periodo'] = periodo
+        context['periodo'] = obtenerPeriodoVigente
 
         #[FALTA IMPLEMENTAR]
         # Verificar si la mutual ya ha cargado algún préstamo

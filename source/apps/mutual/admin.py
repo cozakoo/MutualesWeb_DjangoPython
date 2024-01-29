@@ -5,3 +5,4 @@ from . import models
 admin.site.register(models.Mutual)
 admin.site.register(models.DeclaracionJurada)
 admin.site.register(models.DetalleMutual)
+admin.site.register(models.DetalleDeclaracionJurada)
