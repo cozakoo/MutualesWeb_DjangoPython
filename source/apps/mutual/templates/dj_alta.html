@@ -72,20 +72,6 @@
     <form method="post" enctype="multipart/form-data" id="declaracionForm">
       {% csrf_token %}
 
-      <div class="row">
-        <div class="col">
-        <p>
-      <strong>Mes:</strong>
-      {{ form.mes }}
-    </p>
-        </div>
-        <div class="col">
-
-    <p>
-      <strong>Año:</strong>
-      {{ form.anio }}
-    </p>
-        </div></div>
       
       <div class="mb-3">
           <h5> Prestamo</h5>
@@ -99,7 +85,7 @@
   
       <br />
       <div class="text-center"> 
-          <button type="submit" class="btn btn-success" id="declararBtn" disabled>Declarar</button>
+          <button type="submit" class="btn btn-success" id="declararBtn" disabled>Cargar Declaracion</button>
       </div>
   </form>
   
@@ -115,7 +101,7 @@ $(document).ready(function() {
       var archivoR = $('#{{ form.archivo_r.id_for_label }}');
       var declararBtn = $('#declararBtn');
 
-      if (archivoP.val() && archivoR.val()) {
+      if (archivoP.val() || archivoR.val()) {
           declararBtn.prop('disabled', false);
       } else {
           declararBtn.prop('disabled', true);
@@ -127,7 +113,7 @@ $(document).ready(function() {
       var archivoR = $(this);
       var declararBtn = $('#declararBtn');
 
-      if (archivoP.val() && archivoR.val()) {
+      if (archivoP.val() || archivoR.val()) {
           declararBtn.prop('disabled', false);
       } else {
           declararBtn.prop('disabled', true);
