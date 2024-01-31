@@ -45,6 +45,7 @@ class DetalleDeclaracionJurada(models.Model):
 class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
     fecha_subida = models.DateField()
+    fecha_creacion = models.DateField(auto_now_add=True)
     periodo = models.DateField()
     rectificativa = models.IntegerField(default=0)
     codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
