@@ -74,14 +74,8 @@ def obtenerMutualVinculada(self):
 def obtenerPeriodoVigente(self):
   try:
         periodoActual = obtener_mes_y_anio_actual()
-<<<<<<< HEAD
-
-        if(DeclaracionJurada.objects.get(periodo = periodoActual)):
-=======
-        
         mutual = obtenerMutualVinculada(self)
         if(DeclaracionJurada.objects.get(periodo = periodoActual, mutual = mutual)):
->>>>>>> 6d3aa72519d5a799bb8f2fbf7a6eb79dc748cfea
                 dj = DeclaracionJurada.objects.get(periodo = periodoActual)
                 if(dj.leida):
                     mesSiguiente = periodoActual + relativedelta(months=1)
@@ -114,14 +108,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
 
         mutual = obtenerMutualVinculada(self)
-<<<<<<< HEAD
-        periodo = obtenerPeriodoVigente()
-
-=======
-        
         periodo = obtenerPeriodoVigente(self)
-        
->>>>>>> 6d3aa72519d5a799bb8f2fbf7a6eb79dc748cfea
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
         context['periodo'] =  periodoText
