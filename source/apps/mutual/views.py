@@ -74,8 +74,7 @@ def obtenerMutualVinculada(self):
 def obtenerPeriodoVigente():
   try:
         periodoActual = obtener_mes_y_anio_actual()
-        
-    
+
         if(DeclaracionJurada.objects.get(periodo = periodoActual)):
                 dj = DeclaracionJurada.objects.get(periodo = periodoActual)
                 if(dj.leida):
@@ -100,7 +99,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     model = DetalleDeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
-    LONGITUD = 54
 
     def get_success_url(self):
         return reverse_lazy('dashboard')
@@ -108,87 +106,33 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Declaración Jurada'
+
         mutual = obtenerMutualVinculada(self)
-        
         periodo = obtenerPeriodoVigente()
-        
+
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
         context['periodo'] =  periodoText
-        
-       
+
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
-
-        # Obtener los conceptos de la mutual tipo 'P'
-        detalle_mutual_tipo_p = get_object_or_404(DetalleMutual, mutual=mutual, tipo='P')
-        context['concepto_p'] = {
-            'concepto_1': detalle_mutual_tipo_p.concepto_1,
-            'concepto_2': detalle_mutual_tipo_p.concepto_2,
-        }
-
-        # Obtener los conceptos de la mutual tipo 'R'
-        detalle_mutual_tipo_r = get_object_or_404(DetalleMutual, mutual=mutual, tipo='R')
-        context['concepto_r'] = {
-            'concepto_1': detalle_mutual_tipo_r.concepto_1,
-            'concepto_2': detalle_mutual_tipo_r.concepto_2,
-        }
-
-        # Verificar si la mutual ya ha cargado algún préstamo
-        mutual = get_object_or_404(Mutual, nombre=context['mutual'])
-
-        # Realizar una única consulta para verificar la existencia de préstamos y préstamos leídos en el periodo actual
-        # prestamos_en_periodo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=periodo)
-        
-        # context['existe_prestamo'] = prestamos_en_periodo.exists()
-        # context['prestamo_leido'] = prestamos_en_periodo.filter(leida=True).exists()
 
         return context
 
     def form_valid(self, form):
-        mes = form.cleaned_data['mes']
-        anio = form.cleaned_data['anio']
         mutual = obtenerMutualVinculada(self)
-
-        # Verificar si ya existe una Declaración Jurada para la mutual, mes y año dados
-        declaracion_existente = DeclaracionJurada.objects.filter(
-            mutual=mutual,
-        ).first()
-
-        """
-        SEGUIMMIENTO
-        1.   REVISAR SI EXISTE UNA DECLARACIÓN JURADA EN LA BASE
-        2.a. [EXISTE DJ EN BASE] REVISAR SI EXISTE UNA DECLARACIÓN JURADA EN EL PERIODO SELECCIONADO
-        2.b. [NO EXISTE DJ EN BASE] GENERAR LA DECLARACIÓN JURADA
-        3.a. [EXISTE DJ EN PERIODO SELECCIONADO] REVISAR SI FUE LEIDA
-        3.b. [NO EXISTE DJ EN PERIODO SELECCIONADO] REVISAR SI EXISTE DECLARACIÓN JURADA EN EL MES ANTERIOR
-        4.a. [FUE LEIDA] Error: "no se puede generar Declaracion jurada porque ya fue leida"
-        4.b. [NO FUE LEIDA] RECTIFICAR DECLARACIÓN JURADA
-        4.c. [EXISTE DECLARACIÓN JURADA EN EL MES ANTERIOR] REVISAR SI LA DECLARACIÓN JURADA DEL MES ANTERIOR FUE LEIDA
-        4.d. [NO EXISTE DECLARACIÓN JURADA EN EL MES ANTERIOR] ERROR: "NO PUEDE DECLARAR PORQUE NO TIENE UNA DECLARACION JURADA EN EL MES ANTERIOR"
-        5.a.  [FUE LEIDA DJ MES ANTERIOR] GENERAR LA DECLARACIÓN JURADA
-        5.b.  [NO FUE LEIDA DJ MES ANTERIOR] ERROR: "la declaración del mes anterior no ha sido leida aun"
-        """
-        if declaracion_existente:
-            # Ya existe una Declaración Jurada para este periodo y mutual
-            print(f"Ya existe una Declaración Jurada para {mutual.nombre} en el mes {mes} y año {anio}")
-            # Puedes hacer algo aquí, por ejemplo, mostrar un mensaje al usuario o redirigir a otra página
-        else:
-            print(f"NO EXISTE UNA Declaración Jurada PARA LA MUTUAL EN LA BASE ")
-            archivoPrestamo = form.cleaned_data['archivo_p']
-            archivoReclamo = form.cleaned_data['archivo_r']
-            try:
+        archivoPrestamo = form.cleaned_data['archivo_p']
+        archivoReclamo = form.cleaned_data['archivo_r']
+        try:
                 with transaction.atomic():
                     archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                    
-                    # form.instance.
-                    return super().form_valid(form)
-            except Exception as e:
-                messages.error(self.request, f"Error al procesar el formulario: {e}")
-                return self.form_invalid(form)
-            # Resto del código para guardar la Declaración Jurada
-
-        return super().form_invalid(form)
+                    archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                    print("ARCHIVO PRESTAMO VALIDO -->:", archivo_valido_p)
+                    print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
+                    return super().form_invalid(form)
+        except Exception as e:
+            messages.error(self.request, f"Error al procesar el formulario: {e}")
+            return self.form_invalid(form)
         # try:
         #     with transaction.atomic():
                 # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
@@ -233,9 +177,10 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
     def validar_prestamo(self, form, archivo):
         """Valida el contenido del archivo de PRESTAMO."""
-        print("-----  VALIDANDO  PRESTAMO  -------")
+        print("VALIDANDO PRESTAMO------------")
         print("")
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
+        LONGITUD_P = 54
 
         try:
                 file = archivo.open() 
@@ -244,7 +189,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     print(f"Línea {line_number}: {line_content}")
                     
                     # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                    if len(line_content) != self.LONGITUD:
+                    if len(line_content) != LONGITUD_P:
                         todas_las_lineas_validas = False
                         break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                     else:
@@ -257,9 +202,11 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     print("")
             
                 if not todas_las_lineas_validas:
-                    mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
+                    print("------------ PRESTAMO INVALIDO")
+                    mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres."
                     messages.warning(self.request, mensaje_error)
                     return False
+                print("------------ PRESTAMO VALIDO")
                 return True
 
         except Exception as e:
@@ -294,19 +241,19 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
     def validar_reclamo(self, form, archivo):
         """Valida el contenido del archivo de RECLAMO."""
-        print("-----  VALIDANDO  RECLAMO  -------")
+        print("VALIDANDO RECLAMO------------")
         print("")
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
-        
+        LONGITUD_R = 58
         try:
             file = archivo.open()
             for line_number, line_content_bytes in enumerate(file, start=1):
                 line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
                 print(f"Línea {line_number}: {line_content}")
-                
+                print(len(line_content))
                 # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                if len(line_content) != self.LONGITUD:
-                    print("ATRAPADAAAAAA")
+                if len(line_content) != LONGITUD_R:
+                    print("ESTOY EN EL IF")
                     todas_las_lineas_validas = False
                     break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                 else:
@@ -321,9 +268,11 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
             #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
             if not todas_las_lineas_validas:
-                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
+                print("RECLAMO INVALIDO------------")
+                mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_R} caracteres."
                 messages.warning(self.request, mensaje_error)
                 return False
+            print("RECLAMO VALIDO------------")
             return True
 
         except Exception as e:
@@ -354,130 +303,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
 
         
-class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
-    login_url = '/login/'  # Puedes personalizar la URL de inicio de sesión
-    # permission_required = 'nombre_app.puede_realizar_accion'
-    permission_required = 'mutual.add_declaracionjurada'
-    model = DeclaracionJurada
-    form_class = FormularioDJ
-    template_name = "dj_alta.html"
-    LONGITUD = 57
-    
-
-    def get_success_url(self):
-        return reverse_lazy('dashboard')
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Declaración Jurada (Reclamo)'
-        context['mutual'] = obtenerMutualVinculada(self).nombre
-        periodo = obtener_mes_y_anio_actual()
-        context['periodo'] = obtenerPeriodoVigente
-
-        #[FALTA IMPLEMENTAR]
-        # Verificar si la mutual ya ha cargado algún préstamo
-        mutual = get_object_or_404(Mutual, nombre=context['mutual'])
-
-        existe_reclamo_leido = DeclaracionJurada.objects.filter(mutual=mutual, tipo='R', periodo=periodo, leida=True).exists()
-        print(existe_reclamo_leido)
-
-        context['existe_reclamo_leido'] = False
-        return context
-
-    def form_valid(self, form):
-        archivo = form.cleaned_data['archivos']
-
-        try:
-            with transaction.atomic():
-                archivo_valido = self.validar_reclamo(form, archivo)
-
-                if archivo_valido:
-                    form.instance.periodo = obtener_mes_y_anio_actual()
-                    # Establecer la fecha de subida
-                    form.instance.fecha_subida = date.today()
-                    form.instance.mutual = Mutual.objects.first()
-                    form.instance.archivo = form.cleaned_data['archivos']
-                    form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[0][0]  # Asigna 'R' a tipo (reclamo)
-                    mensaje_error = "Reclamo cargado correctamente"
-                    messages.success(self.request, mensaje_error)
-                    return super().form_valid(form)                    
-                else:
-                     print("es invalido")
-                     return super().form_invalid(form)
-
-        except Exception as e:
-            messages.error(self.request, f"Error al procesar el formulario: {e}")
-            return self.form_invalid(form)
-
-    def form_invalid(self, form):
-        print("Formulario no válido. Corrige los errores marcados.")
-        
-        for field, errors in form.errors.items():
-            print(f"Error en el campo {field}: {', '.join(errors)}")
-
-        messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
-        return super().form_invalid(form)
-    
-    def validar_reclamo(self, form, archivo):
-        """Valida el contenido del archivo de RECLAMO."""
-        print("-----  VALIDANDO  RECLAMO  -------")
-        print("")
-        todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
-        
-        try:
-            file = archivo.open()
-            for line_number, line_content_bytes in enumerate(file, start=1):
-                line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
-                print(f"Línea {line_number}: {line_content}")
-                
-                # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                if len(line_content) != self.LONGITUD:
-                    print("ATRAPADAAAAAA")
-                    todas_las_lineas_validas = False
-                    break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
-                else:
-                    validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
-                    validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
-                    validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
-                    self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO")
-                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN")
-                    validar_numero(self, line_content, line_number, 47, 54, "CUPON")
-                    validar_numero(self,line_content, line_number, 54, 57, "CUOTA")
-                print("")
-
-            #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
-            if not todas_las_lineas_validas:
-                mensaje_error = f"Error: Todas las líneas del archivo deben tener {self.LONGITUD} caracteres."
-                messages.warning(self.request, mensaje_error)
-                return False
-            return True
-
-        except Exception as e:
-          messages.error(self.request, f"Error al leer el archivo: {e}")
-          return False
-
-    def validar_fecha_reclamo(self, line_content, line_number, inicio, fin, tipo_fecha):
-        fecha_str = line_content[inicio:fin]
-        mensaje = f"{tipo_fecha}: {fecha_str}"
-        print(mensaje)
-
-        try:
-            # Convertir la cadena de fecha a un objeto de fecha
-            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
-            print(fecha_obj)
-
-            # Obtener la fecha actual
-            fecha_actual = date.today()
-
-            # Comparar si la fecha de la línea está después de la fecha actual
-            if fecha_obj > fecha_actual:
-                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} es posterior a la fecha actual. Línea: {line_content}"
-                messages.warning(self.request, mensaje_error)
-
-        except ValueError:
-            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
-            messages.warning(self.request, mensaje_error)
-
 
 class DetalleMutualView(DetailView):
     model = Mutual
