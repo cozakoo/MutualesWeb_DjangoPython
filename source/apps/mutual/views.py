@@ -71,12 +71,12 @@ def obtenerMutualVinculada(self):
     mutual = userRol.rol.cliente.mutual
     return mutual
 
-def obtenerPeriodoVigente():
+def obtenerPeriodoVigente(self):
   try:
         periodoActual = obtener_mes_y_anio_actual()
         
-    
-        if(DeclaracionJurada.objects.get(periodo = periodoActual)):
+        mutual = obtenerMutualVinculada(self)
+        if(DeclaracionJurada.objects.get(periodo = periodoActual, mutual = mutual)):
                 dj = DeclaracionJurada.objects.get(periodo = periodoActual)
                 if(dj.leida):
                     mesSiguiente = periodoActual + relativedelta(months=1)
@@ -110,7 +110,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
         mutual = obtenerMutualVinculada(self)
         
-        periodo = obtenerPeriodoVigente()
+        periodo = obtenerPeriodoVigente(self)
         
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
@@ -372,7 +372,7 @@ class DeclaracionJuradaReclamo(LoginRequiredMixin,PermissionRequiredMixin, Creat
         context['titulo'] = 'Declaración Jurada (Reclamo)'
         context['mutual'] = obtenerMutualVinculada(self).nombre
         periodo = obtener_mes_y_anio_actual()
-        context['periodo'] = obtenerPeriodoVigente
+        context['periodo'] = obtenerPeriodoVigente(self)
 
         #[FALTA IMPLEMENTAR]
         # Verificar si la mutual ya ha cargado algún préstamo
