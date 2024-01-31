@@ -19,22 +19,16 @@ import re
 import locale
 from dateutil.relativedelta import relativedelta
 from django.core.exceptions import ObjectDoesNotExist
-    
-    
-    
-    
-    
-def tu_vista(request):
-    data = Mutual.objects.all()
-    return render(request, 'tu_vista.html', {'data': data})
-  
-
 from datetime import datetime
 import calendar
 from timezonefinder import TimezoneFinder
 import pytz
 from django.utils.translation import gettext as _
 from datetime import date
+
+def tu_vista(request):
+    data = Mutual.objects.all()
+    return render(request, 'tu_vista.html', {'data': data})
 
 def obtener_mes_y_anio_actual():
         # Encontrar la zona horaria basada en la ubicación
@@ -44,8 +38,6 @@ def obtener_mes_y_anio_actual():
         # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
         zona_horaria_argentina = pytz.timezone(ubicacion)
         fecha_hora_actual = datetime.today()
-        
-        
 
         # Obtener el mes y el año actual de forma dinámica en español
         mes_actual = fecha_hora_actual.month

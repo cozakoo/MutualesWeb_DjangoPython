@@ -2,13 +2,10 @@ from django.db import models
 from django.core.validators import MaxValueValidator
 import uuid
 
-# Create your models here.
-
-
 # class AcuseRecibo(models.Model):
 #     codigo = codigo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     
-
+##-------------------- MUTUAL Y DETALLE ---------------------
 class DetalleMutual(models.Model):
     TIPO_DECLARACION = [
         ('R', 'reclamo'),
@@ -31,11 +28,8 @@ class Mutual(models.Model):
     def __str__(self):
         return self.nombre
     
-    
-    
 
-    
-    
+##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DetalleDeclaracionJurada(models.Model):
     
     TIPO = [
@@ -48,26 +42,16 @@ class DetalleDeclaracionJurada(models.Model):
     archivo = models.FileField(upload_to='documentos/')
     total_registros= models.IntegerField(default=0)  # Nuevo campo
 
-        
-    
-
-##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
     fecha_subida = models.DateField()
     periodo = models.DateField()
     rectificativa = models.IntegerField(default=0)
     codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
-    leida = models.BooleanField(default=False)
+    es_leida = models.BooleanField(default=False)
+    es_borrador = models.BooleanField(default=True)
     detalles = models.ManyToManyField(DetalleDeclaracionJurada,related_name='detalles', blank=True, through = "DeclaracionJuradaDetalles")
-
-
-
 
 class DeclaracionJuradaDetalles(models.Model):
     declaracionJurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
     detalleDeclaracionJurada = models.ForeignKey(DetalleDeclaracionJurada, on_delete=models.CASCADE)
-
-
-
-
