@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.edit import CreateView 
 from django.views.generic import DetailView
-from .models import Mutual , DeclaracionJurada
+from .models import Mutual , DeclaracionJurada, Periodo
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -76,12 +76,14 @@ def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, 
     #VALIDAR SI MI CONCEPTO ES IGUAL QUE MI DETALLE DE LA MUTUAL
     validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
 
-    concepto = line_content[inicio:fin]
+    concepto = int(line_content[inicio:fin])
 
-    if existeConcepto(self, concepto, tipo_archivo):
-         print("EXISTE CONCEPTO")
-    else:
-         print("NO EXISTE CONCEPTO")
+    if not existeConcepto(self, concepto, tipo_archivo):
+        numero = line_content[inicio:fin]
+        mensaje = f"{tipo_numero}: {numero}"
+        print(mensaje)
+        mensaje_error = f"Error: La línea {line_number}. {mensaje} no esta vinculado a su mutual. Linea: {line_content}"
+        messages.warning(self.request, mensaje_error)
 
 #--------------- VALIDA LA EXISTENCIA DEL CONCEPTO ------------------------
 def existeConcepto(self, concepto, tipo_archivo):
@@ -90,9 +92,7 @@ def existeConcepto(self, concepto, tipo_archivo):
     if mutual and mutual.detalle.exists():
         detalle_mutual = mutual.detalle.filter(tipo=tipo_archivo).first()
         if concepto == detalle_mutual.concepto_1 or concepto == detalle_mutual.concepto_2:
-            print("CONCEPTO VALIDO")
             return True
-
     return False
 
 def obtenerMutualVinculada(self):
@@ -157,8 +157,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             with transaction.atomic():
                 
                 archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                # archivo_valido_r =  True
+                # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                archivo_valido_r =  True
                     
                 print("")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
