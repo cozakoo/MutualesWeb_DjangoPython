@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.edit import CreateView 
 from django.views.generic import DetailView
-from .models import DetalleMutual, Mutual , DeclaracionJurada
+from .models import Mutual , DeclaracionJurada
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -36,18 +36,22 @@ def obtener_mes_y_anio_actual():
         ubicacion = tz_finder.timezone_at(lng=-64.1428, lat=-31.4201)  # Coordenadas de Buenos Aires
 
         # Obtener la fecha y hora actual en la zona horaria de Buenos Aires
-        zona_horaria_argentina = pytz.timezone(ubicacion)
+        # zona_horaria_argentina = pytz.timezone(ubicacion)
+        # print("zonee")
+        # print( datetime.now(zona_horaria_argentina).date())
+        
+        # print("zonee")
         fecha_hora_actual = datetime.today()
 
         # Obtener el mes y el año actual de forma dinámica en español
         mes_actual = fecha_hora_actual.month
         año_actual = fecha_hora_actual.year
         
-        print(año_actual)
+        # print(año_actual)
         
         periodo = datetime(año_actual, mes_actual, 1).date()
        
-        print(periodo)
+        # print(periodo)
         # Devolver el mes y el año en un solo string
         return periodo
 
@@ -98,21 +102,14 @@ def obtenerMutualVinculada(self):
 
 def obtenerPeriodoVigente(self):
   try:
-        periodoActual = obtener_mes_y_anio_actual()
-        mutual = obtenerMutualVinculada(self)
-        if(DeclaracionJurada.objects.get(periodo = periodoActual, mutual = mutual)):
-                dj = DeclaracionJurada.objects.get(periodo = periodoActual)
-                if(dj.leida):
-                    mesSiguiente = periodoActual + relativedelta(months=1)
-                    print(mesSiguiente)
-                    return mesSiguiente
-                else:
-                    return periodoActual
+        periodo = Periodo.objects.get(fecha_fin = None)
+        print(periodo)
+        return periodo
         
   except ObjectDoesNotExist: 
-         return periodoActual
+         return None
 
-  return periodoActual
+  return None
        
           
     # # DeclaracionJurada.objects.get()
@@ -133,13 +130,21 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
 
         mutual = obtenerMutualVinculada(self)
-        # periodo = obtenerPeriodoVigente(self)
+        periodo = obtenerPeriodoVigente(self)
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        # periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
-        # context['periodo'] =  periodoText
+        periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
+        context['periodo'] =  periodoText
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
+        
+        context['borrador'] = ""
+        borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
+        
+        if (borrador != None) :
+            context['borrador'] = borrador
+                      
+
 
         return context
 
