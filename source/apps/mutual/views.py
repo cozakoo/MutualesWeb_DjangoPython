@@ -81,7 +81,7 @@ def obtenerPeriodoVigente(self):
         print(periodo)
         return periodo
         
-  except ObjectDoesNotExist: 
+  except Periodo.DoesNotExist: 
          return None
 
   return None
@@ -117,11 +117,14 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
         
-        context['borrador'] = ""
-        borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
         
-        if (borrador != None) :
-            context['borrador'] = borrador
+        try:
+         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
+         context['borrador'] = borrador
+        except DeclaracionJurada.DoesNotExist:
+            context['borrador'] = ""
+        
+            
                       
 
 
