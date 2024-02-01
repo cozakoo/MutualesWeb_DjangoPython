@@ -120,7 +120,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['borrador'] = ""
         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
         
-        if (borrador != none) :
+        if (borrador != None) :
             context['borrador'] = borrador
                       
 
