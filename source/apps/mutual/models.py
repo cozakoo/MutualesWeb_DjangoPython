@@ -49,7 +49,7 @@ class Periodo(models.Model):
     Antes de crear un nuevo periodo se revisa si el periodo anterior tiene fecha de fin
     """
     fecha_inicio = models.DateField()   # puede o no estar en el mes anterior
-    fecha_fin = models.DateField()      # tiene que estar dentro del mes
+    fecha_fin = models.DateField(null = True , blank=True)      # tiene que estar dentro del mes
     mes_anio = models.DateField()       # mes y año del periodo. EJ: 01/01/2024 corresponde a ENERO
 
 class DeclaracionJurada(models.Model):
