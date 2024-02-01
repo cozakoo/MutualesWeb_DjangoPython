@@ -4,7 +4,7 @@ from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.generic.edit import CreateView 
 from django.views.generic import DetailView
-from .models import Mutual , DeclaracionJurada
+from .models import DetalleMutual, Mutual , DeclaracionJurada
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -66,6 +66,31 @@ def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
             messages.warning(self.request, mensaje_error)
 
 
+#------------------------ VALIDACIÓN PARA EL CONCEPTO ------------------------
+def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, tipo_archivo):
+
+    #VALIDAR SI MI CONCEPTO ES IGUAL QUE MI DETALLE DE LA MUTUAL
+    validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
+
+    concepto = line_content[inicio:fin]
+
+    if existeConcepto(self, concepto, tipo_archivo):
+         print("EXISTE CONCEPTO")
+    else:
+         print("NO EXISTE CONCEPTO")
+
+#--------------- VALIDA LA EXISTENCIA DEL CONCEPTO ------------------------
+def existeConcepto(self, concepto, tipo_archivo):
+    mutual = obtenerMutualVinculada(self)
+
+    if mutual and mutual.detalle.exists():
+        detalle_mutual = mutual.detalle.filter(tipo=tipo_archivo).first()
+        if concepto == detalle_mutual.concepto_1 or concepto == detalle_mutual.concepto_2:
+            print("CONCEPTO VALIDO")
+            return True
+
+    return False
+
 def obtenerMutualVinculada(self):
     userRol = UserRol.objects.get(user=self.request.user)
     mutual = userRol.rol.cliente.mutual
@@ -108,10 +133,10 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
 
         mutual = obtenerMutualVinculada(self)
-        periodo = obtenerPeriodoVigente(self)
+        # periodo = obtenerPeriodoVigente(self)
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
-        context['periodo'] =  periodoText
+        # periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
+        # context['periodo'] =  periodoText
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
@@ -122,13 +147,24 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         mutual = obtenerMutualVinculada(self)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
+        
         try:
-                with transaction.atomic():
-                    archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                    archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                    print("ARCHIVO PRESTAMO VALIDO -->:", archivo_valido_p)
-                    print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
-                    return super().form_invalid(form)
+            with transaction.atomic():
+                
+                archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
+                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                # archivo_valido_r =  True
+                    
+                print("")
+                print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
+                print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
+
+                if (archivo_valido_p and archivo_valido_r):
+                    
+                    print ("los dos archivos son correctos")
+                
+                return super().form_invalid(form)
+
         except Exception as e:
             messages.error(self.request, f"Error al procesar el formulario: {e}")
             return self.form_invalid(form)
@@ -180,6 +216,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         print("")
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
         LONGITUD_P = 54
+        TIPO_ARCHIVO = 'P'
+        total_importe = 0  # Inicializar el total del importe
 
         try:
                 file = archivo.open() 
@@ -193,7 +231,10 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                         break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                     else:
                         validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
-                        validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
+                        
+
+                        validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO)
+
                         validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
                         self.validar_fecha_prestamo(line_content, line_number, 31, 39, "FECHA INICIO")
                         self.validar_fecha_prestamo(line_content, line_number, 39, 47, "FECHA FIN")
@@ -204,9 +245,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     print("------------ PRESTAMO INVALIDO")
                     mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres."
                     messages.warning(self.request, mensaje_error)
-                    return False
+                    return False, 0  # Devolver False y total_importes como 0 si hay líneas inválidas
                 print("------------ PRESTAMO VALIDO")
-                return True
+                return True, total_importe
 
         except Exception as e:
                     messages.error(self.request, f"Error al leer el archivo: {e}")
@@ -243,7 +284,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         print("VALIDANDO RECLAMO------------")
         print("")
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
-        LONGITUD_R = 58
+        LONGITUD_R = 57
         try:
             file = archivo.open()
             for line_number, line_content_bytes in enumerate(file, start=1):
@@ -252,12 +293,13 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 print(len(line_content))
                 # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
                 if len(line_content) != LONGITUD_R:
-                    print("ESTOY EN EL IF")
                     todas_las_lineas_validas = False
                     break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                 else:
                     validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
+
                     validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
+                    
                     validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
                     self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO")
                     self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN")

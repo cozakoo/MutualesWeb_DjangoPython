@@ -17,6 +17,7 @@ class DetalleMutual(models.Model):
     concepto_1 = models.IntegerField()
     concepto_2 = models.IntegerField()
 
+
 class Mutual(models.Model):
 
     nombre = models.CharField(max_length=100)
@@ -27,8 +28,6 @@ class Mutual(models.Model):
 
     def __str__(self):
         return self.nombre
-    
-
 
 ##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DetalleDeclaracionJurada(models.Model):
@@ -52,6 +51,7 @@ class Periodo(models.Model):
     fecha_fin = models.DateField()      # tiene que estar dentro del mes
     mes_anio = models.DateField()       # mes y año del periodo. EJ: 01/01/2024 corresponde a ENERO
 
+
 class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
     fecha_subida = models.DateField()
@@ -63,6 +63,7 @@ class DeclaracionJurada(models.Model):
     
     periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE)
     detalles = models.ManyToManyField(DetalleDeclaracionJurada,related_name='detalles', blank=True, through = "DeclaracionJuradaDetalles")
+
 
 class DeclaracionJuradaDetalles(models.Model):
     declaracionJurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
