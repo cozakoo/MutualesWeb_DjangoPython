@@ -70,21 +70,27 @@ def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
             mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
 
-
 #------------------------ VALIDACIÓN PARA EL CONCEPTO ------------------------
 def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, tipo_archivo):
 
-    #VALIDAR SI MI CONCEPTO ES IGUAL QUE MI DETALLE DE LA MUTUAL
     validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
-
     concepto = int(line_content[inicio:fin])
 
     if not existeConcepto(self, concepto, tipo_archivo):
         numero = line_content[inicio:fin]
         mensaje = f"{tipo_numero}: {numero}"
-        print(mensaje)
+        print(mensaje, "NO ENCONTRADO EN BASE")
         mensaje_error = f"Error: La línea {line_number}. {mensaje} no esta vinculado a su mutual. Linea: {line_content}"
         messages.warning(self.request, mensaje_error)
+
+#------------------------ VALIDACIÓN PARA EL IMPORTE ------------------------
+def validar_importe(self, line_content, line_number, inicio, fin, tipo_numero):
+    validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
+    importe_str = line_content[inicio:fin].lstrip('0')  # Remove leading zeros
+    if not importe_str:
+        importe_str = '0'
+    importe_formatted = float(importe_str) /100 
+    print("IMPORTE CONVERTIDO: ",importe_formatted)
 
 #--------------- VALIDA LA EXISTENCIA DEL CONCEPTO ------------------------
 def existeConcepto(self, concepto, tipo_archivo):
@@ -104,15 +110,13 @@ def obtenerMutualVinculada(self):
 def obtenerPeriodoVigente(self):
   try:
         periodo = Periodo.objects.get(fecha_fin = None)
-        print(periodo)
+        # print(periodo)
         return periodo
         
   except Periodo.DoesNotExist: 
          return None
 
-  return None
-       
-          
+
     # # DeclaracionJurada.objects.get()
     # return  obtener_mes_y_anio_actual()
 
@@ -131,6 +135,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
 
         mutual = obtenerMutualVinculada(self)
+
         periodoActual = obtenerPeriodoVigente(self)
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         context['periodo'] =  ""
@@ -245,13 +250,14 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                         break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                     else:
                         validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
-                        
-
                         validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO)
+                        validar_importe(self, line_content, line_number, 20, 31, "IMPORTE")
+                        
+                        fecha_str_inicio = line_content[31:39]
+                        fecha_str_fin = line_content[39:47]
 
-                        validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
-                        self.validar_fecha_prestamo(line_content, line_number, 31, 39, "FECHA INICIO")
-                        self.validar_fecha_prestamo(line_content, line_number, 39, 47, "FECHA FIN")
+                        self.validar_fechas_prestamo(fecha_str_inicio, fecha_str_fin)
+
                         validar_numero(self, line_content, line_number, 47, 54, "CUPON")
                     print("")
             
@@ -267,27 +273,37 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     messages.error(self.request, f"Error al leer el archivo: {e}")
                     return False
 
-    def validar_fecha_prestamo(self, line_content, line_number, inicio, fin, tipo_fecha):
-        fecha_str = line_content[inicio:fin]
-        mensaje = f"{tipo_fecha}: {fecha_str}"
-        print(mensaje)
+
+    def validar_fechas_prestamo(self, fecha_inicio, fecha_fin):
+        
+        print("FECHA INICIO: ", fecha_inicio)
+        print("FECHA FIN: ", fecha_fin)
 
         try:
             # Convertir la cadena de fecha a un objeto de fecha
-            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
-            print(fecha_obj)
+            fecha_obj_inicio = datetime.strptime(fecha_inicio, "%d%m%Y").date()
+            fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
+            print("Fecha INICIO CONVERTIDA: ",fecha_obj_inicio)
+            print("Fecha FIN CONVERTIDA: ",fecha_obj_fin)
+            
+            periodoActual = obtenerPeriodoVigente(self)
+            locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
+            if(periodoActual != None):
+                periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
+
+            print(periodoActual.mes_anio)
             # Obtener la fecha actual
-            fecha_actual = date.today()
+            # fecha_actual = date.today()
 
             # Obtener el mes y el año de la fecha de la línea
-            mes_fecha = fecha_obj.month
-            anio_fecha = fecha_obj.year
+            # mes_fecha = fecha_obj.month
+            # anio_fecha = fecha_obj.year
 
             # Comparar si la fecha de la línea está dentro del mismo mes que la fecha actual
-            if fecha_obj.month != fecha_actual.month or fecha_obj.year != fecha_actual.year:
-                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} no está dentro del mes actual. Línea: {line_content}"
-                messages.warning(self.request, mensaje_error)
+            # if fecha_obj.month != fecha_actual.month or fecha_obj.year != fecha_actual.year:
+                # mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} no está dentro del mes actual. Línea: {line_content}"
+                # messages.warning(self.request, mensaje_error)
 
         except ValueError:
             mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
