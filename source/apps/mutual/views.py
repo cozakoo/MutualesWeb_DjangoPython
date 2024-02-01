@@ -26,6 +26,7 @@ import pytz
 from django.utils.translation import gettext as _
 from datetime import date
 
+
 def tu_vista(request):
     data = Mutual.objects.all()
     return render(request, 'tu_vista.html', {'data': data})
@@ -106,7 +107,7 @@ def obtenerPeriodoVigente(self):
         print(periodo)
         return periodo
         
-  except ObjectDoesNotExist: 
+  except Periodo.DoesNotExist: 
          return None
 
   return None
@@ -130,25 +131,33 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
 
         mutual = obtenerMutualVinculada(self)
-        periodo = obtenerPeriodoVigente(self)
+        periodoActual = obtenerPeriodoVigente(self)
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        periodoText = calendar.month_name[periodo.month].upper() + " " + str(periodo.year)
-        context['periodo'] =  periodoText
+        context['periodo'] =  ""
+        
+        if(periodoActual != None):
+            periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
+            context['periodo'] =  periodoText
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
         
-        context['borrador'] = ""
-        borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
         
-        if (borrador != None) :
-            context['borrador'] = borrador
+        try:
+         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
+         context['borrador'] = borrador
+        except DeclaracionJurada.DoesNotExist:
+            context['borrador'] = ""
+        
+            
                       
 
 
         return context
 
     def form_valid(self, form):
+        
+        
         mutual = obtenerMutualVinculada(self)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
