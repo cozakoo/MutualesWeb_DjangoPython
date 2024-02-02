@@ -1,7 +1,4 @@
-from typing import Any
-from django.forms import ValidationError
-from django.http import HttpRequest, HttpResponse
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import render
 from django.views.generic.edit import CreateView 
 from django.views.generic import DetailView
 from .models import Mutual , DeclaracionJurada, Periodo
@@ -9,20 +6,13 @@ from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db import transaction
-from django.core.files.base import ContentFile
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
-from django.contrib.auth.models import User
 from ..users.models import UserRol
-import linecache
-import sys
 import re
 import locale
-from dateutil.relativedelta import relativedelta
-from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime
 import calendar
 from timezonefinder import TimezoneFinder
-import pytz
 from django.utils.translation import gettext as _
 from datetime import date
 
@@ -115,20 +105,17 @@ def obtenerPeriodoVigente(self):
         
   except Periodo.DoesNotExist: 
          return None
-
-
     # # DeclaracionJurada.objects.get()
     # return  obtener_mes_y_anio_actual()
 
 
-
+#--------------- DECLARACIÓN JURADA ------------------------
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'
     permission_required = 'mutual.add_declaracionjurada'
     model = DetalleDeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
-
 
     def get_success_url(self):
         return reverse_lazy('dashboard')
@@ -149,23 +136,18 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
-        
-        
+
         try:
          borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
          context['borrador'] = borrador
         except DeclaracionJurada.DoesNotExist:
             context['borrador'] = ""
-        
-            
-                      
-
 
         return context
 
     def form_valid(self, form):
         
-        
+
         mutual = obtenerMutualVinculada(self)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
@@ -173,9 +155,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         try:
             with transaction.atomic():
                 
-                archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                archivo_valido_r =  True
+                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
+                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                archivo_valido_p =  True
                     
                 print("")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
@@ -190,38 +172,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         except Exception as e:
             messages.error(self.request, f"Error al procesar el formulario: {e}")
             return self.form_invalid(form)
-        # try:
-        #     with transaction.atomic():
-                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-        #         archivo_valido_r = self.validar_reclamo(form, archivoReclamo)
-                # print("ARCHIVO PRESTAMO VALIDO -->:", archivo_valido_p)
-        #         print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
-        #         archivo_valido_p = False
-        #         archivo_valido_r = False
-        #         if archivo_valido_p:
-        #             form.instance.periodo = obtener_mes_y_anio_actual()
-        #             # Establecer la fecha de subida
-        #             form.instance.fecha_subida = date.today()
-        #             form.instance.mutual = obtenerMutualVinculada(self)
-        #             form.instance.archivo = form.cleaned_data['archivos']
-        #             form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
-        #             mensaje_error = "Prestamo cargado correctamente"
-
-        #             mutual = get_object_or_404(Mutual, nombre=obtenerMutualVinculada(self).nombre)
-        #             print(mutual)
-
-        #             prestamo_en_periodo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=obtener_mes_y_anio_actual()).first()
-        #             print(prestamo_en_periodo)
-        #             # Eliminar el objeto prestamo_en_periodo de la base de datos
-        #             if prestamo_en_periodo:
-        #                 prestamo_en_periodo.delete()
-
-        #             messages.success(self.request, mensaje_error)
-        #             return super().form_valid(form)                    
-        #         else:
-                    #  print("es invalido")
-                    #  return super().form_invalid(form)
-       
 
     def form_invalid(self, form):
         print("complete la carga de archivos")
@@ -250,6 +200,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     
                     # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
                     if len(line_content) != LONGITUD_P:
+                        print("REVISAR LINEA: ", line_number )
                         todas_las_lineas_validas = False
                         break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                     else:
@@ -260,7 +211,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                         fecha_str_inicio = line_content[31:39]
                         fecha_str_fin = line_content[39:47]
 
-                        self.validar_fechas_prestamo(fecha_str_inicio, fecha_str_fin)
+                        self.validar_fechas_prestamo(line_content, line_number, fecha_str_inicio, fecha_str_fin)
 
                         validar_numero(self, line_content, line_number, 47, 54, "CUPON")
                     print("")
@@ -278,39 +229,32 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     return False
 
 
-    def validar_fechas_prestamo(self, fecha_inicio, fecha_fin):
-        
-        print("FECHA INICIO: ", fecha_inicio)
-        print("FECHA FIN: ", fecha_fin)
+    def validar_fechas_prestamo(self, line_content, line_number, fecha_inicio, fecha_fin):
 
         try:
             # Convertir la cadena de fecha a un objeto de fecha
+            print("FECHA INICIO: ", fecha_inicio)
             fecha_obj_inicio = datetime.strptime(fecha_inicio, "%d%m%Y").date()
-            fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
             print("Fecha INICIO CONVERTIDA: ",fecha_obj_inicio)
+
+            print("FECHA FIN: ", fecha_fin)
+            fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
             print("Fecha FIN CONVERTIDA: ",fecha_obj_fin)
             
             periodoActual = obtenerPeriodoVigente(self)
-            locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-
-            if(periodoActual != None):
-                periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
-
             print(periodoActual.mes_anio)
-            # Obtener la fecha actual
-            # fecha_actual = date.today()
 
-            # Obtener el mes y el año de la fecha de la línea
-            # mes_fecha = fecha_obj.month
-            # anio_fecha = fecha_obj.year
+            if fecha_obj_inicio > periodoActual.mes_anio:
+                mensaje_error = f"Error: La FECHA INICIO en la línea {line_number} es mayor que la fecha inicial del periodo. Línea: {line_content}"
 
-            # Comparar si la fecha de la línea está dentro del mismo mes que la fecha actual
-            # if fecha_obj.month != fecha_actual.month or fecha_obj.year != fecha_actual.year:
-                # mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} no está dentro del mes actual. Línea: {line_content}"
-                # messages.warning(self.request, mensaje_error)
+            if fecha_obj_fin < periodoActual.mes_anio:
+                mensaje_error = f"Error: La FECHA FIN en la línea {line_number} es menor mayor que la fecha inicial del periodo. Línea: {line_content}"
+
+            if fecha_obj_inicio > fecha_obj_fin:
+                mensaje_error = f"Error: La FECHA INICIO en la línea {line_number} es mayor que la FECHA FIN. Línea: {line_content}"
 
         except ValueError:
-            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
+            mensaje_error = f"Error: La FECHA en la línea {line_number} no es válida. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
 
     def validar_reclamo(self, form, archivo):
@@ -377,131 +321,29 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             messages.warning(self.request, mensaje_error)
 
     
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        archivoPrestamo = form.cleaned_data['archivo_p']
-        archivoReclamo = form.cleaned_data['archivo_r']    
-        archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-        archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+    # def post(self, request, *args, **kwargs):
+    #     self.object = None
+    #     form_class = self.get_form_class()
+    #     form = self.get_form(form_class)
+    #     archivoPrestamo = form.cleaned_data['archivo_p']
+    #     archivoReclamo = form.cleaned_data['archivo_r']    
+    #     archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
+    #     archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
          
-        if (archivo_valido_p & archivo_valido_r):
-            #se crea el borrador 
-            dj = DeclaracionJurada(mutual = obtenerMutualVinculada(self))
-            dj.save()
-            #se calculo los totales
-            d_prestamo = DetalleDeclaracionJurada(tipo = 'P', archivo = archivo_valido_p , importe = 10000)
-            d_reclamo  =DetalleDeclaracionJurada(tipo = 'R', archivo = archivoReclamo, importe = 1000)
-            dj.detalles.create(d_prestamo)
-            dj.detalles.create(d_reclamo)
-            return render(request, 'mostrar_borrador.html',{'dj': dj} )
+    #     if (archivo_valido_p & archivo_valido_r):
+    #         #se crea el borrador 
+    #         dj = DeclaracionJurada(mutual = obtenerMutualVinculada(self))
+    #         dj.save()
+    #         #se calculo los totales
+    #         d_prestamo = DetalleDeclaracionJurada(tipo = 'P', archivo = archivo_valido_p , importe = 10000)
+    #         d_reclamo  =DetalleDeclaracionJurada(tipo = 'R', archivo = archivoReclamo, importe = 1000)
+    #         dj.detalles.create(d_prestamo)
+    #         dj.detalles.create(d_reclamo)
+    #         return render(request, 'mostrar_borrador.html',{'dj': dj} )
         
-        render(request, self.template_name, {'form': form})
+    #     render(request, self.template_name, {'form': form})
    
        
-    def get_success_url(self):
-        return reverse_lazy('dashboard')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Declaración Jurada'
-
-        mutual = obtenerMutualVinculada(self)
-        periodoActual = obtenerPeriodoVigente(self)
-        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        context['periodo'] =  ""
-        
-        if(periodoActual != None):
-            periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
-            context['periodo'] =  periodoText
-
-        # Obtener la mutual actual
-        context['mutual'] = mutual.nombre
-        
-        
-        try:
-         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
-         context['borrador'] = borrador
-        except DeclaracionJurada.DoesNotExist:
-            context['borrador'] = ""
-        
-            
-                      
-
-
-        return context
-
-    def form_valid(self, form):
-        
-        
-        mutual = obtenerMutualVinculada(self)
-        archivoPrestamo = form.cleaned_data['archivo_p']
-        archivoReclamo = form.cleaned_data['archivo_r']
-        
-        try:
-            with transaction.atomic():
-                
-                archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                # archivo_valido_r =  True
-                    
-                print("")
-                print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
-                print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
-
-                if (archivo_valido_p and archivo_valido_r):
-                    
-                    print ("los dos archivos son correctos")
-                
-                return super().form_invalid(form)
-
-        except Exception as e:
-            messages.error(self.request, f"Error al procesar el formulario: {e}")
-            return self.form_invalid(form)
-        # try:
-        #     with transaction.atomic():
-                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-        #         archivo_valido_r = self.validar_reclamo(form, archivoReclamo)
-                # print("ARCHIVO PRESTAMO VALIDO -->:", archivo_valido_p)
-        #         print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
-        #         archivo_valido_p = False
-        #         archivo_valido_r = False
-        #         if archivo_valido_p:
-        #             form.instance.periodo = obtener_mes_y_anio_actual()
-        #             # Establecer la fecha de subida
-        #             form.instance.fecha_subida = date.today()
-        #             form.instance.mutual = obtenerMutualVinculada(self)
-        #             form.instance.archivo = form.cleaned_data['archivos']
-        #             form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
-        #             mensaje_error = "Prestamo cargado correctamente"
-
-        #             mutual = get_object_or_404(Mutual, nombre=obtenerMutualVinculada(self).nombre)
-        #             print(mutual)
-
-        #             prestamo_en_periodo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=obtener_mes_y_anio_actual()).first()
-        #             print(prestamo_en_periodo)
-        #             # Eliminar el objeto prestamo_en_periodo de la base de datos
-        #             if prestamo_en_periodo:
-        #                 prestamo_en_periodo.delete()
-
-        #             messages.success(self.request, mensaje_error)
-        #             return super().form_valid(form)                    
-        #         else:
-                    #  print("es invalido")
-                    #  return super().form_invalid(form)
-       
-    
-    def form_invalid(self, form):
-        print("complete la carga de archivos")
-        
-        for field, errors in form.errors.items():
-            print(f"Error en el campo {field}: {', '.join(errors)}")
-
-        messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
-        return super().form_invalid(form)
-
-    
 class DetalleMutualView(DetailView):
     model = Mutual
     template_name = 'detalle_mutual.html'
