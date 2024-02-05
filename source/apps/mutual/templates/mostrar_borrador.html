@@ -14,53 +14,10 @@
   {% endif %}
   
 
-  <!-- Modal para prestamo no leído -->
-  {% comment %} [implementado] {% endcomment %}
-  <div class="modal fade" id="modalNoLeido" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="staticBackdropLabel">Información</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          Ya se ha generado un archivo de prestamo previamente. ¿Desea reemplazar dicho archivo?
-        </div>
-        <div class="modal-footer">
-          <a href="{% url 'dashboard' %}" class="btn btn-primary">Salir</a>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Reemplazar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  {% comment %} FALTA CONFITURAR {% endcomment %}
-<!-- Modal para prestamo leído -->
-<div class="modal" id="modalLeido" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Información</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>Y ESE PRESTAMO HA SIDO LEÍDO</p>
-      </div>
-      <div class="modal-footer">
-        <!-- Puedes agregar botones adicionales o acciones aquí si es necesario -->
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
   <div class="container cuadrado-background">
     <h1 class="text-center">{{ titulo }}</h1>
     <p>
-      <strong>Mutual:</strong>
+      <strong>Prestamo:</strong>
       {{ mutual }}
     </p>
 

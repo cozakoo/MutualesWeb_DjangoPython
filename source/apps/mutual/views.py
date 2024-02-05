@@ -361,27 +361,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             messages.warning(self.request, mensaje_error)
 
     
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        archivoPrestamo = form.cleaned_data['archivo_p']
-        archivoReclamo = form.cleaned_data['archivo_r']    
-        archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-        archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-         
-        if (archivo_valido_p & archivo_valido_r):
-            #se crea el borrador 
-            dj = DeclaracionJurada(mutual = obtenerMutualVinculada(self))
-            dj.save()
-            #se calculo los totales
-            d_prestamo = DetalleDeclaracionJurada(tipo = 'P', archivo = archivo_valido_p , importe = 10000)
-            d_reclamo  =DetalleDeclaracionJurada(tipo = 'R', archivo = archivoReclamo, importe = 1000)
-            dj.detalles.create(d_prestamo)
-            dj.detalles.create(d_reclamo)
-            return render(request, 'mostrar_borrador.html',{'dj': dj} )
-        
-        render(request, self.template_name, {'form': form})
+ 
    
        
     def get_success_url(self):
@@ -415,14 +395,46 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
 
         return context
-
+    
+    
+    
+    def post(self, request,*args, **kwargs):
+        form = FormularioDJ(request.POST)
+        print(form)
+        archivoPrestamo = form.cleaned_data['archivo_p']
+        archivoReclamo = form.cleaned_data['archivo_r']
+        archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
+        archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+         
+        if (archivo_valido_p & archivo_valido_r):
+            #se crea el borrador 
+            dj = DeclaracionJurada(mutual = obtenerMutualVinculada(self))
+            dj.save()
+            #se calculo los totales
+            d_prestamo = DetalleDeclaracionJurada(tipo = 'P', archivo = archivo_valido_p , importe = 10000)
+            d_reclamo  =DetalleDeclaracionJurada(tipo = 'R', archivo = archivoReclamo, importe = 1000)
+            print("PASEE")
+            dj.detalles.create(d_prestamo)
+            dj.detalles.create(d_reclamo)
+            return render(request, 'mostrar_borrador.html',{'dj': dj} )
+        
+        render(request, self.template_name, {'form': form})
+    
+    
+    
+    
+    
+    
+    
+    
+    
     def form_valid(self, form):
         
         
         mutual = obtenerMutualVinculada(self)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
-        
+     
         try:
             with transaction.atomic():
                 
