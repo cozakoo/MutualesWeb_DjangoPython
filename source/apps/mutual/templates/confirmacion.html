@@ -1,0 +1,29 @@
+{% extends 'dashboardCliente.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block contenedor %}
+  {% comment %}Preguinto si ya existe un prestamo previamente{% endcomment %}
+  {% comment %} {% if existe_prestamo %}
+    {% if prestamo_leido %}
+      <p> Y ESE PRESTAMO HA SIDO LEIDO</p>
+    {% endif %}
+  {% endif %}
+   {% endcomment %}
+
+  <div class="container cuadrado-background">
+    <h1>nombre mutual</h1>
+    <p>{{dj.mutual.name}}</p>
+    <h3>¿desdeas subir la declaracion jurada?</h3>
+    <form  method="post">
+        {% csrf_token %}
+        <button class="btn btn-danger" name="cancelar" value="no">cancelar</button>
+        <button class="btn btn-success"  type="submit" name="confirmacion" value="si">si</button>
+        
+    </form>
+
+  
+  {% endblock %}
