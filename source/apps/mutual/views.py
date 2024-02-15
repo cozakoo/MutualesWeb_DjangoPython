@@ -74,13 +74,15 @@ def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, 
         messages.warning(self.request, mensaje_error)
 
 #------------------------ VALIDACIÓN PARA EL IMPORTE ------------------------
-def validar_importe(self, line_content, line_number, inicio, fin, tipo_numero):
+def validar_importe(self, line_content, line_number, inicio, fin, tipo_numero, total_importe):
     validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
     importe_str = line_content[inicio:fin].lstrip('0')  # Remove leading zeros
     if not importe_str:
         importe_str = '0'
     importe_formatted = float(importe_str) /100 
-    print("IMPORTE CONVERTIDO: ",importe_formatted)
+    print("IMPORTE CONVERTIDO: ", importe_formatted)
+    total_importe += importe_formatted  # Sumar el importe al total_importe
+    print("TOTAL IMPORTE ACUMULADO: ", total_importe)
 
 #--------------- VALIDA LA EXISTENCIA DEL CONCEPTO ------------------------
 def existeConcepto(self, concepto, tipo_archivo):
@@ -155,10 +157,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         try:
             with transaction.atomic():
                 
-                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                archivo_valido_p =  True
-                    
+                archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
+                # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                archivo_valido_r = True
                 print("")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
                 print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
@@ -206,7 +207,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     else:
                         validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
                         validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO)
-                        validar_importe(self, line_content, line_number, 20, 31, "IMPORTE")
+                        total_importe = validar_importe(self, line_content, line_number, 20, 31, "IMPORTE", total_importe)
                         
                         fecha_str_inicio = line_content[31:39]
                         fecha_str_fin = line_content[39:47]
@@ -280,7 +281,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     
                     validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
                     self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO")
-                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN")
+                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN") # type: ignore
                     validar_numero(self, line_content, line_number, 47, 54, "CUPON")
                     validar_numero(self,line_content, line_number, 54, 57, "CUOTA")
                 print("")
