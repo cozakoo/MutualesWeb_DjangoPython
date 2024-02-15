@@ -141,7 +141,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         context['titulo'] = 'Declaración Jurada'
 
         mutual = obtenerMutualVinculada(self)
-        print("GETTT CONTEXT")
         periodoActual = obtenerPeriodoVigente(self)
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         context['periodo'] =  ""
@@ -149,27 +148,20 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         if(periodoActual != None):
             periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
             context['periodo'] =  periodoText
-            
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
         
+        
         try:
-         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True)
+         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True, mutual = mutual)
          context['borrador'] = borrador
-         self.request.session['declaracion_borrador'] = borrador
-         return context
-     
         except DeclaracionJurada.DoesNotExist:
-            print("no hay borrador")
-         
-          
-
+            context['borrador'] = ""
         return context
 
+
     def form_valid(self, form):
-        
-        
         mutual = obtenerMutualVinculada(self)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
@@ -202,7 +194,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
         messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
         return super().form_invalid(form)
-
 
     def validar_prestamo(self, form, archivo):
         """Valida el contenido del archivo de PRESTAMO."""
@@ -341,143 +332,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
 
-    
-
- 
-   
-       
-    def get_success_url(self):
-        return reverse_lazy('dashboard')
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Declaración Jurada'
-
-        mutual = obtenerMutualVinculada(self)
-        periodoActual = obtenerPeriodoVigente(self)
-        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-        context['periodo'] =  ""
-        
-        if(periodoActual != None):
-            periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
-            context['periodo'] =  periodoText
-
-        # Obtener la mutual actual
-        context['mutual'] = mutual.nombre
-        
-        
-        try:
-         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True, mutual = mutual)
-         context['borrador'] = borrador
-        except DeclaracionJurada.DoesNotExist:
-            context['borrador'] = ""
-        
-            
-                      
-
-
-        return context
-    
-    
-    
-    # def post(self, request,*args, **kwargs):
-    #     form = self.get_form()
-    #     print(form)
-    #     archivoPrestamo = form.cleaned_data['archivo_p']
-    #     archivoReclamo = form.cleaned_data['archivo_r']
-    #     archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-    #     archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-         
-    #     periodo = obtenerPeriodoVigente(self) 
-    #     if (archivo_valido_p  and archivo_valido_r):
-    #         #se crea el borrador 
-    #         dj = DeclaracionJurada(mutual = obtenerMutualVinculada(self), periodo = periodo)
-    #         dj.save()
-    #         #se calculo los totales
-    #         d_prestamo = DetalleDeclaracionJurada(tipo = 'P', archivo = archivo_valido_p , importe = 10000).save()
-    #         d_reclamo  =DetalleDeclaracionJurada(tipo = 'R', archivo = archivoReclamo, importe = 1000).save()
-    #         print("PASEE")
-            
-    #         dj.detalles.add(d_prestamo)
-    #         dj.detalles.add(d_reclamo)
-    #         return render(request, 'mostrar_borrador.html',{'dj_r': d_reclamo, "dj_p": d_prestamo} )
-    #     print("NO PASEE")
-    #     render(request, self.template_name, {'form': form})
-    
-    
-    
-    def form_valid(self, form):
-        
-        
-        mutual = obtenerMutualVinculada(self)
-        archivoPrestamo = form.cleaned_data['archivo_p']
-        archivoReclamo = form.cleaned_data['archivo_r']
-     
-        try:
-            with transaction.atomic():
-                
-                archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                # archivo_valido_r =  True
-                    
-                print("")
-                print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
-                print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
-
-                if (archivo_valido_p and archivo_valido_r):
-                    
-                    return super().form_valid(form)
-                    print ("los dos archivos son correctos")
-                
-                return super().form_invalid(form)
-
-        except Exception as e:
-            messages.error(self.request, f"Error al procesar el formulario: {e}")
-            return self.form_invalid(form)
-        # try:
-        #     with transaction.atomic():
-                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-        #         archivo_valido_r = self.validar_reclamo(form, archivoReclamo)
-                # print("ARCHIVO PRESTAMO VALIDO -->:", archivo_valido_p)
-        #         print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
-        #         archivo_valido_p = False
-        #         archivo_valido_r = False
-        #         if archivo_valido_p:
-        #             form.instance.periodo = obtener_mes_y_anio_actual()
-        #             # Establecer la fecha de subida
-        #             form.instance.fecha_subida = date.today()
-        #             form.instance.mutual = obtenerMutualVinculada(self)
-        #             form.instance.archivo = form.cleaned_data['archivos']
-        #             form.instance.tipo = DeclaracionJurada.TIPO_DECLARACION[1][0]  # Asigna 'P' a tipo
-        #             mensaje_error = "Prestamo cargado correctamente"
-
-        #             mutual = get_object_or_404(Mutual, nombre=obtenerMutualVinculada(self).nombre)
-        #             print(mutual)
-
-        #             prestamo_en_periodo = DeclaracionJurada.objects.filter(mutual=mutual, tipo='P', periodo=obtener_mes_y_anio_actual()).first()
-        #             print(prestamo_en_periodo)
-        #             # Eliminar el objeto prestamo_en_periodo de la base de datos
-        #             if prestamo_en_periodo:
-        #                 prestamo_en_periodo.delete()
-
-        #             messages.success(self.request, mensaje_error)
-        #             return super().form_valid(form)                    
-        #         else:
-                    #  print("es invalido")
-                    #  return super().form_invalid(form)
-       
-    
-    def form_invalid(self, form):
-        print("complete la carga de archivos")
-        
-        for field, errors in form.errors.items():
-            print(f"Error en el campo {field}: {', '.join(errors)}")
-
-        messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
-        return super().form_invalid(form)
-
-    
-
     # def post(self, request, *args, **kwargs):
     #     self.object = None
     #     form_class = self.get_form_class()
@@ -499,8 +353,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     #         return render(request, 'mostrar_borrador.html',{'dj': dj} )
         
     #     render(request, self.template_name, {'form': form})
-   
-       
 
 class DetalleMutualView(DetailView):
     model = Mutual
