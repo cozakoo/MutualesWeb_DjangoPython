@@ -7,92 +7,51 @@
 
 {% block contenedor %}
   {% comment %}Preguinto si ya existe un prestamo previamente{% endcomment %}
-  {% if existe_prestamo %}
+  {% comment %} {% if existe_prestamo %}
     {% if prestamo_leido %}
       <p> Y ESE PRESTAMO HA SIDO LEIDO</p>
     {% endif %}
   {% endif %}
-  
-
-  <!-- Modal para prestamo no leído -->
-  {% comment %} [implementado] {% endcomment %}
-  <div class="modal fade" id="modalNoLeido" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h1 class="modal-title fs-5" id="staticBackdropLabel">Información</h1>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-          Ya se ha generado un archivo de prestamo previamente. ¿Desea reemplazar dicho archivo?
-        </div>
-        <div class="modal-footer">
-          <a href="{% url 'dashboard' %}" class="btn btn-primary">Salir</a>
-          <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Reemplazar</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-
-  {% comment %} FALTA CONFITURAR {% endcomment %}
-<!-- Modal para prestamo leído -->
-<div class="modal" id="modalLeido" tabindex="-1" role="dialog">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Información</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body">
-        <p>Y ESE PRESTAMO HA SIDO LEÍDO</p>
-      </div>
-      <div class="modal-footer">
-        <!-- Puedes agregar botones adicionales o acciones aquí si es necesario -->
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-      </div>
-    </div>
-  </div>
-</div>
+   {% endcomment %}
 
   <div class="container cuadrado-background">
     <h1 class="text-center">{{ titulo }}</h1>
     <p>
-      <strong>Mutual:</strong>
-      {{ mutual }}
+      <strong>Prestamo:</strong>
+      {% comment %} {{ dj.mutual.nombre }} {% endcomment %}
     </p>
 
-    <p>
+    {% comment %} <p>
       <strong>Periodo a declarar:</strong>
       {{ periodo }}
     </p>
-    
-    <form method="post" enctype="multipart/form-data" id="declaracionForm">
-      {% csrf_token %}
+     {% endcomment %}
+    {% comment %} <form method="post" enctype="multipart/form-data" id="declaracionForm">
+      {% csrf_token %} {% endcomment %}
 
       
       <div class="mb-3">
           <h5> Prestamo</h5>
-          <input class="form-control" type="file" name="{{ form.archivo_p.name }}" id="{{ form.archivo_p.id_for_label }}" />
+          <p>{{ dj_r.id }} </p>
+          
         </div>
   
-      <div class="mb-3">
+      {% comment %} <div class="mb-3">
           <h5>Reclamo</h5>
-          <input class="form-control" type="file" name="{{ form.archivo_r.name }}" id="{{ form.archivo_r.id_for_label }}" />
+          <input class="form-control" type="file" name="{{ dj.archivo_r.name }}" id="{{ dj.archivo_r.id_for_label }}" />
         </div>
   
       <br />
       <div class="text-center"> 
           <button type="submit" class="btn btn-success" id="declararBtn" disabled>Cargar Declaracion</button>
       </div>
-  </form>
-  
+  </form> {% endcomment %}
+  </div>
+
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     
-  <script>
+  {% comment %} <script>
     // Activar el botón cuando se carguen ambos archivos
 // Activar el botón cuando se carguen ambos archivos
 $(document).ready(function() {
@@ -121,7 +80,7 @@ $(document).ready(function() {
   });
 });
 
-$(document).getElementById('verificarBoton').on('click, ')
+$(document).getElementById('verificarBoton').on('click, ') {% endcomment %}
 
   </script>
   {% endblock %}
