@@ -167,15 +167,13 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
-        
-        
+
         try:
          borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True, mutual = mutual)
          context['borrador'] = borrador
         except DeclaracionJurada.DoesNotExist:
             context['borrador'] = ""
         return context
-
 
     def form_valid(self, form):
         mutual = obtenerMutualVinculada(self)
@@ -184,8 +182,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         
         try:
             with transaction.atomic():
-                
-
                 # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
                 # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
                 archivo_valido_r = True
@@ -194,13 +190,19 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 print("")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
                 print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
+                form.importe = 0
 
                 if (archivo_valido_p and archivo_valido_r):
+                    print("los dos archivos son correctos")
+                    # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
+                    detalle_declaracion = form.save(commit=False)
+                    detalle_declaracion.importe = 0  # Asignar el valor deseado al importe
+                    detalle_declaracion.save()  # Guardar el objeto en la base de datos
+
                     print ("los dos archivos son correctos")
                     # --guardar como borrador + detalles
                     
                     return super().form_valid(form)
-                
                 return super().form_invalid(form)
 
         except Exception as e:
