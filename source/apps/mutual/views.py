@@ -112,15 +112,21 @@ class ConfirmacionView(TemplateView):
     template_name = 'confirmacion.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        dj = DeclaracionJurada.objects.get(self.request.session.get('declaracion_borrador').id)
-        context['dj'] = dj
-        # context['detalle_reclamao'] = dj.detalles.get(tipo = 'R')
-        # context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
+        mutual = obtenerMutualVinculada(self)
+        dj = DeclaracionJurada.objects.get(mutual = mutual )
+        
+        context['detalle_reclamao'] = dj.detalles.get(tipo = 'R')
+        context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
         return context
     
     def post(self, request, *args, **kwargs):
         declaracion_borrador = DeclaracionJurada.objects.get(request.session.get('declaracion_borrador').id)
         declaracion_borrador.es_borrador = False
+
+
+
+
+
 
 #--------------- DECLARACIÓN JURADA ------------------------
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
@@ -176,7 +182,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             with transaction.atomic():
                 
                 # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                archivo_valido_r = True
                 archivo_valido_p =  True
                     
                 print("")
@@ -185,6 +192,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
                 if (archivo_valido_p and archivo_valido_r):
                     print ("los dos archivos son correctos")
+                    # --guardar como borrador + detalles
+                    
                     return super().form_valid(form)
                 
                 return super().form_invalid(form)
@@ -415,8 +424,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         try:
             with transaction.atomic():
                 
-                archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
+                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
+                # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
                 # archivo_valido_r =  True
                     
                 print("")
