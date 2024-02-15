@@ -114,15 +114,21 @@ class ConfirmacionView(TemplateView):
     template_name = 'confirmacion.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        dj = DeclaracionJurada.objects.get(self.request.session.get('declaracion_borrador').id)
-        context['dj'] = dj
-        # context['detalle_reclamao'] = dj.detalles.get(tipo = 'R')
-        # context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
+        mutual = obtenerMutualVinculada(self)
+        dj = DeclaracionJurada.objects.get(mutual = mutual )
+        
+        context['detalle_reclamao'] = dj.detalles.get(tipo = 'R')
+        context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
         return context
     
     def post(self, request, *args, **kwargs):
         declaracion_borrador = DeclaracionJurada.objects.get(request.session.get('declaracion_borrador').id)
         declaracion_borrador.es_borrador = False
+
+
+
+
+
 
 #--------------- DECLARACIÓN JURADA ------------------------
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
@@ -166,23 +172,29 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         
         try:
             with transaction.atomic():
-                archivo_valido_p = True
-
                 # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
                 # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
                 archivo_valido_r = True
+                archivo_valido_p = True
+
                 print("")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
                 print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
                 form.importe = 0
 
                 if (archivo_valido_p and archivo_valido_r):
+<<<<<<< HEAD
                     print("los dos archivos son correctos")
                     # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
                     detalle_declaracion = form.save(commit=False)
                     detalle_declaracion.importe = 0  # Asignar el valor deseado al importe
                     detalle_declaracion.save()  # Guardar el objeto en la base de datos
 
+=======
+                    print ("los dos archivos son correctos")
+                    # --guardar como borrador + detalles
+                    
+>>>>>>> f7beaa6e43749c249e68385c04e5fa6709d0d9dd
                     return super().form_valid(form)
                 return super().form_invalid(form)
 
@@ -335,6 +347,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         except ValueError:
             mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
             messages.warning(self.request, mensaje_error)
+
 
     # def post(self, request, *args, **kwargs):
     #     self.object = None
