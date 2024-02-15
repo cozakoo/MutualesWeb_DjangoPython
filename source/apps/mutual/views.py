@@ -73,16 +73,14 @@ def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, 
         mensaje_error = f"Error: La línea {line_number}. {mensaje} no esta vinculado a su mutual. Linea: {line_content}"
         messages.warning(self.request, mensaje_error)
 
-#------------------------ VALIDACIÓN PARA EL IMPORTE ------------------------
-def validar_importe(self, line_content, line_number, inicio, fin, tipo_numero, total_importe):
-    validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
+#------------------------ OINTENGO EL TOTAL DEL IMPORTE ------------------------
+def obtenerImporte(self, line_content, inicio, fin):
     importe_str = line_content[inicio:fin].lstrip('0')  # Remove leading zeros
     if not importe_str:
         importe_str = '0'
     importe_formatted = float(importe_str) /100 
     print("IMPORTE CONVERTIDO: ", importe_formatted)
-    total_importe += importe_formatted  # Sumar el importe al total_importe
-    print("TOTAL IMPORTE ACUMULADO: ", total_importe)
+    return importe_formatted
 
 #--------------- VALIDA LA EXISTENCIA DEL CONCEPTO ------------------------
 def existeConcepto(self, concepto, tipo_archivo):
@@ -172,10 +170,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         
         try:
             with transaction.atomic():
-                # archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-                # archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-                archivo_valido_r = True
-                archivo_valido_p = True
+                archivo_valido_p, importe_p, total_registros_p = self.validar_prestamo(form, archivoPrestamo)
+                archivo_valido_r, importe_r, total_registros_r = self.validar_reclamo(form, archivoReclamo)
 
                 print("")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
@@ -184,14 +180,23 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
                 if (archivo_valido_p and archivo_valido_r):
                     print("los dos archivos son correctos")
+
                     # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
                     detalle_declaracion = form.save(commit=False)
-                    detalle_declaracion.importe = 0  # Asignar el valor deseado al importe
+                    detalle_declaracion.importe = importe_p
+                    detalle_declaracion.tipo = 'P'
+                    detalle_declaracion.archivo = archivoPrestamo
+                    detalle_declaracion.total_registros = total_registros_p
                     detalle_declaracion.save()  # Guardar el objeto en la base de datos
 
-                    print ("los dos archivos son correctos")
-                    # --guardar como borrador + detalles
-                    
+                    # Crear objeto DetalleDeclaracionJurada para reclamo
+                    detalle_reclamo = DetalleDeclaracionJurada.objects.create(
+                        tipo='R',
+                        importe=importe_r,
+                        archivo=archivoReclamo,
+                        total_registros=total_registros_r,
+                    )
+
                     return super().form_valid(form)
                 return super().form_invalid(form)
 
@@ -216,6 +221,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         LONGITUD_P = 54
         TIPO_ARCHIVO = 'P'
         total_importe = 0  # Inicializar el total del importe
+        last_line_number = 0  # Variable para almacenar el último line_number
 
         try:
                 file = archivo.open() 
@@ -231,27 +237,26 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     else:
                         validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
                         validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO)
-                        total_importe = validar_importe(self, line_content, line_number, 20, 31, "IMPORTE", total_importe)
-                        
+                        validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
+                        total_importe += obtenerImporte(self, line_content, 20, 31)
                         fecha_str_inicio = line_content[31:39]
                         fecha_str_fin = line_content[39:47]
-
                         self.validar_fechas_prestamo(line_content, line_number, fecha_str_inicio, fecha_str_fin)
-
                         validar_numero(self, line_content, line_number, 47, 54, "CUPON")
+                        last_line_number = line_number  # Actualizar el último line_number
                     print("")
             
                 if not todas_las_lineas_validas:
                     print("------------ PRESTAMO INVALIDO")
                     mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres."
                     messages.warning(self.request, mensaje_error)
-                    return False, 0  # Devolver False y total_importes como 0 si hay líneas inválidas
+                    return False, 0, last_line_number  # Devolver False y total_importes como 0 si hay líneas inválidas
                 print("------------ PRESTAMO VALIDO")
-                return True, total_importe
+                return True, total_importe, last_line_number
 
         except Exception as e:
-                    messages.error(self.request, f"Error al leer el archivo: {e}")
-                    return False
+            messages.error(self.request, f"Error al leer el archivo: {e}")
+            return False, 0, last_line_number
 
 
     def validar_fechas_prestamo(self, line_content, line_number, fecha_inicio, fecha_fin):
@@ -288,6 +293,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         print("")
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
         LONGITUD_R = 57
+        total_importe = 0  # Inicializar el total del importe
+        last_line_number = 0  # Variable para almacenar el último line_number
+
         try:
             file = archivo.open()
             for line_number, line_content_bytes in enumerate(file, start=1):
@@ -300,14 +308,14 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                 else:
                     validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
-
                     validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
-                    
                     validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
+                    total_importe += obtenerImporte(self, line_content, 20, 31)
                     self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO")
                     self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN") # type: ignore
                     validar_numero(self, line_content, line_number, 47, 54, "CUPON")
                     validar_numero(self,line_content, line_number, 54, 57, "CUOTA")
+                    last_line_number = line_number  # Actualizar el último line_number
                 print("")
 
             #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
@@ -315,13 +323,13 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 print("RECLAMO INVALIDO------------")
                 mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_R} caracteres."
                 messages.warning(self.request, mensaje_error)
-                return False
+                return False, 0, last_line_number
             print("RECLAMO VALIDO------------")
-            return True
+            return True, total_importe, last_line_number
 
         except Exception as e:
           messages.error(self.request, f"Error al leer el archivo: {e}")
-          return False
+          return False, 0, last_line_number
 
     def validar_fecha_reclamo(self, line_content, line_number, inicio, fin, tipo_fecha):
         fecha_str = line_content[inicio:fin]
