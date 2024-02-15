@@ -117,7 +117,7 @@ class ConfirmacionView(TemplateView):
         context = super().get_context_data(**kwargs)
         mutual = obtenerMutualVinculada(self)
         # try:
-        gitdj = DeclaracionJurada.objects.get(mutual = mutual, es_borrador = True )
+        dj = DeclaracionJurada.objects.get(mutual = mutual, es_borrador = True )
         # except DeclaracionJurada.DoesNotExist:
         #  return context 
         context['mutual'] = mutual
