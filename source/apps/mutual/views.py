@@ -183,18 +183,15 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 form.importe = 0
 
                 if (archivo_valido_p and archivo_valido_r):
-<<<<<<< HEAD
                     print("los dos archivos son correctos")
                     # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
                     detalle_declaracion = form.save(commit=False)
                     detalle_declaracion.importe = 0  # Asignar el valor deseado al importe
                     detalle_declaracion.save()  # Guardar el objeto en la base de datos
 
-=======
                     print ("los dos archivos son correctos")
                     # --guardar como borrador + detalles
                     
->>>>>>> f7beaa6e43749c249e68385c04e5fa6709d0d9dd
                     return super().form_valid(form)
                 return super().form_invalid(form)
 
