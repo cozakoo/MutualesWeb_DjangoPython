@@ -1,4 +1,5 @@
 from typing import Any
+from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView
 from .models import Mutual , DeclaracionJurada, Periodo
@@ -110,19 +111,28 @@ def obtenerPeriodoVigente(self):
 #-----------------CONFIRMACION DJ---------------------------
 class ConfirmacionView(TemplateView):
     template_name = 'confirmacion.html'
+    success_url = '/confirmacion/'
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         mutual = obtenerMutualVinculada(self)
-        dj = DeclaracionJurada.objects.get(mutual = mutual )
-        
-        context['detalle_reclamao'] = dj.detalles.get(tipo = 'R')
+        # try:
+        gitdj = DeclaracionJurada.objects.get(mutual = mutual, es_borrador = True )
+        # except DeclaracionJurada.DoesNotExist:
+        #  return context 
+        context['mutual'] = mutual
+        context['dj'] = dj
+        context['detalle_reclamo'] = dj.detalles.get(tipo = 'R')
         context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
         return context
     
     def post(self, request, *args, **kwargs):
-        declaracion_borrador = DeclaracionJurada.objects.get(request.session.get('declaracion_borrador').id)
-        declaracion_borrador.es_borrador = False
-
+        mutual = obtenerMutualVinculada(self)
+        dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
+        dj.es_borrador = False
+        dj.save()
+        
+        return redirect('dashboard')
 
 
 

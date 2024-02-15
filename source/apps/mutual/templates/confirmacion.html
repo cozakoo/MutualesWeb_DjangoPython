@@ -15,8 +15,19 @@
    {% endcomment %}
 
   <div class="container cuadrado-background">
-    <h1>nombre mutual</h1>
-    <p>{{dj.mutual.name}}</p>
+    <p>Mutual: {{dj.mutual}} </p>
+    <h5> Prestamo </h5>
+    <p> Importe: {{detalle_prestamo.importe}}</p>
+    <p>Archivo: {{detalle_prestamo.archivo}}</p>
+    <p>registros: {{detalle_prestamo.total_registros}}</p>
+    {% comment %} <p>{{detalle_prestamo.}}</p> {% endcomment %}
+
+    <h5> Reclamo </h5>
+    <p> Importe: {{detalle_reclamo.importe}}</p>
+    <p>Archivo: {{detalle_reclamo.archivo}}</p>
+    <p>registros: {{detalle_reclamo.total_registros}}</p>
+    {% comment %} <p>{{detalle_prestamo.}}</p> {% endcomment %}
+
     <h3>¿desdeas subir la declaracion jurada?</h3>
     <form  method="post">
         {% csrf_token %}
