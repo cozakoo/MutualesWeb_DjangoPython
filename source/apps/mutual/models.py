@@ -38,7 +38,7 @@ class DetalleDeclaracionJurada(models.Model):
     ]
     
     tipo = models.CharField(max_length=1, choices=TIPO)
-    importe = models.DecimalField(max_digits=10, decimal_places=2)
+    importe = models.DecimalField(max_digits=10, decimal_places=2 , null = True)
     archivo = models.FileField(upload_to='documentos/')
     total_registros= models.IntegerField(default=0)  # Nuevo campo
 
