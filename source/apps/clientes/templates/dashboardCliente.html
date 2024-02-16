@@ -3,12 +3,13 @@
 
 {% block extra_css %}
   <link href="{% static 'Libs/css/dashboard.css' %}" rel="stylesheet" />
+  {% block extra_css_nivel %}
+
+  {% endblock %}
 {% endblock %}
 
 {% block content %}
-    {% include 'navbarCliente.html' %}
-  {% block extra_css_nivel %}
-  {% endblock %}
+  {% include 'navbarCliente.html' %}
   {% block contenedor %}
     <div class="cuadrado-background">
       <h1>¡Bienvenido {{ user }}!</h1>
@@ -16,5 +17,4 @@
       <h5>Ultima conexion: {{ ultimaSession }}</h5>
     </div>
   {% endblock %}
-
 {% endblock %}

@@ -8,6 +8,8 @@ app_name = "mutual"
 urlpatterns = [
     path('crearMutual/',MutualCreateView.as_view(), name="mutual_crear"),
     path('nuevaDeclaracionJurada/',DeclaracionJuradaView.as_view(), name="declaracion_jurada"),
+    path('nuevaDeclaracionJurada/',DeclaracionJuradaView.as_view(), name="historico"),
+    # path('nuevaDeclaracionJurada/',HistoricoView.as_view(), name="historico"),
 
     # path('declararReclamo/',DeclaracionJuradaReclamo.as_view(), name="declarar_reclamo"),
     # path('crearDj/',DeclaracionJuradaCreateView.as_view(), name="dj_crear"),

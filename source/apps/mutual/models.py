@@ -1,3 +1,4 @@
+import calendar
 from django.db import models
 from django.core.validators import MaxValueValidator
 import uuid
@@ -50,10 +51,42 @@ class Periodo(models.Model):
     fecha_inicio = models.DateField()   # puede o no estar en el mes anterior
     fecha_fin = models.DateField(null = True , blank=True)      # tiene que estar dentro del mes
     mes_anio = models.DateField()       # mes y año del periodo. EJ: 01/01/2024 corresponde a ENERO
-
+    
+    def obtener_nombre_mes(self):
+        # Utiliza el atributo month de mes_anio para obtener el número del mes
+        numero_mes = self.mes_anio.month
+        # Utiliza el atributo year de mes_anio para obtener el año
+        año = self.mes_anio.year
+        # Utiliza el módulo calendar para obtener el nombre del mes en inglés
+        nombre_mes_ingles = calendar.month_name[numero_mes]
+        
+        # Traducción simple a español
+        traducciones_meses = {
+            'january': 'enero',
+            'february': 'febrero',
+            'march': 'marzo',
+            'april': 'abril',
+            'may': 'mayo',
+            'june': 'junio',
+            'july': 'julio',
+            'august': 'agosto',
+            'september': 'septiembre',
+            'october': 'octubre',
+            'november': 'noviembre',
+            'december': 'diciembre',
+        }
+        
+        # Obtén el nombre del mes en español desde el diccionario de traducciones
+        nombre_mes_espanol = traducciones_meses[nombre_mes_ingles.lower()]
+        
+        # Devuelve una cadena que incluye el nombre del mes en español y el año
+        return f"{nombre_mes_espanol.capitalize()} {año}"  # Capitaliza la primera letra del mes
 
 class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
+    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE)
+    detalles = models.ManyToManyField(DetalleDeclaracionJurada,related_name='detalles', blank=True, through = "DeclaracionJuradaDetalles")
+    
     fecha_subida = models.DateField(null=True, blank=True)
     fecha_creacion = models.DateField(auto_now_add=True) # fecha creación del borrador
     rectificativa = models.IntegerField(default=0)
@@ -61,8 +94,6 @@ class DeclaracionJurada(models.Model):
     es_leida = models.BooleanField(default=False)
     es_borrador = models.BooleanField(default=True)
     
-    periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE)
-    detalles = models.ManyToManyField(DetalleDeclaracionJurada,related_name='detalles', blank=True, through = "DeclaracionJuradaDetalles")
 
 
 class DeclaracionJuradaDetalles(models.Model):

@@ -7,33 +7,28 @@
 
 {% block contenedor %}
   <div class="container cuadrado-background">
-    <h2 class="text-center text-white-55">Mi mutual</H2> </br>
-    
-        <style>
-            .custom-container {
-              min-width: 0;
-            }
-          </style>
-          
-          <div class="row">
-          {% comment %} <div class="col"> {% endcomment %}
-            <div class="custom-container shadow p-3 mb-4 bg-light rounded d-inline-block">Nombre: {{mimutual.nombre}}</div>
-          {% comment %} </div> {% endcomment %}
-
-          {% comment %} <div class="col"> {% endcomment %}
-            <div class="shadow p-3 mb-4 bg-body rounded">Cuit: {{mimutual.cuit}}</div>
-          </div>
-
-          {% comment %} <div class="col"> {% endcomment %}
-            <div class="custom-container shadow p-3 mb-4 bg-white rounded"> Estado: 
-                {% if mimutual.activo %} Activo {% else %} Inactivo {% endif %}
-            </div>
-          {% comment %} </div> {% endcomment %}
-
-        </div>
-      
+    <h2 class="text-center text-white-55">Mi Mutual</h2>
+    <br />
+    <div class="row">
+      <div class="custom-container shadow p-3 mb-4 bg-light rounded d-inline-block">Nombre: {{ mimutual.nombre }}</div>
+      <div class="shadow p-3 mb-4 bg-body rounded">Cuit: {{ mimutual.cuit }}</div>
+      <div class="custom-container shadow p-3 mb-4 bg-white rounded">
+        Estado:{% if mimutual.activo %}
+          Activo
+        {% else %}
+          Inactivo
+        {% endif %}
       </div>
-  </div>
-  
-  {% endblock %}
 
+      {% for detalle in mimutual.detalle.all %}
+        <div class="shadow p-3 mb-4 bg-body rounded">
+          <h5>{{ detalle.get_tipo_display|capfirst }}</h5>
+          <p style="margin-bottom: 0px;">Origen: {{ detalle.origen }}</p>
+          <p style="margin-bottom: 0px;">Destino: {{ detalle.destino }}</p>
+          <p style="margin-bottom: 0px;">Concepto 1: {{ detalle.concepto_1 }}</p>
+          <p style="margin-bottom: 0px;">Concepto 2: {{ detalle.concepto_2 }}</p>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+{% endblock %}
