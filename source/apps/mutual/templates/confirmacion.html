@@ -18,7 +18,7 @@
 
 {% block contenedor %}
   <div class="container cuadrado-background">
-    <h3 class="text-center">{{ dj.mutual }}</h3>
+    <h4 class="text-center">{{ dj.mutual }}</h4>
     
     <br />
     <ul class="detalle">
@@ -28,26 +28,26 @@
     <br />
     <h4>Prestamo</h4>
     <ul class="detalle">
-      <li><strong>Archivo:</strong> {{ detalle_prestamo.archivo }}</li>
-      <li><strong>N° registros:</strong> {{ detalle_prestamo.total_registros }}</li>
-      <li><strong>Total:</strong> ${{ detalle_prestamo.importe }}</li>
+      <li><strong>Archivo:</strong> {{ d_prestamo.archivo.name }}</li>
+      <li><strong>N° registros:</strong> {{ d_prestamo.total_registros }}</li>
+      <li><strong>Total:</strong> ${{ d_prestamo.importe }}</li>
     </ul>
 
     <br />
     <h4>Reclamo</h4>
     <ul class="detalle">
-      <li><strong>Archivo:</strong> {{ detalle_reclamo.archivo }}</li>
-      <li><strong>N° registros:</strong> {{ detalle_reclamo.total_registros }}</li>
-      <li><strong>Total:</strong> ${{ detalle_reclamo.importe }}</li>
+      <li><strong>Archivo:</strong> {{ d_reclamo.archivo }}</li>
+      <li><strong>N° registros:</strong> {{ d_reclamo.total_registros }}</li>
+      <li><strong>Total:</strong> ${{ d_reclamo.importe }}</li>
     </ul>
 
     <form method="post" class="text-center">
       <br />
-      <h5>¿Deseas subir la declaración jurada?</h5>
+      <h5> Posees una Declaracion Jurada generada el {{dj.fecha_creacion}}, realice una accion</h5>
       <br />
       {% csrf_token %}
-      <button class="btn btn-danger" name="cancelar" value="no">Cancelar</button>
-      <button class="btn btn-success" type="submit" name="confirmacion" value="si">Confirmar</button>
+      <button class="btn btn-danger" type="submit" name="cancelar" value="no">Cancelar declaracion</button>
+      <button class="btn btn-success" type="submit" name="confirmacion" value="si">Confirmar Declaracion</button>
     </form>
 
   </div>

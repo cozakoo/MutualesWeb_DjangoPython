@@ -1,5 +1,5 @@
 from typing import Any
-from django.http import HttpResponse
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView
 from .models import DeclaracionJuradaDetalles, Mutual , DeclaracionJurada, Periodo
@@ -16,6 +16,7 @@ import calendar
 from timezonefinder import TimezoneFinder
 from django.utils.translation import gettext as _
 from datetime import date
+
 
 
 def tu_vista(request):
@@ -105,6 +106,7 @@ def obtenerPeriodoVigente(self):
         return periodo
         
   except Periodo.DoesNotExist: 
+         print("devuelvo none")
          return None
     # # DeclaracionJurada.objects.get()
     # return  obtener_mes_y_anio_actual()
@@ -115,9 +117,9 @@ class ConfirmacionView(TemplateView):
     
     
     def get(self, request, *args, **kwargs):
-       try:
-        dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self) , es_borrador = True )
-       except DeclaracionJurada.DoesNotExist:
+        if request.GET.dict():
+            super.get(self)
+        else:
          return redirect('dashboard')
        
         
@@ -133,18 +135,12 @@ class ConfirmacionView(TemplateView):
         context['detalle_reclamo'] = dj.detalles.get(tipo = 'R')
         context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
         return context
-    
-    def post(self, request, *args, **kwargs):
-        mutual = obtenerMutualVinculada(self)
-        dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
-        dj.es_borrador = False
-        dj.save()
-        
-        return redirect('dashboard')
 
+# ---------------------------------------------------------
 
-
-
+class VisualizarErroresView(TemplateView):
+    template_name = 'visualizar_errores.html'
+    success_url = '/visualizarE/'
 
 #--------------- DECLARACIÓN JURADA ------------------------
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
@@ -154,9 +150,74 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     form_class = FormularioDJ
     template_name = "dj_alta.html"
     success_url = '/confirmacion/'
-
+   
+       
+        
+    def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
+        
+        
+        if 'confirmacion' in request.POST:
+           try:
+                mutual = obtenerMutualVinculada(self)
+                dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
+                dj.es_borrador = False
+                dj.save()
+                return HttpResponse("exito al confirmar declaracion")
+           except DeclaracionJurada.DoesNotExist:
+               return redirect('dashboard')
+               
+            #    mensaje informndo que lo que se quiere confirmar no esta disponible
+            
+      
+                
+        if 'cancelar' in request.POST:
+            try:
+                mutual = obtenerMutualVinculada(self)
+                dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
+                dj.detalles.all().delete()
+                dj.delete()
+                
+                print("borrado")
+                return HttpResponse("exito al eliminar declaracion")
+            except DeclaracionJurada.DoesNotExist:
+                return redirect('dashboard')
+       
+        form = self.get_form()
+       
+        if 'cargarDeclaracion' in request.POST: 
+           # Obtén una instancia del formulario
+          print("sin error 1")
+          if form.is_valid():
+            print("sin error 2")
+            # Hacer algo si el formulario es válido
+            return self.form_valid(form)
+            
+          else:
+            # Hacer algo si el formulario no es válido
+            print("sin error 3")
+            return self.form_invalid(form)
+         
+        return super().post(request, *args, **kwargs)
+        
+    
+    
     
 
+    def get(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
+        try:
+         dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), es_borrador = True )
+         contexto = {'dj': dj,
+                     'd_prestamo': dj.detalles.get(tipo = 'P'),
+                     'd_reclamo': dj.detalles.get(tipo = 'R')
+                     
+                     }
+                    
+         return render(request, 'confirmacion.html', contexto)
+        except DeclaracionJurada.DoesNotExist:
+          print("NO EXIST BORRADOR")
+          return super().get(request, *args, **kwargs)
+        
+        
     def get_success_url(self):
         return reverse_lazy('dashboard')
 
@@ -166,30 +227,28 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
         mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)
-        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         context['periodoActual'] = periodoActual
         context['periodo'] =  ""
         
         if(periodoActual != None):
-            periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
-            context['periodo'] =  periodoText
+            # periodoText = calendar.month_name[periodoActual.mes_anio.month].upper() + " " + str(periodoActual.mes_anio.year)
+            context['periodo'] =  "nuevo periodo"
 
         # Obtener la mutual actual
         context['mutual'] = mutual.nombre
 
-        try:
-         borrador = DeclaracionJurada.objects.get(periodo = periodoActual , es_borrador = True, mutual = mutual)
-         context['borrador'] = borrador
-        except DeclaracionJurada.DoesNotExist:
-            context['borrador'] = ""
         return context
 
     def form_valid(self, form):
+        
+        print("entre al valid sin errores")
         mutual = obtenerMutualVinculada(self)
-        periodoActual = self.get_context_data().get('periodoActual', None)
+        print("despues obt mutual ")
+        periodoActual = obtenerPeriodoVigente(self)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
-        
+        print("antes del try")
         try:
             with transaction.atomic():
                 archivo_valido_p, importe_p, total_registros_p = self.validar_prestamo(form, archivoPrestamo)
@@ -202,7 +261,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
                 if (archivo_valido_p and archivo_valido_r):
                     print("los dos archivos son correctos")
-
+                    
                     declaracionJurada = DeclaracionJurada.objects.create(
                         mutual = mutual,
                         fecha_creacion = datetime.now(),
@@ -242,6 +301,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             messages.error(self.request, f"Error al procesar el formulario: {e}")
             return self.form_invalid(form)
 
+
+    
     def form_invalid(self, form):
         print("complete la carga de archivos")
         

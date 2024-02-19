@@ -2,6 +2,9 @@ import calendar
 from django.db import models
 from django.core.validators import MaxValueValidator
 import uuid
+from django.db.models.signals import pre_delete
+from django.dispatch import receiver
+import os
 
 # class AcuseRecibo(models.Model):
 #     codigo = codigo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
@@ -42,6 +45,16 @@ class DetalleDeclaracionJurada(models.Model):
     importe = models.DecimalField(max_digits=10, decimal_places=2 , null = True)
     archivo = models.FileField(upload_to='documentos/')
     total_registros= models.IntegerField(default=0)  # Nuevo campo
+
+
+@receiver(pre_delete, sender=DetalleDeclaracionJurada)
+def eliminar_archivo(sender, instance, **kwargs):
+    # Verifica si existe un archivo asociado y elimínalo
+    if instance.archivo:
+        if os.path.isfile(instance.archivo.path):
+            os.remove(instance.archivo.path)
+
+
 
 #-------------------- PERIODO ---------------------
 class Periodo(models.Model):
@@ -99,3 +112,4 @@ class DeclaracionJurada(models.Model):
 class DeclaracionJuradaDetalles(models.Model):
     declaracionJurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
     detalleDeclaracionJurada = models.ForeignKey(DetalleDeclaracionJurada, on_delete=models.CASCADE)
+    

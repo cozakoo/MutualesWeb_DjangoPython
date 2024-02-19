@@ -13,13 +13,13 @@
     {% endif %}
   {% endif %} {% endcomment %}
   
-
+{% comment %} 
   {% if borrador.id != null %}
   <script>
       window.location.href = "{% url 'mutual:confirmacion' %}";
   </script> 
 
- {% endif %} 
+ {% endif %}  {% endcomment %}
 
 
 
@@ -101,7 +101,7 @@
   
       <br />
       <div class="text-center"> 
-          <button type="submit" class="btn btn-success" id="declararBtn" disabled>Cargar Declaracion</button>
+          <button type="submit" class="btn btn-success" name="cargarDeclaracion" id="declararBtn" disabled>Cargar Declaracion</button>
       </div>
   </form>
   

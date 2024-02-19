@@ -16,7 +16,8 @@ urlpatterns = [
     path('exito/', mutual_exito, name='mutual_exito'),
     path('prueba/', tu_vista, name='t_vista'),
     path('miMutual/', DetalleMutualView.as_view(), name='detalles_mimutual'),
-     path('confirmacion/', ConfirmacionView.as_view(), name='confirmacion'),
+    path('confirmacion/', ConfirmacionView.as_view(), name='confirmacion'),
+    path('visualizar_errores/', ConfirmacionView.as_view(), name='visualizarE'),
     # path('dj_confirmacion/', , name='t_vista'),
     
 ]

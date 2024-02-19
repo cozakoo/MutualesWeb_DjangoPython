@@ -1,0 +1,34 @@
+{% extends 'dashboardCliente.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+  <style>
+    .detalle {
+        list-style: none;
+        padding: 0;
+    }
+
+    .detalle li strong {
+        display: inline-block;
+        width: 140px; /* Ajusta el ancho según sea necesario */
+    }
+</style>
+{% endblock %}
+
+{% block contenedor %}
+  <div class="container cuadrado-background">
+    <div id="popUp" class="popup">
+        <div class="popup-contenido">
+          <span class="cerrar" onclick="cerrarPopUp()">&times;</span>
+          <h2>Mensajes de Advertencia</h2>
+          <ul>
+            {% for message in errores %}
+              <li>{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+  </div>
+{% endblock %}
