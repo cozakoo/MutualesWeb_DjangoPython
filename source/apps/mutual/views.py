@@ -2,7 +2,7 @@ from typing import Any
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView
-from .models import Mutual , DeclaracionJurada, Periodo
+from .models import DeclaracionJuradaDetalles, Mutual , DeclaracionJurada, Periodo
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -167,6 +167,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)
         locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        context['periodoActual'] = periodoActual
         context['periodo'] =  ""
         
         if(periodoActual != None):
@@ -185,6 +186,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
     def form_valid(self, form):
         mutual = obtenerMutualVinculada(self)
+        periodoActual = self.get_context_data().get('periodoActual', None)
         archivoPrestamo = form.cleaned_data['archivo_p']
         archivoReclamo = form.cleaned_data['archivo_r']
         
@@ -201,6 +203,12 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 if (archivo_valido_p and archivo_valido_r):
                     print("los dos archivos son correctos")
 
+                    declaracionJurada = DeclaracionJurada.objects.create(
+                        mutual = mutual,
+                        fecha_creacion = datetime.now(),
+                        periodo = periodoActual
+                    )
+
                     # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
                     detalle_declaracion = form.save(commit=False)
                     detalle_declaracion.importe = importe_p
@@ -215,6 +223,16 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                         importe=importe_r,
                         archivo=archivoReclamo,
                         total_registros=total_registros_r,
+                    )
+
+                    declaracionJuradaDetalle_r = DeclaracionJuradaDetalles.objects.create(
+                        declaracionJurada = declaracionJurada,
+                        detalleDeclaracionJurada = detalle_declaracion
+                    )
+
+                    declaracionJuradaDetalle_p = DeclaracionJuradaDetalles.objects.create(
+                        declaracionJurada = declaracionJurada,
+                        detalleDeclaracionJurada = detalle_reclamo
                     )
 
                     return super().form_valid(form)
@@ -486,3 +504,22 @@ def mutual_exito(request):
     #     context = super().get_context_data(**kwargs)
     #     context['titulo'] = "Alta de cliente"
     #     return context
+
+# class HistoricoView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
+    # model = DetalleDeclaracionJurada
+    # form_class = FormularioDJ
+    # template_name = "dj_alta.html"
+    # success_url = '/confirmacion/'
+
+    # def get_success_url(self):
+    #     return reverse_lazy('dashboard')
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['titulo'] = 'Declaración Jurada'
+
+    #     mutual = obtenerMutualVinculada(self)
+    #     periodoActual = obtenerPeriodoVigente(self)
+    #     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+    #     context['periodoActual'] = periodoActual
+    #     context['periodo'] =  ""
