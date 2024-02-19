@@ -113,6 +113,14 @@ class ConfirmacionView(TemplateView):
     template_name = 'confirmacion.html'
     success_url = '/confirmacion/'
     
+    
+    def get(self, request, *args, **kwargs):
+       try:
+        dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self) , es_borrador = True )
+       except DeclaracionJurada.DoesNotExist:
+         return redirect('dashboard')
+       
+        
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         mutual = obtenerMutualVinculada(self)
@@ -146,6 +154,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     form_class = FormularioDJ
     template_name = "dj_alta.html"
     success_url = '/confirmacion/'
+
+    
 
     def get_success_url(self):
         return reverse_lazy('dashboard')
