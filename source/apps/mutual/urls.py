@@ -1,7 +1,6 @@
 # Importaciones del sistema
 from django.urls import path
-from .views import HistoricoView, descargarDeclaracion, mutual_exito, MutualCreateView, DeclaracionJuradaView, tu_vista, DetalleMutualView ,ConfirmacionView
-
+from .views import HistoricoView, descargarDeclaracion, mutual_exito, MutualCreateView, DeclaracionJuradaView, tu_vista, DetalleMutualView ,ConfirmacionView, MsjInformativo
 
 app_name = "mutual"
 
@@ -19,6 +18,7 @@ urlpatterns = [
     path('miMutual/', DetalleMutualView.as_view(), name='detalles_mimutual'),
     path('confirmacion/', ConfirmacionView.as_view(), name='confirmacion'),
     path('visualizar_errores/', ConfirmacionView.as_view(), name='visualizarE'),
+    path('msj_informativo/', MsjInformativo.as_view(), name='msj_info'),
     
     # path('dj_confirmacion/', , name='t_vista'),
     

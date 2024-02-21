@@ -131,25 +131,11 @@ class ConfirmacionView(TemplateView):
          return redirect('dashboard')
        
         
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     mutual = obtenerMutualVinculada(self)
-    #     # try:
-    #     dj = DeclaracionJurada.objects.get(mutual = mutual, es_borrador = True )
-    #     # except DeclaracionJurada.DoesNotExist:
-    #     #  return context 
-    #     context['mutual'] = mutual
-    #     context['dj'] = dj
-    #     context['detalle_reclamo'] = dj.detalles.get(tipo = 'R')
-    #     context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
-    #     return context
-    
-    
     
 #-----------------CONFIRMACION DJ---------------------------
-class ConfirmacionView(TemplateView):
-    template_name = 'confirmacion.html'
-    success_url = '/confirmacion/'
+class MsjInformativo(TemplateView):
+    template_name = 'msj_informativo.html'
+    success_url = '/msj_info/'
     
     
     def get(self, request, *args, **kwargs):
@@ -159,18 +145,7 @@ class ConfirmacionView(TemplateView):
          return redirect('dashboard')
        
         
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        mutual = obtenerMutualVinculada(self)
-        # try:
-        dj = DeclaracionJurada.objects.get(mutual = mutual, es_borrador = True )
-        # except DeclaracionJurada.DoesNotExist:
-        #  return context 
-        context['mutual'] = mutual
-        context['dj'] = dj
-        context['detalle_reclamo'] = dj.detalles.get(tipo = 'R')
-        context['detalle_prestamo'] = dj.detalles.get(tipo = 'P')
-        return context
+
 
 def existeBorrador(self):
             try: 
@@ -219,6 +194,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     
                     dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
                     dj.es_borrador = False
+                    dj.fecha_subida = datetime.now()
                     dj.save()
                     messages.success(self.request, "Declaracion Jurada confirmada")
                     return redirect('dashboard')
@@ -271,8 +247,10 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         periodo = obtenerPeriodoVigente(self)
         
         if periodo == None:
-            print("No existe periodo vigente")
-        
+            print("redirijo msj")
+            msj = ("No existe un Periodo de Declaración Jurada disponible actualmente.")
+            contexto = {'msj': msj}
+            return render(request, 'msj_informativo.html', contexto)
         
         # try:
         #  dj = DeclaracionJurada.objects.get(es_borrador = False,  periodo = periodo )
