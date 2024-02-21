@@ -1,0 +1,23 @@
+{% extends 'dashboardCliente.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+  <style>
+    .detalle {
+        list-style: none;
+        padding: 0;
+    }
+
+    .detalle li strong {
+        display: inline-block;
+        width: 140px; /* Ajusta el ancho según sea necesario */
+    }
+</style>
+{% endblock %}
+
+{% block contenedor %}
+  <div class="container cuadrado-background">
+    <h4> {{msj}} </h4>
+  </div>
+{% endblock %}

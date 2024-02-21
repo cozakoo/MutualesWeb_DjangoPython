@@ -19,6 +19,7 @@ urlpatterns = [
     path('miMutual/', DetalleMutualView.as_view(), name='detalles_mimutual'),
     path('confirmacion/', ConfirmacionView.as_view(), name='confirmacion'),
     path('visualizar_errores/', ConfirmacionView.as_view(), name='visualizarE'),
+    
     # path('dj_confirmacion/', , name='t_vista'),
     
 ]
