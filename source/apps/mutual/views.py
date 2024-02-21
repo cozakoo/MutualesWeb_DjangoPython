@@ -666,8 +666,16 @@ def generate_pdf(declaracion):
     pdf.drawRightString(550, 725, f'RAWSON - CHUBUT, {declaracion.fecha_subida}')
 
     # Agregar la información de la declaracion jurada al PDF
-    pdf.drawString(100, 680, f'Mutual: {declaracion.mutual.nombre}')
-    pdf.drawString(100, 660, f'Periodo: {declaracion.periodo.mes_anio.strftime("%B del %Y")}')
+
+    
+    pdf.drawString(120, 680, f'Conste por medio del presente documento, la mutual: {declaracion.mutual.nombre},')
+    pdf.drawString(100, 660, f'identificada con el cuit {declaracion.mutual.cuit} , ha presentado los siguientes documentos')
+    pdf.drawString(100, 640, f'para {declaracion.periodo.mes_anio.strftime("%B del %Y")}.')
+
+
+    # pdf.drawString(100, 680, f'Mutual: {declaracion.mutual.nombre}')
+    # pdf.drawString(100, 660, f'Periodo: {declaracion.periodo.mes_anio.strftime("%B del %Y")}')
+
 
     # Restaurar la configuración regional original
     locale.setlocale(locale.LC_TIME, '')
