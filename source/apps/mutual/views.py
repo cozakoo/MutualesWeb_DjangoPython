@@ -241,7 +241,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 dj.delete()
                 print("borrado")
 
-                messages.success(self.request, "Declaracion Jurada se ha eliminado")
+                messages.success(self.request, "EL Borrador de Declaracion jurada se ha eliminado")
                 # return HttpResponse("exito al eliminar declaracion")
                 return redirect('dashboard')
 
@@ -633,6 +633,13 @@ class HistoricoView(ListView):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Historico'
         return context
+    
+    def get_queryset(self):
+        # Filtrar los objetos según tu lógica
+        queryset = DeclaracionJurada.objects.filter(es_borrador = False)
+
+        # Devolver el queryset filtrado
+        return queryset
 
 import reportlab
 
