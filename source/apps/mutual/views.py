@@ -561,35 +561,56 @@ class HistoricoView(ListView):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Historico'
         return context
-    
+
+import reportlab
+
+import os
+from io import BytesIO
+from reportlab.pdfgen import canvas
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+import threading
+from tkinter import Tk, filedialog
+from django.http import FileResponse
+import io
 
 def generate_pdf(declaracion):
     print(declaracion)
+
     # Crear el PDF en memoria
-    pdf_bytes = BytesIO()
-    pdf = Canvas.Canvas(pdf_bytes)
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer)
 
-    # Agregar contenido al PDF (puedes personalizar esto según tus necesidades)
-    pdf.drawString(100, 100, f"Contenido de la declaración jurada: {declaracion}")
+    # Agregar el título
+    pdf.setFont("Helvetica-Bold", 20)
+    pdf.drawCentredString(300, 770, "Declaración Jurada")
 
+    # Actualizo la letra
+    pdf.setFont("Helvetica", 12)
+
+    # Establecer la configuración regional a español
+    locale.setlocale(locale.LC_TIME, 'es_ES.utf-8')
+
+    pdf.drawRightString(550, 725, f'RAWSON - CHUBUT, {declaracion.fecha_subida}')
+
+    # Agregar la información de la declaracion jurada al PDF
+    pdf.drawString(100, 680, f'Mutual: {declaracion.mutual.nombre}')
+    pdf.drawString(100, 660, f'Periodo: {declaracion.periodo.mes_anio.strftime("%B del %Y")}')
+
+    # Restaurar la configuración regional original
+    locale.setlocale(locale.LC_TIME, '')
     # Guardar el estado del PDF y cerrar el objeto PDF
     pdf.showPage()
     pdf.save()
 
-    # Configurar la respuesta para devolver el PDF en lugar de guardarlo en un archivo
-    pdf_bytes.seek(0)  # Asegúrate de que el cursor esté al principio del archivo
-
-    # Guardar el PDF en un archivo temporal
-    pdf_filename = os.path.join("/ruta/del/archivo/temporal", "declaracion_jurada.pdf")
-    with open(pdf_filename, 'wb') as pdf_file:
-        pdf_file.write(pdf_bytes.read())
-
-    # Puedes devolver el nombre del archivo temporal si lo necesitas
-    return pdf_filename
+    # FileResponse sets the Content-Disposition header so that browsers
+    # present the option to save the file.
+    buffer.seek(0)
+    return buffer
 
 
 def descargarDeclaracion(request, pk):
-    
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
-    generate_pdf(declaracion)
-    return HttpResponse()
+    buffer = generate_pdf(declaracion)
+
+    return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
