@@ -43,15 +43,15 @@
 
     <form method="post" class="text-center">
       <br />
-      <p><strong> Posees una Declaracion Jurada generada el {{dj.fecha_creacion}}, realice una accion </strong> </p>
+      <p><strong> Posees una borrador de Declaracion Jurada generada el {{dj.fecha_creacion}}, realice una accion </strong> </p>
       <br />
       {% csrf_token %}
       <div class="row justify-content-center">
         <div class="col-12 col-sm-6">
-          <button class="btn btn-danger btn-block btn-sm" type="submit" name="cancelar" value="no">Cancelar</button>
+          <button class="btn btn-danger btn-block btn-sm" type="submit" name="cancelar" value="no">Eliminar borrador </button>
         </div>
         <div class="col-12 col-sm-6 mt-2 mt-sm-0">
-          <button class="btn btn-success btn-block btn-sm" type="submit" name="confirmacion" value="si">Confirmar</button>
+          <button class="btn btn-success btn-block btn-sm" type="submit" name="confirmacion" value="si">Confirmar Declaracion</button>
         </div>
       </div>
     </form>

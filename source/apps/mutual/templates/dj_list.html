@@ -42,7 +42,8 @@
 
             <td>{{ declaracion.fecha_creacion|date:'Y/m/d' }}</td>
             <td class="text-end">
-              <a class="btn btn-warning btn-sm" href="{% url 'dashboard' %}">Rectificar</a>
+              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' %}">Rectificar</a>
+               
               <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
             </td>
           </tr>
