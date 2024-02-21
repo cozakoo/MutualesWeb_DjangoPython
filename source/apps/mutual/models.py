@@ -99,7 +99,7 @@ class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
     periodo = models.ForeignKey(Periodo, on_delete=models.CASCADE)
     detalles = models.ManyToManyField(DetalleDeclaracionJurada,related_name='detalles', blank=True, through = "DeclaracionJuradaDetalles")
-    
+
     fecha_subida = models.DateField(null=True, blank=True)
     fecha_creacion = models.DateField(auto_now_add=True) # fecha creación del borrador
     rectificativa = models.IntegerField(default=0)
@@ -107,8 +107,6 @@ class DeclaracionJurada(models.Model):
     es_leida = models.BooleanField(default=False)
     es_borrador = models.BooleanField(default=True)
     
-
-
 class DeclaracionJuradaDetalles(models.Model):
     declaracionJurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
     detalleDeclaracionJurada = models.ForeignKey(DetalleDeclaracionJurada, on_delete=models.CASCADE)

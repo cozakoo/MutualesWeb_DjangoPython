@@ -77,12 +77,8 @@
       {{ mutual }}
     </p>
     <p>
-      info:
-      {{exist}}
-    </p>
-    <p>
       <strong>Periodo a declarar:</strong>
-      {{ periodo }}
+      {{ periodoActual.mes_anio|date:'Y/m/d' }}
     </p>
     
     <form method="post" enctype="multipart/form-data" id="declaracionForm">

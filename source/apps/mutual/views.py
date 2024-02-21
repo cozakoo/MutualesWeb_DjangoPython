@@ -1,6 +1,9 @@
+from io import BytesIO
+import os
+from tkinter import Canvas
 from typing import Any
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import render, redirect
+from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView
 from .models import DeclaracionJuradaDetalles, Mutual , DeclaracionJurada, Periodo
 from .forms import *
@@ -16,6 +19,7 @@ import calendar
 from timezonefinder import TimezoneFinder
 from django.utils.translation import gettext as _
 from datetime import date
+from django.views.generic import ListView
 
 
 
@@ -87,9 +91,10 @@ def obtenerImporte(self, line_content, inicio, fin):
 #--------------- VALIDA LA EXISTENCIA DEL CONCEPTO ------------------------
 def existeConcepto(self, concepto, tipo_archivo):
     mutual = obtenerMutualVinculada(self)
-
+    print(mutual.detalle.exists())
     if mutual and mutual.detalle.exists():
         detalle_mutual = mutual.detalle.filter(tipo=tipo_archivo).first()
+        print(detalle_mutual)
         if concepto == detalle_mutual.concepto_1 or concepto == detalle_mutual.concepto_2:
             return True
     return False
@@ -150,8 +155,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     form_class = FormularioDJ
     template_name = "dj_alta.html"
     success_url = '/confirmacion/'
-   
-       
         
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         
@@ -162,7 +165,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
                 dj.es_borrador = False
                 dj.save()
-                return HttpResponse("exito al confirmar declaracion")
+                messages.success(self.request, "Declaracion Jurada confirmada")
+                return redirect('dashboard')
+
            except DeclaracionJurada.DoesNotExist:
                return redirect('dashboard')
                
@@ -176,9 +181,12 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
                 dj.detalles.all().delete()
                 dj.delete()
-                
                 print("borrado")
-                return HttpResponse("exito al eliminar declaracion")
+
+                messages.success(self.request, "Declaracion Jurada se ha eliminado")
+                # return HttpResponse("exito al eliminar declaracion")
+                return redirect('dashboard')
+
             except DeclaracionJurada.DoesNotExist:
                 return redirect('dashboard')
        
@@ -199,10 +207,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
          
         return super().post(request, *args, **kwargs)
         
-    
-    
-    
-
     def get(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         try:
          dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), es_borrador = True )
@@ -227,6 +231,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
         mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)
+        print("PERIODO ACTUAAAL")
+        print(periodoActual)
         # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
         context['periodoActual'] = periodoActual
         context['periodo'] =  ""
@@ -453,28 +459,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             messages.warning(self.request, mensaje_error)
 
 
-    # def post(self, request, *args, **kwargs):
-    #     self.object = None
-    #     form_class = self.get_form_class()
-    #     form = self.get_form(form_class)
-    #     archivoPrestamo = form.cleaned_data['archivo_p']
-    #     archivoReclamo = form.cleaned_data['archivo_r']    
-    #     archivo_valido_p = self.validar_prestamo(form, archivoPrestamo)
-    #     archivo_valido_r =  self.validar_reclamo(form, archivoReclamo)
-         
-    #     if (archivo_valido_p & archivo_valido_r):
-    #         #se crea el borrador 
-    #         dj = DeclaracionJurada(mutual = obtenerMutualVinculada(self))
-    #         dj.save()
-    #         #se calculo los totales
-    #         d_prestamo = DetalleDeclaracionJurada(tipo = 'P', archivo = archivo_valido_p , importe = 10000)
-    #         d_reclamo  =DetalleDeclaracionJurada(tipo = 'R', archivo = archivoReclamo, importe = 1000)
-    #         dj.detalles.create(d_prestamo)
-    #         dj.detalles.create(d_reclamo)
-    #         return render(request, 'mostrar_borrador.html',{'dj': dj} )
-        
-    #     render(request, self.template_name, {'form': form})
-
 class DetalleMutualView(DetailView):
     model = Mutual
     template_name = 'detalle_mutual.html'
@@ -566,21 +550,46 @@ def mutual_exito(request):
     #     context['titulo'] = "Alta de cliente"
     #     return context
 
-# class HistoricoView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
-    # model = DetalleDeclaracionJurada
-    # form_class = FormularioDJ
-    # template_name = "dj_alta.html"
-    # success_url = '/confirmacion/'
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-    # def get_success_url(self):
-    #     return reverse_lazy('dashboard')
+class HistoricoView(ListView):
+    model = DeclaracionJurada
+    template_name = "dj_list.html"
+    paginate_by = 10# Número de elementos por página
 
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['titulo'] = 'Declaración Jurada'
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Historico'
+        return context
+    
 
-    #     mutual = obtenerMutualVinculada(self)
-    #     periodoActual = obtenerPeriodoVigente(self)
-    #     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
-    #     context['periodoActual'] = periodoActual
-    #     context['periodo'] =  ""
+def generate_pdf(declaracion):
+    print(declaracion)
+    # Crear el PDF en memoria
+    pdf_bytes = BytesIO()
+    pdf = Canvas.Canvas(pdf_bytes)
+
+    # Agregar contenido al PDF (puedes personalizar esto según tus necesidades)
+    pdf.drawString(100, 100, f"Contenido de la declaración jurada: {declaracion}")
+
+    # Guardar el estado del PDF y cerrar el objeto PDF
+    pdf.showPage()
+    pdf.save()
+
+    # Configurar la respuesta para devolver el PDF en lugar de guardarlo en un archivo
+    pdf_bytes.seek(0)  # Asegúrate de que el cursor esté al principio del archivo
+
+    # Guardar el PDF en un archivo temporal
+    pdf_filename = os.path.join("/ruta/del/archivo/temporal", "declaracion_jurada.pdf")
+    with open(pdf_filename, 'wb') as pdf_file:
+        pdf_file.write(pdf_bytes.read())
+
+    # Puedes devolver el nombre del archivo temporal si lo necesitas
+    return pdf_filename
+
+
+def descargarDeclaracion(request, pk):
+    
+    declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
+    generate_pdf(declaracion)
+    return HttpResponse()
