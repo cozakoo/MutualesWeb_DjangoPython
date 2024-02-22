@@ -1,6 +1,12 @@
 from io import BytesIO
+import io
+from reportlab.pdfgen import canvas
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse
+from django.http import FileResponse
+from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfbase import pdfmetrics
 import os
-from tkinter import Canvas
 from typing import Any
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
@@ -15,7 +21,6 @@ from ..users.models import UserRol
 import re
 import locale
 from datetime import datetime
-import calendar
 from timezonefinder import TimezoneFinder
 from django.utils.translation import gettext as _
 from datetime import date
@@ -637,8 +642,6 @@ def mutual_exito(request):
     #     context['titulo'] = "Alta de cliente"
     #     return context
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-
 class HistoricoView(ListView):
     model = DeclaracionJurada
     template_name = "dj_list.html"
@@ -656,60 +659,100 @@ class HistoricoView(ListView):
         # Devolver el queryset filtrado
         return queryset
 
-import reportlab
+def registrar_fuentes():
+    pdfmetrics.registerFont(TTFont('Calibri', 'calibri.ttf'))
+    pdfmetrics.registerFont(TTFont('TituloFont', 'times.ttf'))
+    pdfmetrics.registerFont(TTFont('Times-Italic', 'timesi.ttf'))
+    pdfmetrics.registerFont(TTFont('Times-Bold', 'timesbd.ttf'))
 
-import os
-from io import BytesIO
-from reportlab.pdfgen import canvas
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
-import threading
-from tkinter import Tk, filedialog
-from django.http import FileResponse
-import io
+def establecer_fuente_titulo(pdf):
+    pdf.setFont('Times-Bold', 14)
+    pdf.drawCentredString(300, 770, "Presentación de DJ por internet")
+    pdf.drawCentredString(300, 745, "Acuse de recibo de DJ")
+
+def agregar_linea(pdf, y_position):
+    pdf.setStrokeColorRGB(0.6, 0.6, 0.6)
+    pdf.line(100, y_position, 520, y_position)
+    pdf.setStrokeColorRGB(0, 0, 0)
+
+def agregar_cabecera(pdf, mutual, periodo, codigo_acuse, fecha_subida, total_registros, suma_importes):
+    agregar_linea(pdf, 715)
+    pdf.setFont("Calibri", 11)
+    pdf.drawRightString(295, 695, f'Mutual:')
+    pdf.drawRightString(295, 675, f'CUIT:')
+    pdf.drawRightString(295, 655, f'Fecha de Presentación:')
+    pdf.drawRightString(295, 635, f'Código Acuse:')
+    pdf.drawRightString(295, 615, f'Período:')    
+    pdf.drawRightString(295, 595, f'Total de Importe:')
+    pdf.drawRightString(295, 575, f'Total de Registros:')
+    pdf.drawString(300, 695, f'{mutual.nombre}')
+    pdf.drawString(300, 675, f'{mutual.cuit}')
+    pdf.drawString(300, 655, f'{fecha_subida.strftime("%Y-%m-%d Hora: %H:%M:%S")}')
+    pdf.drawString(300, 635, f'{codigo_acuse}')
+    pdf.drawString(300, 615, f'{periodo.mes_anio.strftime("%Y - %m")}')
+    pdf.drawString(300, 595, f'${suma_importes}')
+    pdf.drawString(300, 575, f'{total_registros}')
+
+def agregar_detalle(pdf, titulo, y_position, archivo, total_registros, importe):
+    agregar_linea(pdf, y_position)
+    pdf.setFont("Times-Italic", 11)
+    pdf.drawCentredString(300, y_position - 20, titulo)
+    pdf.setFont("Calibri", 11)
+    pdf.drawRightString(295, y_position - 40, f'Archivo:')
+    pdf.drawRightString(295, y_position - 60, f'Importe:')
+    pdf.drawRightString(295, y_position - 80, f'Cantidad de Registros:')
+    pdf.drawString(300, y_position - 40, f'{archivo}')
+    pdf.drawString(300, y_position - 60, f'${importe}')
+    pdf.drawString(300, y_position - 80, f'{total_registros}')
+
+def agregar_pie_de_pagina(pdf):
+    pdf.setFont("Calibri", 11)
+    pdf.drawCentredString(300, 50, 'dgc.chubut@gmail.com')
 
 def generate_pdf(declaracion):
-    print(declaracion)
+    detalles_prestamo = declaracion.detalles.filter(tipo='P').first()
+    detalles_reclamo = declaracion.detalles.filter(tipo='R').first()
+    
+    total_registros_prestamo = detalles_prestamo.total_registros if detalles_prestamo else 0
+    total_registros_reclamo = detalles_reclamo.total_registros if detalles_reclamo else 0
+    total_registros = total_registros_prestamo + total_registros_reclamo
 
-    # Crear el PDF en memoria
+    suma_importes_prestamo = detalles_prestamo.importe if detalles_prestamo else 0
+    suma_importes_reclamo = detalles_reclamo.importe if detalles_reclamo else 0
+    suma_importes = suma_importes_prestamo + suma_importes_reclamo
+
+    registrar_fuentes()
+
     buffer = io.BytesIO()
     pdf = canvas.Canvas(buffer)
-
-    # Agregar el título
-    pdf.setFont("Helvetica-Bold", 20)
-    pdf.drawCentredString(300, 770, "Declaración Jurada")
-
-    # Actualizo la letra
-    pdf.setFont("Helvetica", 12)
-
-    # Establecer la configuración regional a español
     locale.setlocale(locale.LC_TIME, 'es_ES.utf-8')
 
-    pdf.drawRightString(550, 725, f'RAWSON - CHUBUT, {declaracion.fecha_subida}')
+    establecer_fuente_titulo(pdf)
+    agregar_cabecera(pdf, declaracion.mutual, declaracion.periodo, declaracion.codigo_acuse_recibo,
+                    declaracion.fecha_subida, total_registros, suma_importes)
 
-    # Agregar la información de la declaracion jurada al PDF
+    if detalles_prestamo:
+        nombre_archivo_prestamo = os.path.basename(detalles_prestamo.archivo.path) if detalles_prestamo else ""
+        nombre_archivo_prestamo_sin_extension, extension_prestamo = os.path.splitext(nombre_archivo_prestamo)
+        nombre_archivo_prestamo_sin_guion_bajo = nombre_archivo_prestamo_sin_extension.split('_')[0]
+        nombre_final_prestamo = f"{nombre_archivo_prestamo_sin_guion_bajo}{extension_prestamo}"
+        agregar_detalle(pdf, 'DETALLE PRÉSTAMO:', 545, nombre_final_prestamo, detalles_prestamo.total_registros, detalles_prestamo.importe)
 
-    
-    pdf.drawString(120, 680, f'Conste por medio del presente documento, la mutual: {declaracion.mutual.nombre},')
-    pdf.drawString(100, 660, f'identificada con el cuit {declaracion.mutual.cuit} , ha presentado los siguientes documentos')
-    pdf.drawString(100, 640, f'para {declaracion.periodo.mes_anio.strftime("%B del %Y")}.')
+    if detalles_reclamo:
+        nombre_archivo_reclamo = os.path.basename(detalles_reclamo.archivo.path) if detalles_reclamo else ""
+        nombre_archivo_reclamo_sin_extension, extension_reclamo = os.path.splitext(nombre_archivo_reclamo)
+        nombre_archivo_reclamo_sin_guion_bajo = nombre_archivo_reclamo_sin_extension.split('_')[0]
+        nombre_final_reclamo = f"{nombre_archivo_reclamo_sin_guion_bajo}{extension_reclamo}"
+        agregar_detalle(pdf, 'DETALLE RECLAMO:', 435, nombre_final_reclamo, detalles_reclamo.total_registros, detalles_reclamo.importe)
 
-
-    # pdf.drawString(100, 680, f'Mutual: {declaracion.mutual.nombre}')
-    # pdf.drawString(100, 660, f'Periodo: {declaracion.periodo.mes_anio.strftime("%B del %Y")}')
-
-
-    # Restaurar la configuración regional original
+    agregar_pie_de_pagina(pdf)
     locale.setlocale(locale.LC_TIME, '')
-    # Guardar el estado del PDF y cerrar el objeto PDF
+
     pdf.showPage()
     pdf.save()
 
-    # FileResponse sets the Content-Disposition header so that browsers
-    # present the option to save the file.
     buffer.seek(0)
     return buffer
-
 
 def descargarDeclaracion(request, pk):
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
