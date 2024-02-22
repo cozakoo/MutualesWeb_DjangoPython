@@ -102,6 +102,7 @@ class DeclaracionJurada(models.Model):
     fecha_subida = models.DateTimeField(null=True, blank=True)
     fecha_creacion = models.DateTimeField(auto_now_add=True) # fecha creación del borrador
     rectificativa = models.IntegerField(default=0)
+    codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     es_leida = models.BooleanField(default=False)
     es_borrador = models.BooleanField(default=True)
     
