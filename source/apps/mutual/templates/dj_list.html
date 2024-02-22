@@ -15,7 +15,7 @@
           <th>Periodo</th>
           <th>Detalle</th>
           <th class="text-center">Leido</th>
-          <th>Fecha creación</th>
+          <th>Fecha subida</th>
           <th></th>
         </tr>
       </thead>
@@ -40,9 +40,12 @@
               {% endif %}
             </td>
 
-            <td>{{ declaracion.fecha_creacion|date:'Y/m/d' }}</td>
+            <td>{{ declaracion.fecha_subida|date:"Y/m/d  H:i:s" }}</td>
             <td class="text-end">
+              {% if not declaracion.es_leida %}
               <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' %}">Rectificar</a>
+              {% endif %}
+              
                
               <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
             </td>
