@@ -15,7 +15,7 @@
           <th>Periodo</th>
           <th>Detalle</th>
           <th class="text-center">Leido</th>
-          <th>Fecha subida</th>
+          <th>Fecha de subida</th>
           <th></th>
         </tr>
       </thead>
@@ -23,7 +23,7 @@
         {% for declaracion in page_obj %}
           <tr>
             <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
-            <td>{{ declaracion.periodo.mes_anio|date:'Y/m/d' }}</td>
+            <td>{{ declaracion.periodo.mes_anio|date:'Y/m' }}</td>
             <td>
               {% for detalle in declaracion.detalles.all %}
                 {{ detalle.tipo }} - ${{ detalle.importe }} - {{ detalle.total_registros }} Registros

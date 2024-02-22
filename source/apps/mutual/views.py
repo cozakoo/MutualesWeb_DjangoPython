@@ -56,28 +56,28 @@ def es_numerico(cadena):
         """Verifica si una cadena está compuesta solo por dígitos."""
         return bool(re.match("^\d+$", cadena))
 
-def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero):
+def validar_numero(self, line_content, line_number, inicio, fin, tipo_numero, listErrores):
         """Valida un número en una línea."""
         numero = line_content[inicio:fin]
         mensaje = f"{tipo_numero}: {numero}"
         print(mensaje)
 
         if not es_numerico(numero):
-            mensaje_error = f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}"
-            messages.warning(self.request, mensaje_error)
+            listErrores.append(f"Error: La línea {line_number}. {mensaje} tiene caracteres no numéricos. Línea: {line_content}")
+            # messages.warning(self.request, mensaje_error)
 
 #------------------------ VALIDACIÓN PARA EL CONCEPTO ------------------------
-def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, tipo_archivo):
+def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, tipo_archivo, listErrores):
 
-    validar_numero(self, line_content, line_number, inicio, fin, tipo_numero)
+    validar_numero(self, line_content, line_number, inicio, fin, tipo_numero, listErrores)
     concepto = int(line_content[inicio:fin])
 
     if not existeConcepto(self, concepto, tipo_archivo):
         numero = line_content[inicio:fin]
         mensaje = f"{tipo_numero}: {numero}"
         print(mensaje, "NO ENCONTRADO EN BASE")
-        mensaje_error = f"Error: La línea {line_number}. {mensaje} no esta vinculado a su mutual. Linea: {line_content}"
-        messages.warning(self.request, mensaje_error)
+        listErrores.append(f"Error: La línea {line_number}. {mensaje} no esta vinculado a su mutual. Linea: {line_content})")
+     
 
 #------------------------ OINTENGO EL TOTAL DEL IMPORTE ------------------------
 def obtenerImporte(self, line_content, inicio, fin):
@@ -162,6 +162,12 @@ def existeBorrador(self):
 class VisualizarErroresView(TemplateView):
     template_name = 'visualizar_errores.html'
     success_url = '/visualizarE/'
+    
+    def get(self, request, *args, **kwargs):
+        if request.GET.dict():
+            super.get(self)
+        else:
+         return redirect('dashboard')
 
 #--------------- DECLARACIÓN JURADA ------------------------
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
@@ -237,7 +243,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
           else:
             # Hacer algo si el formulario no es válido
             print("sin error 3")
-            return self.form_invalid(form)
+            return self.form_valid(form)
         
          
         return super().post(request, *args, **kwargs)
@@ -302,15 +308,32 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         mutual = obtenerMutualVinculada(self)
         print("despues obt mutual ")
         periodoActual = obtenerPeriodoVigente(self)
-        archivoPrestamo = form.cleaned_data['archivo_p']
-        archivoReclamo = form.cleaned_data['archivo_r']
+        listErroresPrestamo = []
+        listErroresReclamo = []
+        archivoReclamo = False
+        archivoPrestamo = False 
+        try:
+            archivoPrestamo = form.cleaned_data['archivo_p']
+        except KeyError:
+            print("prestamo no se encontro", archivoPrestamo)
+            
+        try:
+            archivoReclamo = form.cleaned_data['archivo_r']
+        except KeyError:
+            print("reclamo no se encontro", archivoReclamo) 
+      
+        
         print("antes del try")
+        
         try:
             with transaction.atomic():
-                archivo_valido_p, importe_p, total_registros_p = self.validar_prestamo(form, archivoPrestamo)
-                archivo_valido_r, importe_r, total_registros_r = self.validar_reclamo(form, archivoReclamo)
-
-                print("")
+                if archivoPrestamo: archivo_valido_p, importe_p, total_registros_p, listErroresPrestamo = self.validar_prestamo(form, archivoPrestamo)
+                else: archivo_valido_p = True
+                
+                if archivoReclamo : archivo_valido_r, importe_r, total_registros_r, listErroresReclamo = self.validar_reclamo(form, archivoReclamo)
+                else: archivo_valido_r = True
+                
+                print("estado archivos")
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
                 print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
                 form.importe = 0
@@ -351,27 +374,35 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     )
 
                     return super().form_valid(form)
-                return super().form_invalid(form)
+                
+                print("entre en invalid")
+                return self.form_invalid(form, listErroresPrestamo, listErroresReclamo)
 
         except Exception as e:
             messages.error(self.request, f"Error al procesar el formulario: {e}")
-            return self.form_invalid(form)
+            return self.form_invalid(form,listErroresPrestamo,listErroresReclamo)
 
 
-    
-    def form_invalid(self, form):
-        print("complete la carga de archivos")
+     
+    def form_invalid(self, form, listErroresPrestamo, listErroresReclamo):
+       
+        contexto = {
+            'erroresPrestamo': listErroresPrestamo,
+             'cantErrorPrestamo': len(listErroresPrestamo),
+            'erroresReclamo':listErroresReclamo,
+            'cantErrorReclamo': len(listErroresReclamo)
+        }
         
-        for field, errors in form.errors.items():
-            print(f"Error en el campo {field}: {', '.join(errors)}")
-
-        messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
-        return super().form_invalid(form)
+       
+        return render(self.request, 'visualizar_errores.html', contexto)
+        # messages.error(self.request, 'Error en el formulario. Por favor, corrige los errores marcados.')
+        
 
     def validar_prestamo(self, form, archivo):
         """Valida el contenido del archivo de PRESTAMO."""
         print("VALIDANDO PRESTAMO------------")
         print("")
+        listErrores = []
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
         LONGITUD_P = 54
         TIPO_ARCHIVO = 'P'
@@ -390,31 +421,31 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                         todas_las_lineas_validas = False
                         break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                     else:
-                        validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
-                        validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO)
-                        validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
+                        validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO",listErrores)
+                        validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO, listErrores)
+                        validar_numero(self, line_content, line_number, 20, 31, "IMPORTE", listErrores)
                         total_importe += obtenerImporte(self, line_content, 20, 31)
                         fecha_str_inicio = line_content[31:39]
                         fecha_str_fin = line_content[39:47]
-                        self.validar_fechas_prestamo(line_content, line_number, fecha_str_inicio, fecha_str_fin)
-                        validar_numero(self, line_content, line_number, 47, 54, "CUPON")
+                        self.validar_fechas_prestamo(line_content, line_number, fecha_str_inicio, fecha_str_fin,listErrores)
+                        validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
                         last_line_number = line_number  # Actualizar el último line_number
                     print("")
             
                 if not todas_las_lineas_validas:
                     print("------------ PRESTAMO INVALIDO")
-                    mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres."
-                    messages.warning(self.request, mensaje_error)
-                    return False, 0, last_line_number  # Devolver False y total_importes como 0 si hay líneas inválidas
+                    listErrores.append(f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres.")
+                    # messages.warning(self.request, mensaje_error)
+                    return False, 0, last_line_number, listErrores # Devolver False y total_importes como 0 si hay líneas inválidas
                 print("------------ PRESTAMO VALIDO")
-                return True, total_importe, last_line_number
+                return True, total_importe, last_line_number, listErrores
 
         except Exception as e:
-            messages.error(self.request, f"Error al leer el archivo: {e}")
-            return False, 0, last_line_number
+            listErrores.append(f"Archivo invalido no puede ser leido: {e}")
+            return False, 0, last_line_number, listErrores
 
 
-    def validar_fechas_prestamo(self, line_content, line_number, fecha_inicio, fecha_fin):
+    def validar_fechas_prestamo(self, line_content, line_number, fecha_inicio, fecha_fin, listErrores):
 
         try:
             # Convertir la cadena de fecha a un objeto de fecha
@@ -428,24 +459,28 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             
             periodoActual = obtenerPeriodoVigente(self)
             print(periodoActual.mes_anio)
+         
 
             if fecha_obj_inicio > periodoActual.mes_anio:
-                mensaje_error = f"Error: La FECHA INICIO en la línea {line_number} es mayor que la fecha inicial del periodo. Línea: {line_content}"
+                listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} es mayor que la fecha inicial del periodo. Línea: {line_content}")
 
             if fecha_obj_fin < periodoActual.mes_anio:
-                mensaje_error = f"Error: La FECHA FIN en la línea {line_number} es menor mayor que la fecha inicial del periodo. Línea: {line_content}"
+                listErrores.append(f"Error: La FECHA FIN en la línea {line_number} es menor mayor que la fecha inicial del periodo. Línea: {line_content}")
 
             if fecha_obj_inicio > fecha_obj_fin:
-                mensaje_error = f"Error: La FECHA INICIO en la línea {line_number} es mayor que la FECHA FIN. Línea: {line_content}"
-
+               listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} es mayor que la FECHA FIN. Línea: {line_content}")
+            
+        
         except ValueError:
             mensaje_error = f"Error: La FECHA en la línea {line_number} no es válida. Línea: {line_content}"
-            messages.warning(self.request, mensaje_error)
+            listErrores.append(mensaje_error)
 
     def validar_reclamo(self, form, archivo):
         """Valida el contenido del archivo de RECLAMO."""
         print("VALIDANDO RECLAMO------------")
         print("")
+        TIPO_ARCHIVO = 'R'
+        listErrores = []
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
         LONGITUD_R = 57
         total_importe = 0  # Inicializar el total del importe
@@ -462,31 +497,32 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     todas_las_lineas_validas = False
                     break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
                 else:
-                    validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO")
-                    validar_numero(self, line_content, line_number, 16, 20, "CONCEPTO")
-                    validar_numero(self, line_content, line_number, 20, 31, "IMPORTE")
+                    validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO",listErrores)
+                    validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO, listErrores)
+                    validar_numero(self, line_content, line_number, 20, 31, "IMPORTE",listErrores)
                     total_importe += obtenerImporte(self, line_content, 20, 31)
-                    self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO")
-                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN") # type: ignore
-                    validar_numero(self, line_content, line_number, 47, 54, "CUPON")
-                    validar_numero(self,line_content, line_number, 54, 57, "CUOTA")
+                    self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO",listErrores)
+                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN", listErrores) # type: ignore
+                    validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
+                    validar_numero(self,line_content, line_number, 54, 57, "CUOTA", listErrores)
                     last_line_number = line_number  # Actualizar el último line_number
                 print("")
 
             #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
             if not todas_las_lineas_validas:
                 print("RECLAMO INVALIDO------------")
-                mensaje_error = f"Error: Todas las líneas del archivo deben tener {LONGITUD_R} caracteres."
-                messages.warning(self.request, mensaje_error)
-                return False, 0, last_line_number
+                listErrores.append(f"Error: Todas las líneas del archivo deben tener {LONGITUD_R} caracteres.")
+                
+                # messages.warning(self.request, mensaje_error)
+                return False, 0, last_line_number, listErrores
             print("RECLAMO VALIDO------------")
-            return True, total_importe, last_line_number
+            return True, total_importe, last_line_number, listErrores
 
         except Exception as e:
-          messages.error(self.request, f"Error al leer el archivo: {e}")
+          listErrores.append(f"Archivo invalido no puede ser leido {e}")
           return False, 0, last_line_number
 
-    def validar_fecha_reclamo(self, line_content, line_number, inicio, fin, tipo_fecha):
+    def validar_fecha_reclamo(self, line_content, line_number, inicio, fin, tipo_fecha, listErrores):
         fecha_str = line_content[inicio:fin]
         mensaje = f"{tipo_fecha}: {fecha_str}"
         print(mensaje)
@@ -502,11 +538,11 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             # Comparar si la fecha de la línea está después de la fecha actual
             if fecha_obj > fecha_actual:
                 mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} es posterior a la fecha actual. Línea: {line_content}"
-                messages.warning(self.request, mensaje_error)
+                listErrores.append(mensaje_error)
 
         except ValueError:
-            mensaje_error = f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}"
-            messages.warning(self.request, mensaje_error)
+            listErrores.append(f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}")
+            # messages.warning(self.request, mensaje_error)
 
 
 class DetalleMutualView(DetailView):
@@ -557,6 +593,7 @@ class MutualCreateView(CreateView):
     
     
     def form_valid(self, form, d_reclamo, d_prestam):
+            
             
             campo_existente = form.cleaned_data['cuit']
             if Mutual.objects.filter(cuit = campo_existente).exists():
