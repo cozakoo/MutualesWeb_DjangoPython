@@ -18,35 +18,36 @@
 {% endblock %}
 
 {% block contenedor %}
-  
 
-</head>
-<body>
-  <div class="container cuadrado-background" align="center">
-    <h4 class="card-title">Errores detectados</h4>
-  </br>
-        <div class="card text-center" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">Prestamo</h5>
-            <p class="card-text">Cantidad de Errores: {{cantErrorPrestamo}}</p>
-            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Det. Prést.</button>
-          </div>
-        </div>
-      </br>
-    </br>
-        <div class="card text-center" style="width: 18rem;">
-          <div class="card-body">
-            <h5 class="card-title">Reclamo</h5>
-            <p class="card-text">Cantidad Errores: {{cantErrorReclamo}} </p>
-            <a href="#" class="btn btn-danger">Go somewhere</a>
-          </div>
-        </div>
-          
-        </div>
+<div class="container cuadrado-background" align="center">
+  
+  <br>
+
+  {% if erroresPrestamo %}
+  <div class="card text-center" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Prestamo</h5>
+      <p class="card-text">Cantidad de Errores: {{ cantErrorPrestamo }}</p>
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Visualizar 45 Errores</button>
+    </div>
+  </div>
+  {% endif %}
+
+  {% if erroresReclamo %}
+  <br><br>
+  <div class="card text-center" style="width: 18rem;">
+    <div class="card-body">
+      <h5 class="card-title">Reclamo</h5>
+      <p class="card-text">Cantidad Errores: {{ cantErrorReclamo }}</p>
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalReclamo"> Visualizar Errores 55 </button>
+    </div>
+  </div>
+  {% endif %}
+
+
   </div>
 
-  
-
+  <!-- MODAL PRESTAMO -->
   <div class="modal fade" id="modalPrestamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
@@ -56,128 +57,38 @@
         </div>
         <div class="modal-body">
           <div style="height: 300px; overflow-y: auto;">
-          {% for item in erroresPrestamo %}
-          <tr>
-            
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              <td>{{ item }}</td>
-              
-            </div>
-    
-              <div class="modal-footer">
-                <!-- Botón para descargar el contenido del modal -->
-                <button id="downloadButton" type="button" class="btn btn-secondary">Descargar</button>
-              </div>
-              <!-- Agrezga más columnas según sea necesario -->
-          </tr>
-      {% endfor %}
+            {% for item in erroresPrestamo %}
+            <p>LSSLSLSL {{ item }}</p>
+            {% endfor %}
+          </div>
         </div>
-  </div>  
-
-
-
-
-
-</body>
-        {% comment %} <h1 align= "center">Errores detectados</h1>
-        <h2>Prestamo</h2>
-        <h6>Cantidad de Errores: {{cantErrorPrestamo}}</h6>
-        {% for item in erroresPrestamo %}
-        <tr>
-            <td>{{ item }}</td>
-            <!-- Agrezga más columnas según sea necesario -->
-        </tr>
-    {% endfor %}
-
-    <h2>Reclamo</h2>
-        <h6>Cantidad de Errores: {{cantErrorReclamo}}</h6>
-        {% for item in erroresReclamo %}
-        <tr>
-            <td>{{ item }}</td>
-            <!-- Agrezga más columnas según sea necesario -->
-        </tr>
-    {% endfor %}
-      </div> {% endcomment %}
+        <div class="modal-footer">
+          <!-- Botón para descargar el contenido del modal -->
+          <button id="downloadButtonPrestamo" type="button" class="btn btn-secondary">Descargar</button>
+      </div>
+    
+   
+  <div class="modal fade" id="modalReclamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="detalleReclamo">Errores en el archivo Prestamo</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div style="height: 300px; overflow-y: auto;">
+            {% for item in erroresReclamo %}
+            <p>LSSLSLSL {{ item }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <!-- Botón para descargar el contenido del modal -->
+          <button id="downloadButtonPrestamo" type="button" class="btn btn-secondary">Descargar</button>
+      </div>
 
  
- 
-  
+
+
+
 {% endblock %}
