@@ -10,11 +10,30 @@
 
 {% block content %}
   {% include 'navbarCliente.html' %}
-  {% block contenedor %}
-    <div class="cuadrado-background">
-      <h1>¡Bienvenido {{ user }}!</h1>
-      <h5>Mutual asociada: {{ rol.cliente.mutual }}</h5>
-      <h5>Ultima conexion: {{ ultimaSession }}</h5>
-    </div>
-  {% endblock %}
+  <div style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 60px);">
+    {% block contenedor %}
+      <div class="cuadrado-background">
+        <h1 class="text-center">¡Bienvenido {{ user }}!</h1>
+
+        <div class="row">
+          <div class="col-md-4 col-sm-12">
+            <h5>Mutual asociada:</h5>
+          </div>
+
+          <div class="col-md-8 col-sm-12">
+            <h5 class="negrita">{{ rol.cliente.mutual }}</h5>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4 col-sm-12">
+            <h5>Ultima conexion:</h5>
+          </div>
+          <div class="col-md-8 col-sm-12">
+            <h5 class="negrita">{{ ultimaSession }}</h5>
+          </div>
+        </div>
+      </div>
+    {% endblock %}
+  </div>
 {% endblock %}

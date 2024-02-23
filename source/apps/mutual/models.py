@@ -21,7 +21,6 @@ class DetalleMutual(models.Model):
     concepto_1 = models.IntegerField()
     concepto_2 = models.IntegerField()
 
-
 class Mutual(models.Model):
 
     nombre = models.CharField(max_length=100)

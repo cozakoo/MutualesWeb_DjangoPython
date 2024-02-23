@@ -288,7 +288,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Declaración Jurada'
+        context['titulo'] = 'Declaración'
 
         mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)

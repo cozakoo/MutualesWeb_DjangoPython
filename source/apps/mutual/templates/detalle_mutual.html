@@ -7,27 +7,54 @@
 
 {% block contenedor %}
   <div class="container cuadrado-background">
-    <h2 class="text-center text-white-55">Mutual</h2>
+    <h2 class="text-center">Mutual</h2>
     <br />
+    
     <div class="row">
-      <div class="custom-container shadow p-3 mb-4 bg-light rounded d-inline-block">Nombre: {{ mimutual.nombre }}</div>
-      <div class="shadow p-3 mb-4 bg-body rounded">Cuit: {{ mimutual.cuit }}</div>
-      <div class="custom-container shadow p-3 mb-4 bg-white rounded">
-        Estado:{% if mimutual.activo %}
-          Activo
+      <div class="col-md-4 col-sm-5">Mutual:</div>
+      <div class="col-md-8 col-sm-12 negrita">{{ mimutual.nombre }}</div>
+    </div>
+    
+    <div class="row">
+      <div class="col-md-4 col-sm-5">Cuit:</div>
+      <div class="col-6 col-md-8">{{ mimutual.cuit }}</div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-4 col-sm-5">Estado:</div>
+      <div class="col-6 col-md-8">
+        {% if mimutual.activo %}
+        Activo
         {% else %}
-          Inactivo
+        Inactivo
         {% endif %}
       </div>
-
+    </div>
+      
       {% for detalle in mimutual.detalle.all %}
-        <div class="shadow p-3 mb-4 bg-body rounded">
-          <h5>{{ detalle.get_tipo_display|capfirst }}</h5>
-          <p style="margin-bottom: 0px;">Origen: {{ detalle.origen }}</p>
-          <p style="margin-bottom: 0px;">Destino: {{ detalle.destino }}</p>
-          <p style="margin-bottom: 0px;">Concepto 1: {{ detalle.concepto_1 }}</p>
-          <p style="margin-bottom: 0px;">Concepto 2: {{ detalle.concepto_2 }}</p>
-        </div>
+      <br>
+      <h5>{{ detalle.get_tipo_display|capfirst }} asociado</h5>
+      <div class="row">
+        <div class="col-md-4 col-sm-5">Origen:</div>
+        <div class="col-6 col-md-8">{{ detalle.origen }}.txt</div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 col-sm-5">Destino:</div>
+        <div class="col-6 col-md-8">{{ detalle.destino }}.txt</div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 col-sm-6">Concepto:</div>
+        <div class="col-6 col-md-8">{{ detalle.concepto_1 }}</div>
+      </div>
+
+      {% if detalle.concepto_2 is not None and detalle.concepto_2 != 0 %}
+      <div class="row">
+        <div class="col-md-4 col-sm-5">Concepto:</div>
+        <div class="col-6 col-md-8">{{ detalle.concepto_2 }}</div>
+      </div>
+      {% endif %}
+
       {% endfor %}
     </div>
   </div>

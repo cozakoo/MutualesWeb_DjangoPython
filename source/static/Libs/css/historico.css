@@ -1,3 +1,68 @@
-.cuadrado-background{
+.cuadrado-background {
     width: 90%;
+}
+
+.table {
+    border-collapse: collapse;
+    /* Elimina todos los bordes */
+
+    /* Combina los bordes de las celdas para evitar espacios entre ellas */
+}
+
+
+.table th:first-child {
+    border-top-left-radius: 10px;
+    /* Ajusta el radio de las esquinas superiores izquierdas */
+    border-top-right-radius: 0;
+    /* Elimina el radio de la esquina superior derecha */
+    border-bottom-left-radius: 0;
+    /* Elimina el radio de la esquina inferior izquierda */
+    border-bottom-right-radius: 0;
+    /* Elimina el radio de la esquina inferior derecha */
+}
+
+.table td:first-child {
+    border-top-left-radius: 10px;
+    /* Ajusta el radio de las esquinas superiores izquierdas */
+}
+
+.table th:last-child {
+    border-top-right-radius: 0;
+    /* Elimina el radio de la esquina superior derecha */
+    border-top-left-radius: 0;
+    /* Elimina el radio de la esquina superior izquierda */
+    border-bottom-left-radius: 0;
+    /* Elimina el radio de la esquina inferior izquierda */
+    border-bottom-right-radius: 0;
+    /* Elimina el radio de la esquina inferior derecha */
+}
+
+.table td:last-child {
+    border-top-left-radius: 0px;
+}
+
+.table th:first-child {
+    border-top-left-radius: 10px;
+
+}
+
+.table th:last-child {
+    border-top-right-radius: 10px;
+}
+
+.table td:first-child {
+    border-top-left-radius: 0px;
+    /* Ajusta el radio de las esquinas inferiores izquierdas */
+    border-bottom-left-radius: 10px;
+    /* Ajusta el radio de las esquinas inferiores izquierdas */
+}
+
+.table td:last-child {
+    border-bottom-right-radius: 10px;
+    /* Ajusta el radio de las esquinas inferiores derechas */
+}
+
+.table th:last-child {
+    border-bottom-width: 0;
+    /* Establece el ancho del borde inferior a 0 */
 }
