@@ -46,12 +46,12 @@ class FormularioDJ(forms.ModelForm):
 
     archivo_p = forms.FileField(
         widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
-        required=True
+        required=False
     )
 
     archivo_r = forms.FileField(
         widget=forms.ClearableFileInput(attrs={'multiple': True, 'class': 'form-control'}),
-        required=True
+        required=False
     )
 
     MES_CHOICES = [

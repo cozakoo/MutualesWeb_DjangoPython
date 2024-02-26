@@ -19,27 +19,27 @@
 
 {% block contenedor %}
 
-<div class="container cuadrado-background" align="center">
-  
+<div class="container cuadrado-background" align="center" style="width: 40rem;">
+  <h4> Errores encontrados en los siguientes Archivos</h4>
   <br>
-
+  
   {% if erroresPrestamo %}
-  <div class="card text-center" style="width: 18rem;">
+  <div class="card text-center">
     <div class="card-body">
       <h5 class="card-title">Prestamo</h5>
       <p class="card-text">Cantidad de Errores: {{ cantErrorPrestamo }}</p>
-      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Visualizar 45 Errores</button>
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Visualizar Errores</button>
     </div>
   </div>
   {% endif %}
 
   {% if erroresReclamo %}
   <br><br>
-  <div class="card text-center" style="width: 18rem;">
+  <div class="card text-center">
     <div class="card-body">
       <h5 class="card-title">Reclamo</h5>
       <p class="card-text">Cantidad Errores: {{ cantErrorReclamo }}</p>
-      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalReclamo"> Visualizar Errores 55 </button>
+       <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalReclamo"> Visualizar Errores </button>
     </div>
   </div>
   {% endif %}
@@ -52,42 +52,77 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="detalleReclamo">Errores en el archivo Prestamo</h5>
+          <h5 class="modal-title" id="detallePrestamo">Errores en el archivo Prestamo</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div id="bodyPrestamo" class="modal-body">
           <div style="height: 300px; overflow-y: auto;">
             {% for item in erroresPrestamo %}
-            <p>LSSLSLSL {{ item }}</p>
+            <p>{{ item }}</p>
+            </br>
             {% endfor %}
           </div>
         </div>
         <div class="modal-footer">
           <!-- Botón para descargar el contenido del modal -->
-          <button id="downloadButtonPrestamo" type="button" class="btn btn-secondary">Descargar</button>
+          <button id="downloadButtonPrestamo" onclick="descargarContenido('prestamo')" type="button" class="btn btn-success">Descargar</button>
+        </div>
       </div>
-    
+    </div>
+  </div>       
    
-  <div class="modal fade" id="modalReclamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal fade" id="modalReclamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="detalleReclamo">Errores en el archivo Prestamo</h5>
+          <h5 class="modal-title" id="detalleReclamo">Errores en el archivo Reclamo</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div id="bodyReclamo" class="modal-body">
           <div style="height: 300px; overflow-y: auto;">
             {% for item in erroresReclamo %}
-            <p>LSSLSLSL {{ item }}</p>
+            <p>{{ item }}</p>
             {% endfor %}
           </div>
         </div>
         <div class="modal-footer">
           <!-- Botón para descargar el contenido del modal -->
-          <button id="downloadButtonPrestamo" type="button" class="btn btn-secondary">Descargar</button>
+          <button id="downloadButtonReclamo" onclick="descargarContenido('reclamo')" type="button" class="btn btn-success">Descargar</button>
+        </div>
       </div>
+    </div>
+  </div>   
 
- 
+ <script>
+ var mutual = "{{mutual}}";
+ function descargarContenido(tipo) {
+    // Suponiendo que tu contenido está en una variable llamada 'contenido'
+   var reclamo;
+   if(tipo == "reclamo") {
+    reclamo = "soy reclamo";
+   }
+    cabecera = "Mutual: "+ mutual +"\n" + "Tipo Archivo: " + tipo + "\n \n";
+   
+
+    if(tipo == "reclamo") {
+    
+    var contenido = document.getElementById('bodyReclamo').innerText;
+   }else{
+    var contenido = document.getElementById('bodyPrestamo').innerText;
+   }
+    
+    // Crear un Blob con el contenido
+    var blob = new Blob([cabecera+contenido], {type: "text/plain;charset=utf-8"});
+    // Crear una URL para el Blob
+    var url = window.URL.createObjectURL(blob);
+    // Crear un enlace temporal y descargar el archivo
+    var tempLink = document.createElement('a');
+    tempLink.href = url;
+    tempLink.setAttribute('download','Errores_'+tipo+'_'+mutual+'.txt');
+    tempLink.click();
+    window.URL.revokeObjectURL(url);
+}
+ </script> 
 
 
 

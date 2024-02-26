@@ -208,7 +208,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     dj.fecha_subida = datetime.now()
                     dj.save()
                     messages.success(self.request, "Declaracion Jurada confirmada")
-                    return redirect('dashboard')
+                    return redirect('mutual:historico')
 
             except DeclaracionJurada.DoesNotExist:
                 return redirect('dashboard')
@@ -268,14 +268,21 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         #  print("aviso se va rectificar")
         # except DeclaracionJurada.DoesNotExist:
         #     print("Se puede declarar o rectificar")
-        
+        contexto = {}
         try:
          dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), es_borrador = True )
-         contexto = {'dj': dj,
-                     'd_prestamo': dj.detalles.get(tipo = 'P'),
-                     'd_reclamo': dj.detalles.get(tipo = 'R')
-                     
-                     }
+         contexto['dj'] = dj 
+          
+         try:
+          contexto['d_prestamo'] = dj.detalles.get(tipo = 'P') 
+         except DetalleDeclaracionJurada.DoesNotExist:
+          print("no se agrega detalle 1")
+          
+         try:
+          contexto['d_reclamo'] = dj.detalles.get(tipo = 'R') 
+         except DetalleDeclaracionJurada.DoesNotExist:
+          print("no se agrega detalle2")
+                    
                     
          return render(request, 'confirmacion.html', contexto)
         except DeclaracionJurada.DoesNotExist:
@@ -315,19 +322,19 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         periodoActual = obtenerPeriodoVigente(self)
         listErroresPrestamo = []
         listErroresReclamo = []
-        archivoReclamo = False
-        archivoPrestamo = False 
-        try:
-            archivoPrestamo = form.cleaned_data['archivo_p']
-        except KeyError:
-            print("prestamo no se encontro", archivoPrestamo)
+        # archivoReclamo = False
+        # archivoPrestamo = False 
+        # try:
+        #     archivoPrestamo = form.cleaned_data['archivo_p']
+        # except KeyError:
+        #     print("prestamo no se encontro", archivoPrestamo)
             
-        try:
-            archivoReclamo = form.cleaned_data['archivo_r']
-        except KeyError:
-            print("reclamo no se encontro", archivoReclamo) 
-      
-        
+        # try:
+        #     archivoReclamo = form.cleaned_data['archivo_r']
+        # except KeyError:
+        #     print("reclamo no se encontro", archivoReclamo) 
+        archivoPrestamo = form.cleaned_data['archivo_p']
+        archivoReclamo = form.cleaned_data['archivo_r']
         print("antes del try")
         
         try:
@@ -338,60 +345,63 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 if archivoReclamo : archivo_valido_r, importe_r, total_registros_r, listErroresReclamo = self.validar_reclamo(form, archivoReclamo)
                 else: archivo_valido_r = True
                 
+                
+                
                 print("estado archivos")
+                print(archivoPrestamo,archivoReclamo)
                 print("ARCHIVO PRESTAMO VALIDO ->:", archivo_valido_p)
                 print("ARCHIVO RECLAMO VALIDO -->:", archivo_valido_r)
                 form.importe = 0
-
+                
                 if (archivo_valido_p and archivo_valido_r):
                     print("los dos archivos son correctos")
+                    
                     
                     declaracionJurada = DeclaracionJurada.objects.create(
                         mutual = mutual,
                         fecha_creacion = datetime.now(),
                         periodo = periodoActual
                     )
-
+                    
                     # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
-                    detalle_declaracion = form.save(commit=False)
-                    detalle_declaracion.importe = importe_p
-                    detalle_declaracion.tipo = 'P'
-                    detalle_declaracion.archivo = archivoPrestamo
-                    detalle_declaracion.total_registros = total_registros_p
-                    detalle_declaracion.save()  # Guardar el objeto en la base de datos
-
+                    if archivoPrestamo:
+                        print("entre creacion det prestamo")
+                        detalle_Prestamo = declaracionJurada.detalles.create(
+                            tipo='P',
+                            importe=importe_p,
+                            archivo=archivoPrestamo,
+                            total_registros=total_registros_p,
+                        )
+                        
+                    
+                    if archivoReclamo:
+                        print("entre creacion det reclamo")
+                        print(listErroresReclamo)
                     # Crear objeto DetalleDeclaracionJurada para reclamo
-                    detalle_reclamo = DetalleDeclaracionJurada.objects.create(
-                        tipo='R',
-                        importe=importe_r,
-                        archivo=archivoReclamo,
-                        total_registros=total_registros_r,
-                    )
+                        detalle_reclamo = declaracionJurada.detalles.create(
+                            tipo='R',
+                            importe=importe_r,
+                            archivo=archivoReclamo,
+                            total_registros=total_registros_r,
+                        )
 
-                    declaracionJuradaDetalle_r = DeclaracionJuradaDetalles.objects.create(
-                        declaracionJurada = declaracionJurada,
-                        detalleDeclaracionJurada = detalle_declaracion
-                    )
-
-                    declaracionJuradaDetalle_p = DeclaracionJuradaDetalles.objects.create(
-                        declaracionJurada = declaracionJurada,
-                        detalleDeclaracionJurada = detalle_reclamo
-                    )
-
+                    print("entre en valid")
                     return super().form_valid(form)
                 
                 print("entre en invalid")
                 return self.form_invalid(form, listErroresPrestamo, listErroresReclamo)
 
         except Exception as e:
+            print("exepcion is valid")
             messages.error(self.request, f"Error al procesar el formulario: {e}")
             return self.form_invalid(form,listErroresPrestamo,listErroresReclamo)
 
 
      
     def form_invalid(self, form, listErroresPrestamo, listErroresReclamo):
-       
+        
         contexto = {
+            'mutual': obtenerMutualVinculada(self),
             'erroresPrestamo': listErroresPrestamo,
              'cantErrorPrestamo': len(listErroresPrestamo),
             'erroresReclamo':listErroresReclamo,
@@ -435,6 +445,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                         self.validar_fechas_prestamo(line_content, line_number, fecha_str_inicio, fecha_str_fin,listErrores)
                         validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
                         last_line_number = line_number  # Actualizar el último line_number
+                    
                     print("")
             
                 if not todas_las_lineas_validas:
@@ -443,7 +454,11 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     # messages.warning(self.request, mensaje_error)
                     return False, 0, last_line_number, listErrores # Devolver False y total_importes como 0 si hay líneas inválidas
                 print("------------ PRESTAMO VALIDO")
+                
+                if len(listErrores) != 0:
+                    return False, total_importe, last_line_number, listErrores
                 return True, total_importe, last_line_number, listErrores
+             
 
         except Exception as e:
             listErrores.append(f"Archivo invalido no puede ser leido: {e}")
@@ -521,6 +536,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                 # messages.warning(self.request, mensaje_error)
                 return False, 0, last_line_number, listErrores
             print("RECLAMO VALIDO------------")
+            if len(listErrores) != 0:
+                return False, total_importe, last_line_number, listErrores
             return True, total_importe, last_line_number, listErrores
 
         except Exception as e:

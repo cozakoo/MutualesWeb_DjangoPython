@@ -6,10 +6,11 @@
 {% endblock %}
 
 {% block contenedor %}
+
   <div class="container">
+   
     {% comment %} <h1 class="text-center">{{ titulo }}</h1> {% endcomment %}
     <div class="table-responsive">
-
 
     <table class="table table-sm  table-striped table-hover table-borderless">
       <thead>
@@ -37,9 +38,7 @@
               {% if not declaracion.es_leida %}
                 <span class="text-danger">&#10006;</span>
               {% else %}
-                <div class="form-check">
-                  <input class="form-check-input" type="checkbox" disabled />
-                </div>
+                <i class="fa fa-check-circle fa-2x " aria-hidden="true"></i>
               {% endif %}
             </td>
 

@@ -24,7 +24,7 @@
     <ul class="detalle">
       <li><strong>Periodo:</strong> {{ dj.periodo.obtener_nombre_mes }}</li>
     </ul>
-
+     {% if d_prestamo %}
     <br />
     <h4>Prestamo</h4>
     <ul class="detalle">
@@ -32,7 +32,9 @@
       <li><strong>N° registros:</strong> {{ d_prestamo.total_registros }}</li>
       <li><strong>Total:</strong> ${{ d_prestamo.importe }}</li>
     </ul>
+    {% endif %}
 
+    {% if d_reclamo %}
     <br />
     <h4>Reclamo</h4>
     <ul class="detalle">
@@ -40,7 +42,7 @@
       <li><strong>N° registros:</strong> {{ d_reclamo.total_registros }}</li>
       <li><strong>Total:</strong> ${{ d_reclamo.importe }}</li>
     </ul>
-
+    {% endif %}
     <form method="post" class="text-center">
       <br />
       <p><strong> Posees una borrador de Declaracion Jurada generada el {{dj.fecha_creacion}}, realice una accion </strong> </p>
