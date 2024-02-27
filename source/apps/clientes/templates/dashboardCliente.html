@@ -10,6 +10,8 @@
 
 {% block content %}
   {% include 'navbarCliente.html' %}
+  {% comment %} {% include 'navbarEmpleadoPublico.html' %} {% endcomment %}
+  {% comment %} {% include 'navbarAdministrador.html' %} {% endcomment %}
   <div style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 60px);">
     {% block contenedor %}
       <div class="cuadrado-background">

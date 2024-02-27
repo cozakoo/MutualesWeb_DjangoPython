@@ -49,7 +49,10 @@
               {% endif %}
               
                
-              <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
+              <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
+                <i class="fa-solid fa-file-pdf fa-xl"></i>               
+                 {% comment %} <i class="fa-solid fa-download"></i> {% endcomment %}
+                </a>
             </td>
           </tr>
         {% endfor %}

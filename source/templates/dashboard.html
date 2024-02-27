@@ -8,7 +8,8 @@
 {% block content %}
 
   {% if rol.persona.es_cliente %}
-    {% include 'navbarCliente.html' %}
+  {% comment %} {% include 'navbarEmpleadoPublico.html' %}
+  {% include 'navbarCliente.html' %} {% endcomment %}
   {% endif %}
 
   {% block extra_css_nivel %}

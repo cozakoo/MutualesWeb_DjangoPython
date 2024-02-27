@@ -1,0 +1,26 @@
+{% extends 'nav_bar.html' %}
+
+
+{% block opcion_mutual %}
+<li>
+  <a class="dropdown-item" href="{% url 'mutual:detalles_mimutual' %}">Listado de Mutuales</a>
+</li>
+{% block opcion_mutual_adicional %}
+{% endblock %}
+
+{% endblock %}
+
+{% block opcion_declaracion_jurada %}
+<li>
+  <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada' %}">Nuevo Periodo Declarativo</a>
+</li>
+<li>
+  <a class="dropdown-item" href="{% url 'mutual:historico' %}">Periodo Declarado Vigente</a>
+  </li>
+  <li>
+    <a class="dropdown-item" href="{% url 'mutual:historico' %}">Historial Periodos Declarados</a>
+  </li>
+  {% block opcion_declaracion_jurada_adicional %}
+  {% endblock %}
+{% endblock %}
+
