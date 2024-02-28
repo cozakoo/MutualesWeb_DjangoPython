@@ -2,20 +2,35 @@
 {% load static %}
 
 {% block extra_css_nivel %}
-  <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" />
+  {% comment %} <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" /> {% endcomment %}
 {% endblock %}
 
 {% block contenedor %}
   <div class="container">
-    
-    {% comment %} <h1 class="text-center">{{ titulo }}</h1> {% endcomment %}
-    <div class="table-responsive">
 
-    <table class="table table-sm  table-striped table-hover table-borderless">
+    <form method="get">
+      {% csrf_token %}
+      <!-- Personalizar el campo mutual -->
+    <div class="mb-3">
+    <label for="{{ filter_form.mutual.id_for_label }}" class="form-label">{{ filter_form.mutual.label }}</label>
+    {{ filter_form.mutual }}
+
+    <label for="{{ filter_form.periodo.id_for_label }}" class="form-label">{{ filter_form.periodo.label }}</label>
+    {{ filter_form.periodo }}
+
+    <button type="submit">Filtrar</button>
+    </div>
+  </form>
+
+
+    {% comment %} <h1 class="text-center">{{ titulo }}</h1> {% endcomment %}
+    <div class=" table-responsive">
+
+    <table class="table table-sm  table-striped table-hover ">
       <thead>
         <tr>
           <th>#</th>
-          <th>Periodo</th>
+          <th>Mutual</th>
           <th>Detalle Prestamo y/o Reclamo</th>
           <th class="text-center">Leido</th>
           <th>Fecha de subida</th>

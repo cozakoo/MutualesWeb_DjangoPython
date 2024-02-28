@@ -776,3 +776,67 @@ def descargarDeclaracion(request, pk):
     buffer = generate_pdf(declaracion)
 
     return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
+
+
+
+
+class MutualesListView(ListView):
+    model = Mutual
+    template_name = "mutuales_listado.html"
+    paginate_by = 10# Número de elementos por página
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Mutuales'
+        return context
+    
+    def get_queryset(self):
+        # Filtrar los objetos según tu lógica
+        queryset = Mutual.objects.all()
+        print("LISTADO DE MUTUALES")
+        print(queryset)
+        # Devolver el queryset filtrado
+        return queryset
+
+class DeclaracionJuradaDeclaradoView(ListView):
+    model = DeclaracionJurada
+    template_name = "dj_declarados_list.html"
+    paginate_by = 10  # Número de elementos por página
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Historico'
+        context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
+        return context
+
+    def get_queryset(self):
+        # Obtener el queryset original sin filtrar
+        queryset = DeclaracionJurada.objects.all()
+
+        # Obtener los datos del formulario enviado por el usuario
+        filter_form = DeclaracionJuradaFilterForm(self.request.GET)
+
+        # Validar el formulario y aplicar filtros si es válido
+        if filter_form.is_valid():
+            es_borrador = filter_form.cleaned_data.get('es_borrador')
+            mutual = filter_form.cleaned_data.get('mutual')  
+            periodo = filter_form.cleaned_data.get('periodo')
+
+            # Aplicar filtros al queryset
+            if es_borrador is not None:
+                queryset = queryset.filter(es_borrador=es_borrador)
+
+            # Filtrar por mutual
+            if mutual:
+                queryset = queryset.filter(mutual=mutual)
+
+            # Filtrar por periodo
+            if periodo:
+                queryset = queryset.filter(periodo=periodo)
+
+        return queryset
+
+class DeclaracionJuradaFilterForm(forms.Form):
+    mutual = forms.ModelChoiceField(queryset=Mutual.objects.all(), required=False, empty_label="Todas las mutuals")
+    periodo = forms.ModelChoiceField(queryset=Periodo.objects.all(), required=False, empty_label="Todos los periodos")
+    es_borrador = forms.BooleanField(required=False)

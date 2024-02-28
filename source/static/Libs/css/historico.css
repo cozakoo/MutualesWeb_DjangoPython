@@ -4,6 +4,7 @@
 
 .table {
     border-collapse: collapse;
+    padding: 100%;
     /* Elimina todos los bordes */
 
     /* Combina los bordes de las celdas para evitar espacios entre ellas */
@@ -66,3 +67,8 @@
     border-bottom-width: 0;
     /* Establece el ancho del borde inferior a 0 */
 }
+
+.small-btn {
+    font-size: 12px; /* Ajusta el tamaño de fuente según sea necesario */
+    padding: 4px 8px; /* Ajusta el espaciado interno según sea necesario */
+  }

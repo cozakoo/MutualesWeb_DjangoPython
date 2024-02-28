@@ -1,0 +1,90 @@
+{% extends 'dashboardCliente.html' %}
+{% load static %}
+
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" />
+{% endblock %}
+
+
+{% block contenedor %}
+
+<div class="container">
+   
+  {% comment %} <h1 class="text-center">{{ titulo }}</h1> {% endcomment %}
+  <div class="table-responsive">
+
+  <table class="table table-sm  table-striped table-hover table-borderless">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Cuit</th>
+        <th>Nombre</th>
+        <th>Estado</th>
+        <th>Detalle</th>
+        <th>Opcion</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for mutual in page_obj %}
+        <tr>
+          <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
+          <td>{{ mutual.cuit }}</td>
+          <td>{{ mutual.nombre }}</td>
+          <td>
+            {% if mutual.activo %}
+            Activo
+            {% else %}
+            Inactivo
+            {% endif %}
+          <td>
+
+            {% for detalle in mutual.detalle.all %}
+              {{ detalle.tipo }} -  
+              Origen: {{ detalle.origen }}.txt - 
+              Destino: {{ detalle.destino }}.txt - 
+              Concepto: {{ detalle.concepto_1 }} y
+              {{ detalle.concepto_2 }}
+              <br />
+            {% endfor %}
+          </td>
+          <td class="text-end">
+            <a class="btn btn-secondary" href="{% url 'mutual:listado_mutual' %}">
+               detalle</a>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  </div>
+
+  <nav aria-label="...">
+    <ul class="pagination justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link small-btn" href="?page=1">&laquo; first</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
+        </li>
+      {% endif %}
+  
+        
+      {% for num in page_obj.paginator.page_range %}
+        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+          <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
+        </li>
+      {% endfor %}
+  
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+{% endblock %}

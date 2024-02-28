@@ -110,7 +110,7 @@
 
   <form id="login-form" method="post">
     {% csrf_token %}
-    <h1 id="iniciar-session"> Iniciar Sessión </h1>
+    <h4 id="iniciar-session"> Iniciar Sessión </h4>
     <input type="{{ form.username.widget.type }}" name="{{ form.username.name }}" placeholder="{{ form.username.label }}" {% if form.username.value %}value="{{ form.username.value }}"{% endif %} class="form-control text-center" required>
     <br>
     <div class="password-input-container">

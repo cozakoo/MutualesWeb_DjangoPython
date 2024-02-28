@@ -93,6 +93,11 @@ class Periodo(models.Model):
         
         # Devuelve una cadena que incluye el nombre del mes en español y el año
         return f"{nombre_mes_espanol.capitalize()} {año}"  # Capitaliza la primera letra del mes
+    
+    def __str__(self):
+        return self.obtener_nombre_mes()
+    
+
 
 class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
