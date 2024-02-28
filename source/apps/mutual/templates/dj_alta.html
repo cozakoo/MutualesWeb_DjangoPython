@@ -7,9 +7,6 @@
 
 {% block contenedor %}
 
-
-
-
   <!-- Modal para prestamo no leído -->
   {% comment %} [implementado] {% endcomment %}
   <div class="modal fade" id="modalNoLeido" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
@@ -85,8 +82,15 @@
         </div>
       <br />
       <div class="text-center"> 
-          <button type="submit" class="btn btn-success" name="cargarDeclaracion" id="declararBtn" disabled>Cargar Declaracion</button>
-      </div>
+        <button type="submit" class="btn btn-success" name="cargarDeclaracion" id="declararBtn" disabled>
+            Cargar Declaracion
+            <span class="spinner" style="display:none;">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span class="visually-hidden" role="status">Cargando...</span>
+            </span>
+        </button>
+    </div>
+      
   </form>
   
 
@@ -121,5 +125,18 @@ $(document).ready(function() {
   });
 });
 
-  </script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Agrega un escucha de evento de clic al botón "Cargar Declaracion"
+        document.getElementById('declararBtn').addEventListener('click', function () {
+            // Deshabilita el botón para evitar clics múltiples
+            this.disabled = true;
+            
+            // Muestra el spinner
+            this.querySelector('.spinner').style.display = 'inline-block';
+
+            // Envía el formulario
+            document.getElementById('declaracionForm').submit();
+        });
+    });
+</script>
   {% endblock %}

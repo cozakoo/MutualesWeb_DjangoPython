@@ -30,10 +30,11 @@
         {% endif %}
       </div>
     </div>
-      
+    
+    <br>
+      <h3>Archivos asociados</h3>
       {% for detalle in mimutual.detalle.all %}
-      <br>
-      <h5>{{ detalle.get_tipo_display|capfirst }} asociado</h5>
+      <h5>{{ detalle.get_tipo_display|capfirst }}</h5>
       <div class="row">
         <div class="col-md-4 col-sm-5">Origen:</div>
         <div class="col-6 col-md-8">{{ detalle.origen }}.txt</div>

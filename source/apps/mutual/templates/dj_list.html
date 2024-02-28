@@ -8,9 +8,7 @@
 {% block contenedor %}
   <div class="container">
     
-    {% comment %} <h1 class="text-center">{{ titulo }}</h1> {% endcomment %}
     <div class="table-responsive">
-
     <table class="table table-sm  table-striped table-hover table-borderless">
       <thead>
         <tr>
@@ -19,6 +17,8 @@
           <th>Detalle Prestamo y/o Reclamo</th>
           <th class="text-center">Leido</th>
           <th>Fecha de subida</th>
+          <th class="text-center">Rectificatica</th>
+
           <th></th>
         </tr>
       </thead>
@@ -34,17 +34,19 @@
               {% endfor %}
             </td>
             <td class="text-center">
-              {% if not declaracion.es_leida %}
-                <span class="text-danger">&#10006;</span>
+              {% if declaracion.es_leida %}
+              <i class="fa-solid fa-check" style="color: #004200;"></i>              
               {% else %}
-                <i class="fa fa-check-circle fa-2x " aria-hidden="true"></i>
+              <i class="fa-solid fa-x" style="color: #6a0606;"></i>
               {% endif %}
             </td>
 
-            <td>{{ declaracion.fecha_subida|date:"Y/m/d  H:i:s" }}</td>
+            <td>{{ declaracion.fecha_subida|date:"Y/m/d H:i:s" }}</td>
+            <td class="text-center"> {{ declaracion.rectificativa }}</td>
+
             <td class="text-end">
               {% if not declaracion.es_leida %}
-              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' %}">Rectificar</a>
+              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada'%}">Rectificar</a>
               {% endif %}
               <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
                  <i class="fa-solid fa-download"></i>

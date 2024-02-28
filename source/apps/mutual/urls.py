@@ -9,6 +9,7 @@ urlpatterns = [
 
     path('declaracionjurada/crear',DeclaracionJuradaView.as_view(), name="declaracion_jurada"),
     path('declaracionjurada/historialDeclarado',DeclaracionJuradaDeclaradoView.as_view(), name="declaracion_jurada_declarado"),
+
     path('declaracionjurada/historico',HistoricoView.as_view(), name="historico"),
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),
 

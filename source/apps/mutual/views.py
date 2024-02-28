@@ -174,15 +174,7 @@ class VisualizarErroresView(TemplateView):
         else:
          return redirect('dashboard')
 
-
-
-
-
-
-
 #--------------- DECLARACIÓN JURADA ------------------------
-
-
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'
     permission_required = "clientes.permission_cliente_mutual"
@@ -190,13 +182,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
     form_class = FormularioDJ
     template_name = "dj_alta.html"
     success_url = reverse_lazy('mutual:declaracion_jurada')
-        
-        
-  
-         
+
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
-        
-        
         if 'confirmacion' in request.POST:
            mutual = obtenerMutualVinculada(self)
            if existeBorrador(self) :
@@ -224,10 +211,6 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
            
            return redirect('dashboard')
                
-            #    mensaje informndo que lo que se quiere confirmar no esta disponible
-            
-      
-                
         if 'cancelar' in request.POST:
             try:
                 mutual = obtenerMutualVinculada(self)
