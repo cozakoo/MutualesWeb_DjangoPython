@@ -18,8 +18,8 @@ class DetalleMutual(models.Model):
     tipo = models.CharField(max_length=1 , choices=TIPO_DECLARACION)
     origen = models.CharField(max_length=100)
     destino = models.CharField(max_length=100)
-    concepto_1 = models.IntegerField()
-    concepto_2 = models.IntegerField()
+    concepto_1 = models.IntegerField(null = True , blank=True)
+    concepto_2 = models.IntegerField(null = True , blank=True)
 
 class Mutual(models.Model):
 

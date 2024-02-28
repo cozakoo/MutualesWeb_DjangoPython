@@ -174,10 +174,18 @@ class VisualizarErroresView(TemplateView):
         else:
          return redirect('dashboard')
 
+
+
+
+
+
+
 #--------------- DECLARACIÓN JURADA ------------------------
+
+
 class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'
-    permission_required = 'mutual.add_declaracionjurada'
+    permission_required = "clientes.permission_cliente_mutual"
     model = DetalleDeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
@@ -185,7 +193,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         
         
   
-             
+         
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         
         
@@ -257,6 +265,9 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         
         periodo = obtenerPeriodoVigente(self)
         
+        
+        print(request.user.get_all_permissions)
+          
         if periodo == None:
             print("redirijo msj")
             msj = ("No existe un Periodo de Declaración Jurada disponible actualmente.")
@@ -567,7 +578,8 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
             # messages.warning(self.request, mensaje_error)
 
 
-class DetalleMutualView(DetailView):
+class DetalleMutualView(LoginRequiredMixin, DetailView):
+    login_url = '/login/'
     model = Mutual
     template_name = 'detalle_mutual.html'
     context_object_name = 'mimutual'
@@ -671,7 +683,8 @@ class HistoricoView(ListView):
     
     def get_queryset(self):
         # Filtrar los objetos según tu lógica
-        queryset = DeclaracionJurada.objects.filter(es_borrador = False)
+        mutual = obtenerMutualVinculada(self)
+        queryset = DeclaracionJurada.objects.filter(es_borrador = False, mutual = mutual)
 
         # Devolver el queryset filtrado
         return queryset

@@ -1,17 +1,6 @@
 {% extends 'navbarEmpleadoPublico.html' %}
 
 
-{% block opcion_mutual_adicional %}
-<li><hr class="dropdown-divider"></li>
-<li>
-  <a class="dropdown-item" href="{% url 'mutual:detalles_mimutual' %}">Crear</a>
-</li>
-<li>
-  <a class="dropdown-item" href="{% url 'mutual:detalles_mimutual' %}">Buscar</a>
-</li>
-
-{% endblock %}
-
 {% block dropdown_adicional %}
 <li class="nav-item dropdown">
   <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Usuarios</a>

@@ -8,5 +8,5 @@ urlpatterns = [
     path('registrar/', registrar_usuario, name='registrar_usuario'),
 
     path('crear/',ClienteCreateView.as_view(), name="cliente_crear"),
-    path('confirmacion/', confirmacion_cliente, name='confirmacion_cliente'),
+    # path('confirmacion/', confirmacion_cliente, name='confirmacion_cliente'),
 ]
