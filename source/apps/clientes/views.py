@@ -19,6 +19,10 @@ from django.core.mail import send_mail
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
+from django.contrib.auth.models import Permission
+from django.contrib.contenttypes.models import ContentType
+from ..clientes.models import Cliente
+from ..empleadospublicos.models import EmpleadoPublico
 
 def registrar_usuario(request):
     if request.method == 'POST':
@@ -66,5 +70,11 @@ class ClienteCreateView(CreateView):
         response = super().form_valid(form)
         return response
 
-def confirmacion_cliente(request):
-    return render(request, 'confirmacion_cliente.html')
+
+
+
+
+
+        
+        
+            

@@ -31,3 +31,7 @@ class Rol(models.Model):
     @classmethod
     def register(cls, Klass):
         cls.TIPOS.append((Klass.TIPO, Klass.__name__.lower()))
+        
+        
+        
+        

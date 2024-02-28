@@ -4,6 +4,14 @@
 {% block opcion_mutual %}
 <li>
   <a class="dropdown-item" href="{% url 'mutual:listado_mutual' %}">Listado de Mutuales</a>
+   <li><hr class="dropdown-divider"></li>
+<li>
+  <a class="dropdown-item" href="{% url 'mutual:mutual_crear' %}">Crear</a>
+</li>
+<li>
+  <a class="dropdown-item" href="{% url 'mutual:detalles_mimutual' %}">Buscar</a>
+</li>
+  <a class="dropdown-item" href="{% url 'mutual:detalles_mimutual' %}">Listado de Mutuales</a>
 </li>
 {% block opcion_mutual_adicional %}
 {% endblock %}
