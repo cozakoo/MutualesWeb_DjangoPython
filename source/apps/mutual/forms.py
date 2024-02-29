@@ -6,7 +6,10 @@ class FormDetalle(forms.Form):
     origen = forms.CharField(max_length=100, initial='')
     destino = forms.CharField(max_length=100, initial='')
     concep1 = forms.IntegerField()
-    concep2 = forms.IntegerField()
+    concep2 = forms.IntegerField(initial=0, required=False)
+    
+    # concep1 = forms.IntegerField()
+    # concep2 = forms.IntegerField()
 
     # def clean_concep1(self):
     #     concep1 = self.cleaned_data.get('concep1')

@@ -1,7 +1,9 @@
 from pyexpat.errors import messages
+from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView
-from .forms import CustomLoginForm, RegisterUserMutualForm
+from django.views import View
+from .forms import CustomLoginForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 from django.views.generic.edit import CreateView
@@ -60,10 +62,15 @@ def cerrar_session(request):
     return redirect('users:login')
 
 
-class CustomLoginView(LoginView):
+class CustomLoginView(LoginView, View):
     template_name = 'login_acceso.html'
     form_class = CustomLoginForm
     success_url = reverse_lazy('mutualWeb:dashboard')
+    
+    def get(self, request, *args: str, **kwargs):
+        if request.user.is_authenticated:
+           return redirect('dashboard')
+        return super().get(request, *args, **kwargs)
     
 class RegisterUserMutalView(CreateView):
     template_name ='registrar_usuario_mutual.html'
@@ -152,12 +159,12 @@ def register_user_mutual_exito(request):
 
 class RegistereEmpleadoPublicoView(CreateView):
     template_name ='registrar_usuario_empleado_publico.html'
-    form_class = RegisterUserMutualForm
+    form_class = RegisterUserEmpleadoPublicoForm
     success_url = reverse_lazy('users:register_userM_exito')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Registro Usuario Mutual'
+        context['titulo'] = 'Registro Usuario Empleado Publico'
         return context
     
     def post(self, request, *args, **kwargs):

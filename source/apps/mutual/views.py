@@ -2,7 +2,7 @@ from io import BytesIO
 import io
 from reportlab.pdfgen import canvas
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.http import FileResponse
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
@@ -25,6 +25,7 @@ from timezonefinder import TimezoneFinder
 from django.utils.translation import gettext as _
 from datetime import date
 from django.views.generic import ListView
+from django.urls import reverse
 
 
 
@@ -199,13 +200,14 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         
         if 'confirmacion' in request.POST:
            mutual = obtenerMutualVinculada(self)
+           nroRectificativa = 0
            if existeBorrador(self) :
             try:
                 periodo = obtenerPeriodoVigente(self)
-                djs = DeclaracionJurada.objects.filter(mutual = mutual , es_borrador = False, periodo = periodo)
-                for dj in djs:
-                    dj.detalles.all().delete()
-                    dj.delete()
+                dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = False, periodo = periodo)
+                nroRectificativa = dj.rectificativa + 1
+                dj.detalles.all().delete()
+                dj.delete()
             except DeclaracionJurada.DoesNotExist:
                 print("omite")
             
@@ -213,6 +215,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
                     
                     dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
                     dj.es_borrador = False
+                    dj.rectificativa = nroRectificativa
                     dj.fecha_subida = datetime.now()
                     dj.save()
                     messages.success(self.request, "Declaracion Jurada confirmada")
@@ -247,16 +250,21 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
        
         if 'cargarDeclaracion' in request.POST: 
            # Obtén una instancia del formulario
-          print("sin error 1")
-          if form.is_valid():
-            print("sin error 2")
-            # Hacer algo si el formulario es válido
-            return self.form_valid(form)
-            
-          else:
-            # Hacer algo si el formulario no es válido
-            print("sin error 3")
-            return self.form_valid(form)
+           
+           try:
+             DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), periodo = obtenerPeriodoVigente(self), es_borrador = True)
+             return render(request, 'dj_alta.html')
+           except DeclaracionJurada.DoesNotExist: 
+                print("sin error 1")
+                if form.is_valid():
+                    print("sin error 2")
+                    # Hacer algo si el formulario es válido
+                    return self.form_valid(form)
+                    
+                else:
+                    # Hacer algo si el formulario no es válido
+                    print("sin error 3")
+                    return self.form_valid(form)
         
          
         return super().post(request, *args, **kwargs)
@@ -330,6 +338,7 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
         print("entre al valid sin errores")
         mutual = obtenerMutualVinculada(self)
         print("despues obt mutual ")
+        mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)
         listErroresPrestamo = []
         listErroresReclamo = []
@@ -595,19 +604,15 @@ class MutualCreateView(CreateView):
     template_name = 'mutual_alta.html'
     success_url = reverse_lazy('mutual:mutual_exito')
     
-    def form_invalid(self, form):
-        form.error.clear()
-        return super().form_invalid(form)
+    # def form_invalid(self, form):
+    #     form.error.clear()
+    #     return super().form_invalid(form)
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
-        if self.request.method == 'POST':
-            context['detalle_prestamo'] = FormDetalle(self.request.POST, prefix='d_prestamo')
-            context['detalle_reclamo'] = FormDetalle(self.request.POST, prefix='d_reclamo')
-        else:
-            context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
-            context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')
+
+        context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
+        context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')
 
         context['titulo'] = 'Alta de Mutual'
         return context
@@ -619,11 +624,25 @@ class MutualCreateView(CreateView):
             detalle_reclamo  = FormDetalle(request.POST, prefix='d_reclamo')
             detalle_prestamo = FormDetalle(request.POST, prefix='d_prestamo')
             
+            print("---------------imprimo post------------------------------")
+            
+            print(request.POST)
+            
 
+            print("---------------cierro post------------------------------")
+            
+            print(detalle_prestamo, detalle_reclamo)
+            print("impresion validaciones",form.is_valid() , detalle_prestamo.is_valid() , detalle_reclamo.is_valid())
             if form.is_valid() and detalle_prestamo.is_valid() and detalle_reclamo.is_valid():
                 return self.form_valid(form, detalle_reclamo, detalle_prestamo)
             else:
                 print("LLLLLLLLLLformularios invalidosLLLLLLLLL")
+                return self.form_invalid(form)
+    
+ 
+    # def form_invalid(self, form):
+    #     """If the form is invalid, render the invalid form."""
+    #     return self.render_to_response(self.get_context_data(form=form, ))
     
     
     def form_valid(self, form, d_reclamo, d_prestam):
@@ -635,34 +654,37 @@ class MutualCreateView(CreateView):
                 return self.render_to_response(self.get_context_data(form=form))
         
         
- 
+            
             # Si no existe, guarda el objeto y realiza las acciones necesarias
-      
-            m = Mutual(nombre=form.cleaned_data["nombre"],
-                      cuit=form.cleaned_data["cuit"],
-                      activo = True,
-                      )
-            m.save()         
-            m.detalle.create(
-                tipo = "P",
-                origen = d_prestam.cleaned_data['origen'],
-                destino = d_prestam.cleaned_data['destino'],
-                concepto_1 = d_prestam.cleaned_data['concep1'],
-                concepto_2 = d_prestam.cleaned_data['concep2'],
-            )
-       
-          
-            m.detalle.create(
-                tipo = "R",
-                origen = d_reclamo.cleaned_data['origen'],
-                destino = d_reclamo.cleaned_data['destino'],
-                concepto_1 = d_reclamo.cleaned_data['concep1'],
-                concepto_2 = d_reclamo.cleaned_data['concep2'],
-            )
+            with transaction.atomic():    
+                m = Mutual.objects.create(nombre=form.cleaned_data["nombre"],
+                        cuit=form.cleaned_data["cuit"],
+                        activo = True,
+                        )
+                      
+                m.detalle.create(
+                    tipo = "P",
+                    origen = d_prestam.cleaned_data['origen'],
+                    destino = d_prestam.cleaned_data['destino'],
+                    concepto_1 = d_prestam.cleaned_data['concep1'],
+                    concepto_2 = d_prestam.cleaned_data['concep2'],
+                )
         
             
-            return super().form_valid(form)
-   
+                m.detalle.create(
+                    tipo = "R",
+                    origen = d_reclamo.cleaned_data['origen'],
+                    destino = d_reclamo.cleaned_data['destino'],
+                    concepto_1 = d_reclamo.cleaned_data['concep1'],
+                    concepto_2 = d_reclamo.cleaned_data['concep2'],
+                )
+        
+            # url = reverse('mutual_exito')
+            # return HttpResponseRedirect(url)
+            return redirect('mutual:mutual_exito')
+    
+    
+    
 def mutual_exito(request):
     return render(request,'mutual_exito.html')
   
