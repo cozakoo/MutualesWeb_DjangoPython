@@ -89,7 +89,7 @@ class Periodo(models.Model):
         }
         
         # Obtén el nombre del mes en español desde el diccionario de traducciones
-        nombre_mes_espanol = traducciones_meses[nombre_mes_ingles.lower()]
+        nombre_mes_espanol = traducciones_meses.get(nombre_mes_ingles.lower(), nombre_mes_ingles.lower())
         
         # Devuelve una cadena que incluye el nombre del mes en español y el año
         return f"{nombre_mes_espanol.capitalize()} {año}"  # Capitaliza la primera letra del mes
@@ -109,7 +109,8 @@ class DeclaracionJurada(models.Model):
     codigo_acuse_recibo = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     es_leida = models.BooleanField(default=False)
     es_borrador = models.BooleanField(default=True)
-    
+    fecha_lectura = models.DateTimeField(null=True, blank=True)
+
 class DeclaracionJuradaDetalles(models.Model):
     declaracionJurada = models.ForeignKey(DeclaracionJurada, on_delete=models.CASCADE)
     detalleDeclaracionJurada = models.ForeignKey(DetalleDeclaracionJurada, on_delete=models.CASCADE)

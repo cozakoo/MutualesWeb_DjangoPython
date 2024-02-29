@@ -1,0 +1,43 @@
+<!-- Modal -->
+<div class="modal fade" id="modalDetalle_{{ declaracion.pk }}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5">{{declaracion.mutual}}</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body" style="text-align: left;">
+            {% for detalle in declaracion.detalles.all %}
+                {% if detalle.tipo == 'P' %}
+                    <div class="detalle-prestamo">
+                        <h3 class="detalle-tipo">Prestamo</h3>
+                        <ul class="detalle-lista">
+                            <li>
+                                Importe: ${{ detalle.importe }}
+                            </li>
+                            <li>
+                                Registros: {{ detalle.total_registros }}
+                            </li>
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="detalle-reclamo">
+                        <h3 class="detalle-tipo">Reclamo</h3>
+                        <ul class="detalle-lista">
+                            <li>
+                                Importe: ${{ detalle.importe }}
+                            </li>
+                            <li>
+                                Registros: {{ detalle.total_registros }}
+                            </li>
+                        </ul>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+</div>

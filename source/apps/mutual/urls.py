@@ -7,8 +7,14 @@ urlpatterns = [
     path('crearMutual/',MutualCreateView.as_view(), name="mutual_crear"),
     path('mutuales/listado', MutualesListView.as_view(), name="listado_mutual"),
 
-    path('declaracionjurada/crear',DeclaracionJuradaView.as_view(), name="declaracion_jurada"),
-    path('declaracionjurada/historialDeclarado',DeclaracionJuradaDeclaradoView.as_view(), name="declaracion_jurada_declarado"),
+
+    path('declaracionjurada/crear/<str:accion>/', DeclaracionJuradaCreateView.as_view(), name="declaracion_jurada"),
+    path('declaracionjurada/historialDeclarado',DeclaracionJuradaDeclaradoListView.as_view(), name="declaracion_jurada_declarado_listado"),
+    
+    
+    path('declaracionjurada/leer/',leerDeclaracionJurada , name="leer_declaracion_jurada"),
+
+
 
     path('declaracionjurada/historico',HistoricoView.as_view(), name="historico"),
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),

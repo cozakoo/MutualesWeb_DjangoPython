@@ -175,16 +175,17 @@ class VisualizarErroresView(TemplateView):
          return redirect('dashboard')
 
 #--------------- DECLARACIÓN JURADA ------------------------
-class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
+class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, CreateView):
     login_url = '/login/'
     permission_required = "clientes.permission_cliente_mutual"
     model = DetalleDeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
-    success_url = reverse_lazy('mutual:declaracion_jurada')
+    # success_url = reverse_lazy('mutual:declaracion_jurada')
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         if 'confirmacion' in request.POST:
+
            mutual = obtenerMutualVinculada(self)
            if existeBorrador(self) :
             try:
@@ -289,8 +290,13 @@ class DeclaracionJuradaView(LoginRequiredMixin,PermissionRequiredMixin, CreateVi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Declaración'
+        accion = self.kwargs.get('accion')
 
+        if accion == 'rectificar':
+            context['titulo'] = 'Declaración Rectificativa'
+        else:
+            context['titulo'] = 'Declaración Jurada'
+        
         mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)
         print("PERIODO ACTUAAAL")
@@ -794,7 +800,7 @@ class MutualesListView(ListView):
         # Devolver el queryset filtrado
         return queryset
 
-class DeclaracionJuradaDeclaradoView(ListView):
+class DeclaracionJuradaDeclaradoListView(ListView):
     model = DeclaracionJurada
     template_name = "dj_declarados_list.html"
     paginate_by = 10  # Número de elementos por página
@@ -833,6 +839,36 @@ class DeclaracionJuradaDeclaradoView(ListView):
         return queryset
 
 class DeclaracionJuradaFilterForm(forms.Form):
-    mutual = forms.ModelChoiceField(queryset=Mutual.objects.all(), required=False, empty_label="Todas las mutuals")
+    mutual = forms.ModelChoiceField(queryset=Mutual.objects.all(), required=False, empty_label="Todas las mutuales")
     periodo = forms.ModelChoiceField(queryset=Periodo.objects.all(), required=False, empty_label="Todos los periodos")
     es_borrador = forms.BooleanField(required=False)
+
+
+
+
+    
+from django.http import JsonResponse
+
+def leerDeclaracionJurada(request):
+    if request.method == 'POST':
+        declaraciones_ids = request.POST.getlist('declaracion_leidos')
+        declaraciones = DeclaracionJurada.objects.filter(id__in=declaraciones_ids)
+
+        for declaracion in declaraciones:
+            declaracion.es_leida = True
+            declaracion.fecha_lectura = datetime.now()
+            declaracion.save()
+
+        return JsonResponse({'status': 'success'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+
+
+    # declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
+    # declaracion.es_leida = True
+    # declaracion.fecha_lectura = datetime.now()
+    # declaracion.save()
+    # print("DECLARACION JURADA ", declaracion)
+
+
+

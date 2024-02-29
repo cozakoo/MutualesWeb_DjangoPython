@@ -46,7 +46,7 @@
 
             <td class="text-end">
               {% if not declaracion.es_leida %}
-              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada'%}">Rectificar</a>
+              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' accion='rectificar' %}">Rectificar</a>
               {% endif %}
               <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
                  <i class="fa-solid fa-download"></i>
