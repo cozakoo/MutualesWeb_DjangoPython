@@ -839,10 +839,21 @@ class DeclaracionJuradaDeclaradoListView(ListView):
         return queryset
 
 class DeclaracionJuradaFilterForm(forms.Form):
-    mutual = forms.ModelChoiceField(queryset=Mutual.objects.all(), required=False, empty_label="Todas las mutuales")
-    periodo = forms.ModelChoiceField(queryset=Periodo.objects.all(), required=False, empty_label="Todos los periodos")
+    mutual = forms.ModelChoiceField(
+        queryset=Mutual.objects.all(),
+        required=False,
+        empty_label="Todas las mutuales",
+        widget=forms.Select(attrs={'class': 'form-select-sm'})
+    )
+    
+    periodo = forms.ModelChoiceField(
+        queryset=Periodo.objects.all(),
+        required=False,
+        empty_label="Todos los periodos",
+        widget=forms.Select(attrs={'class': 'form-select-sm'})
+    )
+    
     es_borrador = forms.BooleanField(required=False)
-
 
 
 
@@ -851,6 +862,23 @@ from django.http import JsonResponse
 
 def leerDeclaracionJurada(request):
     if request.method == 'POST':
+
+        accion = request.POST.get('accion', None)
+
+        if accion == '1':
+            print("SOY ACCION 1")
+            # Realizar acciones para la opción 1 (Marcar como leído)
+            # ...
+
+        elif accion == '2':
+            print("SOY ACCION 2")
+
+            # Realizar acciones para la opción 2 (Marcar como no leído)
+            # ...
+
+        else:
+            print("NO SOY NADA")
+        
         declaraciones_ids = request.POST.getlist('declaracion_leidos')
         declaraciones = DeclaracionJurada.objects.filter(id__in=declaraciones_ids)
 

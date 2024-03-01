@@ -10,7 +10,7 @@
             {% for detalle in declaracion.detalles.all %}
                 {% if detalle.tipo == 'P' %}
                     <div class="detalle-prestamo">
-                        <h3 class="detalle-tipo">Prestamo</h3>
+                        <h5 class="detalle-tipo">Prestamo</h5>
                         <ul class="detalle-lista">
                             <li>
                                 Importe: ${{ detalle.importe }}
@@ -22,7 +22,7 @@
                     </div>
                 {% else %}
                     <div class="detalle-reclamo">
-                        <h3 class="detalle-tipo">Reclamo</h3>
+                        <h5 class="detalle-tipo">Reclamo</h5>
                         <ul class="detalle-lista">
                             <li>
                                 Importe: ${{ detalle.importe }}
