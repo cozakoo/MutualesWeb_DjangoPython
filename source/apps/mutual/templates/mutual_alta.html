@@ -1,4 +1,4 @@
-{% extends 'dashboardCliente.html' %}
+{% extends 'dashboardEmpleadoPublico.html' %}
 {% load static %}
 
 {% block extra_css_nivel %}
@@ -13,6 +13,8 @@
       {% csrf_token %}
       <div class="form-group">
         {{ form.as_p }}
+        {% include "modal_detalle_prestamo.html" %}
+         {% include "modal_detalle_reclamo.html" %}
         
         <div class="row">
           
@@ -26,15 +28,20 @@
         </div>
         
         <br />
+       
+
+
         <button type="submit" class="btn btn-success">Crear Mutual</button>
       
+
+
       </div>
+
+      
     </form>
     <div />
 </div>
 
-  {% include "modal_detalle_prestamo.html" %}
-  {% include "modal_detalle_reclamo.html" %}
 
   {% endblock %}
 

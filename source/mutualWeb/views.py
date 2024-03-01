@@ -19,6 +19,10 @@ def dashboard(request):
      
     if  userRol.rol.persona.es_cliente: 
      return render(request, 'dashboardCliente.html',contexto)
+     
+    if  userRol.rol.persona.es_empleado_publico: 
+     return render(request, 'dashboardEmpleadoPublico.html',contexto)
+     
 
 
 

@@ -33,3 +33,25 @@ class RegisterUserMutualForm(UserCreationForm):
             raise forms.ValidationError("El correo electrónico debe incluir un signo @.")
         
         return email
+
+
+
+class RegisterUserEmpleadoPublicoForm(UserCreationForm):
+    email = forms.EmailField(required=True, help_text="Debe incluir un signo @ en la dirección de correo electrónico.")
+    
+    class Meta:
+        model = User  
+        fields = UserCreationForm.Meta.fields + ('email',)
+        
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        print("asdasd")
+        # Validar que el correo electrónico sea único
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Este correo electrónico ya está en uso. Por favor, elige otro.")
+        
+        # Validar que el correo electrónico incluya un signo @
+        if '@' not in email:
+            raise forms.ValidationError("El correo electrónico debe incluir un signo @.")
+        
+        return email
