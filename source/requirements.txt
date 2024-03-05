@@ -1,5 +1,6 @@
 asgiref==3.7.2
 cffi==1.16.0
+chardet==5.2.0
 Django==4.1.1
 django-appconf==1.0.6
 django-select2==8.1.2
@@ -9,7 +10,7 @@ pillow==10.2.0
 psycopg2==2.9.3
 pycparser==2.21
 python-decouple==3.8
-reportlab==3.5.67
+reportlab==4.1.0
 sqlparse==0.4.4
 timezonefinder==6.2.0
 typing_extensions==4.10.0
