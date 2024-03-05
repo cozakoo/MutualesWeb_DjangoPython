@@ -2,4 +2,5 @@ from django.apps import AppConfig
 
 
 class MutualConfig(AppConfig):
-    name = 'mutual'
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'apps.mutual'

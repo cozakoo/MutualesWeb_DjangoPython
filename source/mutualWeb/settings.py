@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     'apps.personas',
     'apps.administradores',
     'apps.users',
-    'apps.empleadospublicos'
+    'apps.empleadospublicos',
+    'django_select2',
 ]
 
 SASS_PROCESSOR_ENABLED = True
