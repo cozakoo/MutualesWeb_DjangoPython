@@ -1,0 +1,22 @@
+{% extends 'dashboardEmpleadoPublico.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+{% endblock %}
+
+
+{% block contenedor %}
+<div class="container-xxl" align = "center">
+{% comment %} <div class="container  cuadrado-background"   align = "center"> {% endcomment %}
+<div class="d-grid gap-2 col-6 mx-auto">
+  <button onclick="window.location.href={% url 'users:register_U_M' %}" class="btn btn-primary btn-lg" type="button">crear usuario Mutual</button>
+  <button onclick="window.location.href={% url 'users:register_E_P' %}"class="btn btn-primary btn-lg" type="button">crear usuario Empleado Publico</button>
+  <button onclick="window.location.href={% url 'users:register_A' %}" class="btn btn-primary btn-lg" type="button">crear usuario Administrador</button>
+</div>
+
+<div/>
+
+{% endblock %}
+
+  
