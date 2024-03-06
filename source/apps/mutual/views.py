@@ -1,5 +1,6 @@
 from io import BytesIO
 import io
+from apps.personas.forms import FormularioPersona
 from reportlab.pdfgen import canvas
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
@@ -942,7 +943,7 @@ def es_siguiente_mes(periodo_anterior, periodo_creado):
 
 class PeriodoCreateView(CreateView):
     model = Periodo
-    form_class = FormularioPeriodo
+    form_class = FormularioPersona
     template_name = 'periodo_alta.html'
     success_url = reverse_lazy('mutual:mutual_crear')
     
