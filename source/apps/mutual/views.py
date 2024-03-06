@@ -830,6 +830,7 @@ class DeclaracionJuradaDeclaradoListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Historico'
+        context['mutuales'] = Mutual.objects.all()
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
         return context
 
@@ -839,20 +840,32 @@ class DeclaracionJuradaDeclaradoListView(ListView):
 
         # Obtener los datos del formulario enviado por el usuario
         filter_form = DeclaracionJuradaFilterForm(self.request.GET)
+        
+        mutual_id = self.request.GET.get('enc_cliente')
 
-        # Validar el formulario y aplicar filtros si es válido
-        if filter_form.is_valid():
+        # Convertir mutual_id a entero si es posible
+        try:
+            mutual_id = int(mutual_id)
+        except (ValueError, TypeError):
+            mutual_id = None
+
+        # Inicializar la variable mutual fuera del bloque condicional
+        mutual = None
+        
+        if filter_form.is_valid() :
             es_borrador = filter_form.cleaned_data.get('es_borrador')
-            mutual = filter_form.cleaned_data.get('mutual')  
             periodo = filter_form.cleaned_data.get('periodo')
+
+            # if mutual_id != 0: 
+                # mutual = get_object_or_404(Mutual, pk=mutual_id)
 
             # Aplicar filtros al queryset
             if es_borrador is not None:
                 queryset = queryset.filter(es_borrador=es_borrador)
 
             # Filtrar por mutual
-            if mutual:
-                queryset = queryset.filter(mutual=mutual)
+            # if mutual_id != 0:
+                # queryset = queryset.filter(mutual=mutual)
 
             # Filtrar por periodo
             if periodo:
@@ -861,20 +874,12 @@ class DeclaracionJuradaDeclaradoListView(ListView):
         return queryset
 
 class DeclaracionJuradaFilterForm(forms.Form):
-    mutual = forms.ModelChoiceField(
-        queryset=Mutual.objects.all(),
-        required=False,
-        empty_label="Todas las mutuales",
-        widget=forms.Select(attrs={'class': 'form-select-sm'})
-    )
-    
     periodo = forms.ModelChoiceField(
         queryset=Periodo.objects.all(),
         required=False,
         empty_label="Todos los periodos",
         widget=forms.Select(attrs={'class': 'form-select-sm'})
     )
-    
     es_borrador = forms.BooleanField(required=False)
 
 
@@ -888,26 +893,22 @@ def leerDeclaracionJurada(request):
         accion = request.POST.get('accion', None)
 
         if accion == '1':
-            print("SOY ACCION 1")
-            # Realizar acciones para la opción 1 (Marcar como leído)
-            # ...
+            # Marcar como leído
+            declaracion_leida_ids = request.POST.getlist('declaracion_leidos')
+            declaraciones = DeclaracionJurada.objects.filter(id__in=declaracion_leida_ids)
 
+            for declaracion in declaraciones:
+                declaracion.es_leida = True
+                declaracion.fecha_lectura = datetime.now()
+                declaracion.save()
+            
+            messages.success(request, f'Declaraciones Juradas marcadas como leidas con exito.')
+            return redirect('mutual:declaracion_jurada_declarado_listado')
+        
         elif accion == '2':
             print("SOY ACCION 2")
-
-            # Realizar acciones para la opción 2 (Marcar como no leído)
-            # ...
-
         else:
             print("NO SOY NADA")
-        
-        declaraciones_ids = request.POST.getlist('declaracion_leidos')
-        declaraciones = DeclaracionJurada.objects.filter(id__in=declaraciones_ids)
-
-        for declaracion in declaraciones:
-            declaracion.es_leida = True
-            declaracion.fecha_lectura = datetime.now()
-            declaracion.save()
 
         return JsonResponse({'status': 'success'})
     else:
@@ -921,4 +922,81 @@ def leerDeclaracionJurada(request):
     # print("DECLARACION JURADA ", declaracion)
 
 
+def es_siguiente_mes(periodo_anterior, periodo_creado):
+    
+    print(periodo_anterior.month)
+    print(periodo_creado.month)
 
+    print(periodo_anterior.month + 1)
+    print(periodo_creado.month + 1)
+
+    return periodo_creado.year == periodo_anterior.year and periodo_creado.month == periodo_anterior.month
+
+class PeriodoCreateView(CreateView):
+    model = Periodo
+    form_class = FormularioPeriodo
+    template_name = 'periodo_alta.html'
+    success_url = reverse_lazy('mutual:mutual_crear')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        periodos = Periodo.objects.all()
+
+        context['titulo'] = 'Alta de Periodo'
+        context['habilitado'] = True
+
+        # Verificar si hay periodos y obtener el último periodo creado
+        if periodos.exists():
+            ultimo_periodo = periodos.latest('fecha_inicio')
+
+            # Verificar si el último periodo tiene fecha_fin
+            if ultimo_periodo.fecha_fin is None:
+                print("ULTIMO PERIODO")
+                context['habilitado'] = False
+                context['titulo'] = 'El último periodo vigente no ha finalizado'
+
+        return context
+
+    def form_valid(self, form):
+        periodos = Periodo.objects.all()
+        fecha_inicio = form.cleaned_data["fecha_inicio"]
+
+        if periodos.exists():
+            #Obtengo el ultimo periodo creado por fecha de inicio
+            ultimo_periodo = periodos.latest('fecha_inicio')
+            #obtengo el mes de inicio
+            print(ultimo_periodo.mes_anio)
+            #compario si el mes_anio del ultimo periodo es igual del mes anio que mi fecha de creacion
+            if (ultimo_periodo.mes_anio.month == fecha_inicio.month ):
+                if (ultimo_periodo.mes_anio.month == 12 ):
+                    mes_anio = datetime(ultimo_periodo.mes_anio.year+1, 1, 1 ).date()
+                else:
+                    mes_anio = datetime(ultimo_periodo.mes_anio.year, ultimo_periodo.mes_anio.month+1 , 1 ).date()
+            else:
+                # Si son distintos, entonces comparo si el siguiente mes corresponde al mes de mi fecha de inicio
+                if (ultimo_periodo.mes_anio.month == 12 ):
+                    
+                    if (fecha_inicio.month == 1 ):
+                        mes_anio = datetime(ultimo_periodo.mes_anio.year+1, 1 , 1 ).date()
+                else:
+                    if (ultimo_periodo.mes_anio.month + 1 == fecha_inicio.month ):
+                        mes_anio = datetime(ultimo_periodo.mes_anio.year, fecha_inicio.month , 1 ).date()
+                    else:
+                        messages.error(self.request, 'La fecha de inicio no sigue una correlacion con el periodo anterior.')
+                        return super().form_invalid(form)
+ 
+        else:
+            mes_anio = datetime(fecha_inicio.year, fecha_inicio.month , 1 ).date()
+
+        periodo = form.save(commit=False)
+        periodo.mes_anio = mes_anio
+        periodo.save()
+            
+        response = super().form_valid(form)
+        messages.success(self.request, f'Periodo creado exitosamente.')
+
+        return response
+
+    def form_invalid(self, form):
+        messages.error(self.request, 'Ha ocurrido un error al momento de completar el formulario.')
+        return super().form_invalid(form)
