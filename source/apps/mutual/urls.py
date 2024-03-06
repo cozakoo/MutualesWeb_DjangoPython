@@ -24,6 +24,8 @@ urlpatterns = [
 
     path('periodos/periodo/crear', PeriodoCreateView.as_view(), name="periodo_crear"),
 
+    path('periodos/periodo/vigente', periodoVigenteDetalle , name="periodo_vigente_detalle"),
+
 
     path('exito/', mutual_exito, name='mutual_exito'),
     path('prueba/', tu_vista, name='t_vista'),

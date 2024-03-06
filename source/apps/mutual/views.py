@@ -1000,3 +1000,52 @@ class PeriodoCreateView(CreateView):
     def form_invalid(self, form):
         messages.error(self.request, 'Ha ocurrido un error al momento de completar el formulario.')
         return super().form_invalid(form)
+
+
+class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
+    es_leida = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label='Leídos'  # Set the custom label here
+    )
+
+    class Meta:
+        model = DeclaracionJurada
+        fields = ['es_leida']
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+def periodoVigenteDetalle(request):
+    # Obtenemos el ultimo periodo que no tiene fecha de fin
+    periodo = Periodo.objects.filter(fecha_fin__isnull=True).first()
+
+    # Obtenemos todas las declaraciones juradas presentadas en el periodo
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+
+    # Handle form submission
+    if request.method == 'POST':
+        form = PeriodoVigenteDeclaracionFilterForm(request.POST)
+        if form.is_valid():
+            es_leida_value = form.cleaned_data['es_leida']
+            declaraciones = declaraciones.filter(es_leida=es_leida_value)
+    else:
+        form = PeriodoVigenteDeclaracionFilterForm()
+
+    # Pagination
+    page_number = request.GET.get('page', 1)
+    paginator = Paginator(declaraciones, 10)  # Show 10 declarations per page
+    try:
+        page_obj = paginator.page(page_number)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
+
+    mutuales = [declaracion.mutual for declaracion in page_obj]
+
+    context = {
+        'periodo': periodo,
+        'declaraciones': page_obj,
+        'mutuales': mutuales,
+        'form': form,
+    }
+    return render(request, 'periodo_vigente_detalle.html', context)

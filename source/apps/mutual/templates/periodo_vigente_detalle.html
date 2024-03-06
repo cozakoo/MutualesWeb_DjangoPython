@@ -1,0 +1,171 @@
+{% extends 'dashboardEmpleadoPublico.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/dj_declarados_list.css' %}" rel="stylesheet" />
+{% endblock %}
+
+{% block contenedor %}
+<div class=" container cuadrado-background">
+  <div class="row">
+    <div class="col">
+      <strong>Fecha de Inicio:</strong>
+       {{periodo.fecha_inicio}}
+    </div>
+
+    <div class="col">
+      <strong>Periodo:</strong>
+      {{periodo.mes_anio}}
+      </div>
+  </div>
+  <br>
+
+  <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
+    {% csrf_token %}
+
+    <div class="row g-7">
+      <div class="col-md-3">
+          <label class="form-label negrita">Mutual:</label>
+          <select name="enc_cliente" id="enc_cliente">
+            <option value="0"> Todas las mutuales </option>
+            {% for mutual in mutuales %}
+              <option value="{{mutual.id}}">{{mutual.nombre}} </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-1 ">
+          {{ form.as_p }}
+        </div>
+
+        <div class="col mb-2">
+          <button type="submit" class="btn btn-primary btn-sm">
+            <i class="fa-solid fa-filter"></i>
+            Filtrar</button>
+        </div>
+
+    </div>
+  </form>
+
+<hr>
+  
+<form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
+  {% csrf_token %}
+    <div class="d-flex align-items-center">
+      <label for="accion" class="form-label negrita me-2">Accion:</label>
+      <div class="me-2">
+          <select id="accion" name="accion" class="form-select form-select-sm" aria-label="Small select example">
+              <option selected>------------------</option>
+              <option value="1">Marcar como leído</option>
+              <option value="2">Marcar como no leído</option>
+          </select>
+      </div>
+      
+      <button type="submit" id="realizarAccionBtn" class="btn btn-primary btn-sm" disabled>Realizar acción</button>
+    </div>
+    <br>
+    <div class=" table-responsive">
+      <table class="table table-sm  table-striped table-hover ">
+        <thead>
+          <tr>
+          <th>#</th>
+            <th>Mutual</th>
+            <th class="text-center">Leido</th>
+            <th class="text-center">Fecha de lectura</th>
+           <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for declaracion in page_obj %}
+          <tr>
+            <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
+            <td> {{ declaracion.mutual }}</td>
+            <td class="text-center">
+              {% if declaracion.es_leida %}
+              <i class="fa-solid fa-check" style="color: #004200;"></i>              
+              {% else %}
+              <i class="fa-solid fa-x" style="color: #6a0606;"></i>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if declaracion.es_leida %}
+                {declaracion.fecha_lectura}
+              {% endif %}
+            </td>
+
+            <td class="text-center d-flex justify-content-between">
+              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
+                <i class="fa-regular fa-eye"></i> ver
+            </button>
+              {% include "detalle_declaracion_jurada.html" %}
+              <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}">
+              <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
+                <i class="fa-solid fa-download"></i>
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </form>
+
+
+  <nav aria-label="...">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page=1">&laquo; first</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            </li>
+        {% endif %}
+    </ul>
+</nav>
+
+</div>
+<script type="text/javascript">
+  $('.django-select2').on("change", () => console.log("hola"));
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script>
+  $(function () {
+    $("#enc_cliente").select2();
+  });
+
+  $(document).ready(function() {
+    // Manejar el cambio en el select
+    $("#accion").change(function() {
+      // Obtener el valor seleccionado del select
+      var accionSeleccionada = $("#accion").val();
+
+      // Habilitar o deshabilitar el botón según la selección
+      if (accionSeleccionada === '------------------') {
+        $("#realizarAccionBtn").prop("disabled", true);
+      } else {
+        $("#realizarAccionBtn").prop("disabled", false);
+      }
+    });
+  });
+</script>
+
+{% endblock %}

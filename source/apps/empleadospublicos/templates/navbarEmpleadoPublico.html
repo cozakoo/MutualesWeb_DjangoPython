@@ -20,10 +20,10 @@
     <a class="dropdown-item" href="{% url 'mutual:periodo_crear' %}">Nuevo Periodo</a>
   </li>
   <li>
-    <a class="dropdown-item" href="#">Periodo Vigente</a>
+    <a class="dropdown-item" href="{% url 'mutual:periodo_vigente_detalle' %}">Periodo Vigente</a>
   </li>
   <li>
-    <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada_declarado_listado' %}">Historial Periodos Declarados</a>
+    <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada_declarado_listado' %}">Historial de Periodos</a>
   </li>
   {% block opcion_declaracion_jurada_adicional %}
 
