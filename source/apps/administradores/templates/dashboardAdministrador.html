@@ -11,6 +11,7 @@
 {% block content %}
   {% comment %} {% include 'navbarCliente.html' %} {% endcomment %}
   {% comment %} {% include 'navbarEmpleadoPublico.html' %} {% endcomment %}
+  {% include 'navbarAdministrador.html' %}
  
   <div style="display: flex; justify-content: center; align-items: center; min-height: calc(100vh - 60px);">
     {% block contenedor %}
@@ -18,9 +19,7 @@
         <h1 class="text-center">¡Bienvenido {{ user }}!</h1>
 
         <div class="row">
-          <div class="col-md-4 col-sm-12">
-            <h5>Mutual asociada:</h5>
-          </div>
+         
 
           <div class="col-md-8 col-sm-12">
             <h5 class="negrita">{{ rol.cliente.mutual }}</h5>

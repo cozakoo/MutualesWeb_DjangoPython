@@ -576,22 +576,25 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             # messages.warning(self.request, mensaje_error)
 
 
-class DetalleMutualView(LoginRequiredMixin, DetailView):
+class DetalleMutualView(LoginRequiredMixin,PermissionRequiredMixin, DetailView):
     login_url = '/login/'
     model = Mutual
     template_name = 'detalle_mutual.html'
     context_object_name = 'mimutual'
+    permission_required = "clientes.permission_cliente_mutual"
     
     def get_object(self, queryset=None):  
       userRol = UserRol.objects.get(user = self.request.user )
       id = userRol.rol.cliente.mutual.id
       return Mutual.objects.get(id = id)
         
-class MutualCreateView(CreateView):
+class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Mutual
     form_class = FormularioMutual
     template_name = 'mutual_alta.html'
     success_url = reverse_lazy('mutual:mutual_exito')
+    login_url = "/login/"
+    permission_required = "empleadospublicos.permission_empleado_publico"
     
     # def form_invalid(self, form):
     #     form.error.clear()
@@ -682,10 +685,12 @@ def mutual_exito(request):
     #     context['titulo'] = "Alta de cliente"
     #     return context
 
-class HistoricoView(ListView):
+class HistoricoView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    login_url = '/login/'
     model = DeclaracionJurada
     template_name = "dj_list.html"
     paginate_by = 10# Número de elementos por página
+    permission_required =  "clientes.permission_cliente_mutual"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -804,10 +809,11 @@ def descargarDeclaracion(request, pk):
 
 
 
-class MutualesListView(ListView):
+class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Mutual
     template_name = "mutuales_listado.html"
     paginate_by = 10# Número de elementos por página
+    permission_required = "empleadospublicos.permission_empleado_publico"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -822,10 +828,12 @@ class MutualesListView(ListView):
         # Devolver el queryset filtrado
         return queryset
 
-class DeclaracionJuradaDeclaradoListView(ListView):
+class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMixin,ListView):
     model = DeclaracionJurada
     template_name = "dj_declarados_list.html"
     paginate_by = 10  # Número de elementos por página
+    login_url = "/login/"
+    permission_required = "empleadospublicos.permission_empleado_publico"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

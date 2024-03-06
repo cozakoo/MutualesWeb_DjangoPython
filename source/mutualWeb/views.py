@@ -22,7 +22,10 @@ def dashboard(request):
      
     if  userRol.rol.persona.es_empleado_publico: 
      return render(request, 'dashboardEmpleadoPublico.html',contexto)
-     
+ 
+    if userRol.rol.persona.es_admin:
+        return render(request, 'dashboardAdministrador.html',contexto)
+             
 
 
 

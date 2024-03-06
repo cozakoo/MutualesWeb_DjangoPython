@@ -23,6 +23,7 @@ from django.contrib.auth import logout
         
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 
 
 def obtenerPermiso(name):
@@ -69,9 +70,11 @@ def cerrar_session(request):
 # class Menu(View):
 #     template_name = 'menu.html'
 
-class Menu(TemplateView):
+class Menu(LoginRequiredMixin,PermissionRequiredMixin,TemplateView):
     template_name = 'menu.html'
     success_url = '/menu_user/'
+    login_url = '/login/'
+    permission_required = "administradores.permission_administrador"
     
     
    
@@ -87,10 +90,12 @@ class CustomLoginView(LoginView, View):
            return redirect('dashboard')
         return super().get(request, *args, **kwargs)
     
-class RegisterUserMutalView(CreateView):
+class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name ='registrar_usuario_mutual.html'
     form_class = RegisterUserMutualForm
     success_url = reverse_lazy('users:register_userM_exito')
+    login_url = '/login/'
+    permission_required = "administradores.permission_administrador"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -173,10 +178,12 @@ def register_user_mutual_exito(request):
 
 
 
-class RegistereEmpleadoPublicoView(CreateView):
+class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin , CreateView):
     template_name ='registrar_usuario_empleado_publico.html'
     form_class = RegisterUserEmpleadoPublicoForm
     success_url = reverse_lazy('users:register_userM_exito')
+    login_url = '/login/'
+    permission_required = "administradores.permission_administrador"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -243,11 +250,13 @@ class RegistereEmpleadoPublicoView(CreateView):
     
     
     
-class RegistereAdministradorView(CreateView):
+class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         template_name ='registrar_usuario_administrador.html'
         form_class = RegisterUserEmpleadoPublicoForm
         success_url = reverse_lazy('users:register_userM_exito')
-    
+        login_url = '/login/'
+        permission_required = "administradores.permission_administrador"
+
         def get_context_data(self, **kwargs):
             context = super().get_context_data(**kwargs)
             context['titulo'] = 'Registro Usuario Adminsitrador'
@@ -298,6 +307,9 @@ class RegistereAdministradorView(CreateView):
                 user = User.objects.get(username=form.cleaned_data["username"])
                 
                 permiso = obtenerPermiso("administrador")
+                user.user_permissions.add(permiso)
+                
+                permiso = obtenerPermiso("empleadoPublico")
                 user.user_permissions.add(permiso)
                 
                 UserRol.objects.create(user = user , rol = e)
