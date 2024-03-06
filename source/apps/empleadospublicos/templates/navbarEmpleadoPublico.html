@@ -2,13 +2,13 @@
 
 {% block opcion_mutual %}
   <li>
-    <a class="dropdown-item" href="{% url 'mutual:listado_mutual' %}">Listado de Mutuales</a>
-  </li>
-  <li>
     <a class="dropdown-item" href="{% url 'mutual:mutual_crear' %}">Crear</a>
   </li>
   <li>
-    <a class="dropdown-item" href="#">Buscar</a>
+    <a class="dropdown-item" href="{% url 'mutual:listado_mutual' %}">Listado de Mutuales</a>
+  </li>
+  <li>
+    {% comment %} <a class="dropdown-item" href="#">Buscar</a> {% endcomment %}
   </li>
   {% block opcion_mutual_adicional %}
 
@@ -17,13 +17,13 @@
 
 {% block opcion_declaracion_jurada %}
   <li>
-    <a class="dropdown-item" href="#">Nuevo Periodo Declarativo</a>
+    <a class="dropdown-item" href="{% url 'mutual:periodo_crear' %}">Nuevo Periodo</a>
   </li>
   <li>
-    <a class="dropdown-item" href="#">Periodo Declarado Vigente</a>
+    <a class="dropdown-item" href="{% url 'mutual:periodo_vigente_detalle' %}">Periodo Vigente</a>
   </li>
   <li>
-    <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada_declarado_listado' %}">Historial Periodos Declarados</a>
+    <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada_declarado_listado' %}">Historial de Periodos</a>
   </li>
   {% block opcion_declaracion_jurada_adicional %}
 

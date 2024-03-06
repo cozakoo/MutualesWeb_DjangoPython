@@ -1,5 +1,5 @@
 from django import forms
-from apps.mutual.models import DetalleDeclaracionJurada, Mutual
+from apps.mutual.models import DetalleDeclaracionJurada, Mutual, Periodo
 
 
 class FormDetalle(forms.Form):
@@ -73,3 +73,23 @@ class FormularioDJ(forms.ModelForm):
 
     anio = forms.ChoiceField(choices=ANIO_CHOICES, required=False, initial=current_year,
                              widget=forms.Select(attrs={'class': 'form-select'}))
+
+from django.forms import DateInput
+from django.utils import timezone
+
+class FormularioPeriodo(forms.ModelForm):
+    class Meta:
+        model = Periodo
+        fields = ['fecha_inicio']
+        widgets = {
+            'fecha_inicio': DateInput(attrs={'type': 'date'}),
+        }
+    
+    def clean_fecha_inicio(self):
+        fecha_inicio = self.cleaned_data.get('fecha_inicio')
+        fecha_actual = timezone.now().date()
+
+        if fecha_inicio and fecha_inicio < fecha_actual:
+            self.add_error('fecha_inicio', "La fecha debe ser igual o posterior a la fecha actual.")
+
+        return fecha_inicio

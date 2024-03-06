@@ -22,6 +22,10 @@ urlpatterns = [
     # path('declararReclamo/',DeclaracionJuradaReclamo.as_view(), name="declarar_reclamo"),
     # path('crearDj/',DeclaracionJuradaCreateView.as_view(), name="dj_crear"),
 
+    path('periodos/periodo/crear', PeriodoCreateView.as_view(), name="periodo_crear"),
+
+    path('periodos/periodo/vigente', periodoVigenteDetalle , name="periodo_vigente_detalle"),
+
 
     path('exito/', mutual_exito, name='mutual_exito'),
     path('prueba/', tu_vista, name='t_vista'),

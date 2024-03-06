@@ -18,7 +18,8 @@
     <link href="{% static 'Libs/css/normalize.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/css/base.css' %}" rel="stylesheet" />
     {% comment %} <link src="{% static 'Libs/DataTables/DataTables-1.13.8/css/jquery.dataTables.css' %}" rel="stylesheet" /> {% endcomment %}
-    
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
     <title>
       {% block title %}
         Mutuales | DGC
@@ -46,7 +47,8 @@
     <script src="{% static 'Libs/js/main.js' %}"></script>
     {% comment %} <script src="{% static 'Libs/DataTables/DataTables-1.13.8/js/jquery.dataTables.js' %}"></script> {% endcomment %}
     <script src="https://cdn.datatables.net/v/bs5/datatables.min.js"></script>
-   
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
     {% block extra_js %}
 
     {% endblock %}

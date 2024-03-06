@@ -7,11 +7,24 @@
 
 {% block contenedor %}
 <div class=" container cuadrado-background">
-  <form method="get" class="mb-7">
+  <div class="row">
+    <div class="col">
+      <strong>Fecha de Inicio:</strong>
+       {{periodo.fecha_inicio}}
+    </div>
+
+    <div class="col">
+      <strong>Periodo:</strong>
+      {{periodo.mes_anio}}
+      </div>
+  </div>
+  <br>
+
+  <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
     {% csrf_token %}
 
     <div class="row g-7">
-        <div class="col-md-3">
+      <div class="col-md-3">
           <label class="form-label negrita">Mutual:</label>
           <select name="enc_cliente" id="enc_cliente">
             <option value="0"> Todas las mutuales </option>
@@ -20,16 +33,17 @@
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-3 ">
-            <label for="{{ filter_form.periodo.id_for_label }}" class="form-label negrita">Periodo:</label>
-            {{ filter_form.periodo }}
-          </div>
-          
-          <div class="col mb-2">
+
+        <div class="col-md-1 ">
+          {{ form.as_p }}
+        </div>
+
+        <div class="col mb-2">
           <button type="submit" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-filter"></i>
             Filtrar</button>
         </div>
+
     </div>
   </form>
 
@@ -55,9 +69,9 @@
         <thead>
           <tr>
           <th>#</th>
-            <th>Período</th>
             <th>Mutual</th>
             <th class="text-center">Leido</th>
+            <th class="text-center">Fecha de lectura</th>
            <th></th>
           </tr>
         </thead>
@@ -65,7 +79,6 @@
           {% for declaracion in page_obj %}
           <tr>
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
-            <td> {{ declaracion.periodo }}</td>
             <td> {{ declaracion.mutual }}</td>
             <td class="text-center">
               {% if declaracion.es_leida %}
@@ -74,7 +87,13 @@
               <i class="fa-solid fa-x" style="color: #6a0606;"></i>
               {% endif %}
             </td>
-            
+
+            <td>
+              {% if declaracion.es_leida %}
+                {declaracion.fecha_lectura}
+              {% endif %}
+            </td>
+
             <td class="text-center d-flex justify-content-between">
               <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
                 <i class="fa-regular fa-eye"></i> ver
@@ -92,34 +111,34 @@
     </div>
   </form>
 
+
   <nav aria-label="...">
     <ul class="pagination justify-content-center">
-      {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page=1">&laquo; first</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
-        </li>
-      {% endif %}
-  
-        
-      {% for num in page_obj.paginator.page_range %}
-        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-          <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% endfor %}
-  
-      {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        </li>
-      {% endif %}
+        {% if page_obj.has_previous %}
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page=1">&laquo; first</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
+            </li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
+                <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
+            </li>
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
+            </li>
+            <li class="page-item">
+                <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            </li>
+        {% endif %}
     </ul>
-  </nav>
+</nav>
 
 </div>
 <script type="text/javascript">
