@@ -183,7 +183,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
     model = DetalleDeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
-    # success_url = reverse_lazy('mutual:declaracion_jurada')
+    success_url = reverse_lazy('mutual:declaracion_jurada')
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         if 'confirmacion' in request.POST:

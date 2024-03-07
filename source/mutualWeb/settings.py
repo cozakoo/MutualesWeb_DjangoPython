@@ -35,7 +35,8 @@ SECRET_KEY = 'django-insecure-e-ci_*^+2*7f!n-y33c1s0r1&djna=l&d8wt(r2h!i_-rjvsk)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.empleadospublicos',
     'django_select2',
+    'mutualWeb',
 ]
 
 SASS_PROCESSOR_ENABLED = True
@@ -162,7 +164,7 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+APPEND_SLASH = True
 # EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
 # EMAIL_PORT = 587
