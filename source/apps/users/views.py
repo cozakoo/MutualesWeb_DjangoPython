@@ -147,10 +147,6 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
                     c.register
                     c.save()
                     
-                    permiso, creado = Permission.objects.get_or_create(
-                                                                        codename='add_declaracionjurada',
-                                                                        name='Can add declaracion jurada',
-                                                                    )
                     
                     
                     form.save() 
@@ -212,36 +208,40 @@ class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin ,
             print(form.cleaned_data["username"])
          
             correo = form.cleaned_data["email"]
-        #  with transaction.atomic(): 
-            p = Persona(
-                correo = correo,
-                es_empleado_publico = True
-            )
-            
-            p.save()
-            
-            
-            e =  EmpleadoPublico(
-                persona = p,
-                tipo = EmpleadoPublico.TIPO
-            )
-            
-            e.register
-            e.save()
-            
-            
-            form.save() 
-            
-            user = User.objects.get(username=form.cleaned_data["username"])
-            
-            permiso = obtenerPermiso("empleadoPublico")
-            user.user_permissions.add(permiso)
-            
-            UserRol.objects.create(user = user , rol = e)
-             
-            
-            print("pude añadir permiso")
-            return super().form_valid(form)
+            try:   
+                with transaction.atomic(): 
+                    p = Persona(
+                        correo = correo,
+                        es_empleado_publico = True
+                    )
+                    
+                    p.save()
+                    
+                    
+                    e =  EmpleadoPublico(
+                        persona = p,
+                        tipo = EmpleadoPublico.TIPO
+                    )
+                    
+                    e.register
+                    e.save()
+                    
+                    
+                    form.save() 
+                    
+                    user = User.objects.get(username=form.cleaned_data["username"])
+                    
+                    permiso = obtenerPermiso("empleadoPublico")
+                    user.user_permissions.add(permiso)
+                    
+                    UserRol.objects.create(user = user , rol = e)
+                    
+                    
+                    print("pude añadir permiso")
+                    return super().form_valid(form)
+            except e:
+               return super().form_invalid(form)
+                
         
     def form_invalid(self, form):
         print("Errores del formulario en form_invalid:", form.errors)
@@ -285,39 +285,45 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
             
                 correo = form.cleaned_data["email"]
             #  with transaction.atomic(): 
-                p = Persona(
-                    correo = correo,
-                    es_admin = True
-                )
-                
-                p.save()
-                
-                
-                e =  Administrador(
-                    persona = p,
-                    tipo = Administrador.TIPO
-                )
-                
-                e.register
-                e.save()
-                
-                
-                form.save() 
-                
-                user = User.objects.get(username=form.cleaned_data["username"])
-                
-                permiso = obtenerPermiso("administrador")
-                user.user_permissions.add(permiso)
-                
-                permiso = obtenerPermiso("empleadoPublico")
-                user.user_permissions.add(permiso)
-                
-                UserRol.objects.create(user = user , rol = e)
-                
-                
-                print("pude añadir permiso")
-                return super().form_valid(form)
-            
+                try:   
+                    with transaction.atomic():           
+                        p = Persona(
+                            correo = correo,
+                            es_admin = True
+                        )
+                        
+                        p.save()
+                        
+                        
+                        e =  Administrador(
+                            persona = p,
+                            tipo = Administrador.TIPO
+                        )
+                        
+                        e.register
+                        e.save()
+                        
+                        
+                        form.save() 
+                        
+                        user = User.objects.get(username=form.cleaned_data["username"])
+                        
+                        permiso = obtenerPermiso("administrador")
+                        user.user_permissions.add(permiso)
+                        
+                        permiso = obtenerPermiso("empleadoPublico")
+                        user.user_permissions.add(permiso)
+                        
+                        UserRol.objects.create(user = user , rol = e)
+                        
+                        
+                        print("pude añadir permiso")
+                        return super().form_valid(form)
+                except e:
+                  return super().form_invalid(form)
+              
+              
+              
         def form_invalid(self, form):
             print("Errores del formulario en form_invalid:", form.errors)
             return super().form_invalid(form)
