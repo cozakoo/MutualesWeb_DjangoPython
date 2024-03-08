@@ -11,6 +11,7 @@ urlpatterns = [
     path('declaracionjurada/historialDeclarado',DeclaracionJuradaDeclaradoListView.as_view(), name="declaracion_jurada_declarado_listado"),
     
     path('declaracionjurada/leer',leerDeclaracionJurada , name="leer_declaracion_jurada"),
+    path('verificar_todas_leidas/<int:periodo_pk>/', verificar_todas_leidas, name='verificar_declaraciones_todas_leidas'),
 
     path('declaracionjurada/historico',HistoricoView.as_view(), name="historico"),
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),

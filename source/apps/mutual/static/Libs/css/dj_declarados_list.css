@@ -1,3 +1,12 @@
 .cuadrado-background {
-    width: 90%;
-  }
+  width: 90%;
+}
+
+h1 {
+  font-family: 'TuTipoDeLetra', sans-serif;
+  /* Puedes ajustar el tamaño, el peso y otros estilos según tus necesidades */
+  font-size: 2em;
+  font-weight: bold;
+  /* Alinea el texto al centro */
+  text-align: center;
+}

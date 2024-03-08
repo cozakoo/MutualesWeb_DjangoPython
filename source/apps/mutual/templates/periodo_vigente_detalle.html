@@ -2,244 +2,310 @@
 {% load static %}
 
 {% block extra_css_nivel %}
-  <link href="{% static 'Libs/css/dj_declarados_list.css' %}" rel="stylesheet" />
+<link href="{% static 'Libs/css/dj_declarados_list.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block contenedor %}
-<div class=" container cuadrado-background">
+<div class="container cuadrado-background">
+  <h1 class="text-center">{{ titulo }}</h1>
+  
   <div class="row">
     <div class="col">
-      <strong>Fecha de Inicio:</strong>
-       {{periodo.fecha_inicio}}
+      <strong>Fecha de inicio:</strong>
+      {{ periodo.fecha_inicio }}
     </div>
-
+    
     <div class="col">
       <strong>Periodo:</strong>
-      {{periodo.mes_anio}}
-      </div>
+      {{ periodo.mes_anio|date:'Y/m' }}
+    </div>
+    
+    <div class="col">
+      {% comment %} <a href="{% url 'mutual:verificar_declaraciones_todas_leidas periodo_pk=periodo.pk' %}" class="btn btn-outline-secondary">Finalizar Periodo</a> {% endcomment %}
+    </div>
+    
   </div>
-  <br>
+  <br />
+    <hr />
 
-  <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
-    {% csrf_token %}
+    <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
+      {% csrf_token %}
 
-    <div class="row g-7">
-      <div class="col-md-3">
+      <div class="row g-7">
+        <div class="col-md-3">
           <label class="form-label negrita">Mutual:</label>
           <select name="enc_mutual" id="enc_mutual">
-            <option value="0"> Todas las mutuales </option>
+            <option value="0">Todas las mutuales</option>
             {% for mutual in mutuales %}
-              <option value="{{mutual.id}}">{{mutual.nombre}} </option>
+              <option value="{{ mutual.id }}">{{ mutual.nombre }}</option>
             {% endfor %}
           </select>
         </div>
 
-        <div class="col-md-1 ">
-          {{ form.as_p }}
-        </div>
+        <div class="col-md-1">{{ form.as_p }}</div>
 
         <div class="col mb-2">
           <button type="submit" class="btn btn-primary btn-sm">
             <i class="fa-solid fa-filter"></i>
-            Filtrar</button>
+            Filtrar
+          </button>
+        </div>
+      </div>
+      
+    </form>
+
+    <hr />
+
+    <form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
+      {% csrf_token %}
+      <div class="d-flex align-items-center justify-content-center" >
+        <label for="accion" class="form-label negrita me-2">Acción:</label>
+        <div class="me-2">
+          <select id="accion" name="accion" class="form-select form-select-sm" aria-label="Small select example">
+            <option selected>------------------</option>
+            <option value="1">Marcar como leído</option>
+            <option value="2">Marcar como no leído</option>
+          </select>
         </div>
 
-    </div>
-  </form>
+        <div class="btn-group dropend me-2">
+          <div class="btn border-info btn-sm bg-info bg-opacity-10 border">
+            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
+            <label class="form-check-label" for="flexCheckDefault"></label>
+          </div>
 
-<hr>
-  
-<form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
-  {% csrf_token %}
-    <div class="d-flex align-items-center">
-      <label for="accion" class="form-label negrita me-2">Accion:</label>
-      <div class="me-2">
-          <select id="accion" name="accion" class="form-select form-select-sm" aria-label="Small select example">
-              <option selected>------------------</option>
-              <option value="1">Marcar como leído</option>
-              <option value="2">Marcar como no leído</option>
-          </select>
+          <button type="button" class="btn border-info bg-info bg-opacity-10 border dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"><span class="visually-hidden">Toggle Dropend</span></button>
+          <ul class="dropdown-menu">
+            <li>
+              <a class="dropdown-item" href="#">Todas</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">Ninguna</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">Leídas</a>
+            </li>
+            <li>
+              <a class="dropdown-item" href="#">No leídas</a>
+            </li>
+          </ul>
+        </div>
+
+        <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">Realizar acción</button>
+        {% include 'modal_confirmacion_lectura.html' %}
       </div>
-      <div class="me-2">
 
-      <label class="form-check-label negrita" for="seleccionarTodosCheckbox">Seleccionar Todos</label>
-      <input type="checkbox" id="seleccionarTodosCheckbox" class="form-check-input">
-      </div>
-      <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Realizar acción
-      </button>
-      {% include "modal_confirmacion_lectura.html" %}
+      <br />
 
-    </div>
-
-      <br>
-
-    <div class=" table-responsive">
-      <table class="table table-sm  table-striped table-hover ">
-      
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Mutual</th>
-            <th class="text-center">Leido</th>
-            <th>Fecha de lectura</th>
-            <th class="text-center">Rectificativa</th>
-
-            <th class="text-center">    
-              <label class="form-check-label" for="seleccionarTodosCheckbox">Marcar todos:</label>
-              <input type="checkbox" id="seleccionarTodosCheckbox" class="form-check-input">
-            </th>
-            <th></th>
-          </tr>
-        </thead>
-        
-        <tbody>
-          {% for declaracion in page_obj %}
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover">
+          <thead>
             <tr>
-              <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
-              <td> {{ declaracion.mutual }}</td>
-              <td class="text-center">
-                {% if declaracion.es_leida %}
-                <i class="fa-solid fa-check" style="color: #004200;"></i>              
-                {% else %}
-                <i class="fa-solid fa-x" style="color: #6a0606;"></i>
-                {% endif %}
-              </td>
+              <th>#</th>
+              <th>Mutual</th>
+              <th class="text-center">Leido</th>
+              <th>Fecha de lectura</th>
+              <th class="text-center">Rectificativa</th>
+              <th></th>
+            </tr>
+          </thead>
 
-              <td>
-                {% if declaracion.es_leida %}
-                  {declaracion.fecha_lectura}
-                {% else %}
-                  No ha sido leido aún
-                {% endif %}
-              </td>
-            
-              <td class="text-center">
-                {{declaracion.rectificativa}}
-              </td>
+          <tbody>
+            {% for declaracion in page_obj %}
+              <tr>
+                <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                <td>{{ declaracion.mutual }}</td>
+                <td class="text-center">
+                  {% if declaracion.es_leida %}
+                    <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
+                  {% else %}
+                  <i class="fa-solid fa-circle-exclamation" style="color: #ffa500;"></i>
+                  {% endif %}
+                </td>
 
-              <td class="text-center">
-                <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}">
-              </td>
+                <td>
+                  {% if declaracion.es_leida %}
+                    {{ declaracion.fecha_lectura }}
+                  {% else %}
+                    No ha sido leido aún
+                  {% endif %}
+                </td>
 
-              <td class="text-end">
-                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
-                  <i class="fa-regular fa-eye"></i> Ver
-                </button>
-                {% include "detalle_declaracion_jurada.html" %}
-              <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
-                <i class="fa-solid fa-download"></i>
-              </a>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-  </form>
+                <td class="text-center">{{ declaracion.rectificativa }}</td>
 
+                <td class="text-end">
+                  <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />
+                  <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
+                  {% include 'detalle_declaracion_jurada.html' %}
+                  <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </form>
 
-  <nav aria-label="...">
-    <ul class="pagination justify-content-center">
+    <nav aria-label="...">
+      <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
-            <li class="page-item">
-                <a class="page-link small-btn" href="?page=1">&laquo; first</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
-            </li>
+          <li class="page-item">
+            <a class="page-link small-btn" href="?page=1">&laquo; first</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
+          </li>
         {% endif %}
 
         {% for num in page_obj.paginator.page_range %}
-            <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-                <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
-            </li>
+          <li class="page-item {% if num == page_obj.number %}{% endif %}">
+            <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
+          </li>
         {% endfor %}
 
         {% if page_obj.has_next %}
-            <li class="page-item">
-                <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-            </li>
+          <li class="page-item">
+            <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+          </li>
         {% endif %}
-    </ul>
-  </nav>
+      </ul>
+    </nav>
+  </div>
 
-</div>
+  <script type="text/javascript">
+    $('.django-select2').on('change', () => console.log('hola'))
+  </script>
+  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+  <script>
+    $(function () {
+      $('#enc_mutual').select2()
+    })
+    
+    $(document).ready(function () {
+      // Manejar el cambio en el select
+      $('#accion').change(function () {
+        actualizarModal()
+      })
+    
+      // Manejar el cambio en los checkboxes
+      $("input[name='declaracion_leidos']").change(function () {
+        // Simular el cambio en el select para actualizar el modal
+        $('#accion').trigger('change')
+      })
+    
+      // Trigger inicial al cargar la página para asegurar el estado correcto del botón
+      $('#accion').trigger('change')
+    
+      // Manejar el cambio en el checkbox "Seleccionar Todos"
+      $('#seleccionarTodosCheckbox').change(function () {
+        // Obtener el estado actual del checkbox
+        var seleccionarTodos = $(this).prop('checked')
+    
+        // Marcar o desmarcar todos los checkboxes individuales según el estado actual
+        $("input[name='declaracion_leidos']").prop('checked', seleccionarTodos)
+    
+        // Simular el cambio en el select para actualizar el modal
+        $('#accion').trigger('change')
+      })
+    
+        // Manejar el cambio en el checkbox principal
+      $('#flexCheckDefault').change(function () {
+        // Obtener el estado actual del checkbox principal
+        var seleccionarTodos = $(this).prop('checked');
 
-<script type="text/javascript">
-  $('.django-select2').on("change", () => console.log("hola"));
-</script>
-<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<script>
-  $(function () {
-    $("#enc_mutual").select2();
-  });
-  
-  $(document).ready(function() {
-    // Manejar el cambio en el select
-    $("#accion").change(function() {
-      // Obtener el valor seleccionado del select
-      var accionSeleccionada = $("#accion option:selected").text();
+        // Marcar o desmarcar todos los checkboxes individuales según el estado actual
+        $("input[name='declaracion_leidos']").prop('checked', seleccionarTodos);
 
-      // Actualizar el texto en el span del modal
-      $("#nombreAccionSeleccionada").text(accionSeleccionada);
-
-      // Obtener las declaraciones marcadas
-      var declaracionesMarcadas = [];
-      $("input[name='declaracion_leidos']:checked").each(function() {
-        declaracionesMarcadas.push($(this).val());
+        // Simular el cambio en el select para actualizar el modal
+        $('#accion').trigger('change');
       });
 
-      // Mostrar las declaraciones en la lista del modal
-      var listaDeclaraciones = $("#modalDeclaraciones");
-      listaDeclaraciones.empty();
-      $.each(declaracionesMarcadas, function(index, value) {
-        listaDeclaraciones.append("<li>Declaracion " + value + "</li>");
-      });
-
-      // Habilitar o deshabilitar el botón según la selección
-      if (accionSeleccionada === '------------------' || declaracionesMarcadas.length === 0) {
-        $("#realizarAccionBtn").prop("disabled", true);
-      } else {
-        $("#realizarAccionBtn").prop("disabled", false);
+      // Manejar el cambio en el menú desplegable
+      $('.dropdown-menu a').click(function () {
+        var opcionSeleccionada = $(this).text()
+    
+        // Actualizar los estados de los checkboxes y las declaraciones según la opción seleccionada
+        if (opcionSeleccionada === 'Todas') {
+          $("input[name='declaracion_leidos']").prop('checked', true)
+          updateCheckboxState(true)
+        } else if (opcionSeleccionada === 'Ninguna') {
+          $("input[name='declaracion_leidos']").prop('checked', false)
+          updateCheckboxState(false)
+        } else if (opcionSeleccionada === 'Leídas') {
+          marcarLeidas()
+          updateCheckboxState(true)
+        } else if (opcionSeleccionada === 'No leídas') {
+          marcarNoLeidas()
+          updateCheckboxState(true)
+        }
+        // Simular el cambio en el select para actualizar el modal
+        $('#accion').trigger('change')
+      })
+    
+      // Resto de tu script...
+    
+      // Función para actualizar el modal
+      function actualizarModal() {
+        var accionSeleccionada = $('#accion option:selected').text()
+        var declaracionesMarcadas = obtenerDeclaracionesMarcadas()
+    
+        // Actualizar el texto en el span del modal
+        $('#nombreAccionSeleccionada').text(accionSeleccionada)
+    
+        // Mostrar las declaraciones en la lista del modal
+        var listaDeclaraciones = $('#modalDeclaraciones')
+        listaDeclaraciones.empty()
+        $.each(declaracionesMarcadas, function (index, value) {
+          listaDeclaraciones.append('<li>Declaracion ' + value + '</li>')
+        })
+    
+        // Habilitar o deshabilitar el botón según la selección
+        if (accionSeleccionada === '------------------' || declaracionesMarcadas.length === 0) {
+          $('#realizarAccionBtn').prop('disabled', true)
+        } else {
+          $('#realizarAccionBtn').prop('disabled', false)
+        }
       }
-    });
+    
+      // Función para obtener las declaraciones marcadas
+      function obtenerDeclaracionesMarcadas() {
+        var declaracionesMarcadas = []
+        $("input[name='declaracion_leidos']:checked").each(function () {
+          declaracionesMarcadas.push($(this).val())
+        })
+        return declaracionesMarcadas
+      }
+    
+      // Función para actualizar el estado del checkbox individual y las declaraciones
+      function updateCheckboxState(estado) {
+        var checkbox = $('#flexCheckDefault')
+        checkbox.prop('checked', estado)
+      }
+    
+      // Función para marcar las declaraciones como leídas
+      function marcarLeidas() {
+        $("input[name='declaracion_leidos']").each(function () {
+          var declaracionId = $(this).val()
+          // Obtener el valor de es_leida directamente desde el atributo data
+          var esLeida = $(this).data('es-leida') === 'True'
+          $(this).prop('checked', esLeida)
+        })
+      }
 
-    // Manejar el cambio en los checkboxes
-    $("input[name='declaracion_leidos']").change(function() {
-      // Simular el cambio en el select para actualizar el modal
-      $("#accion").trigger("change");
-    });
+      // Función para marcar las declaraciones como leídas
+      function marcarNoLeidas() {
+        $("input[name='declaracion_leidos']").each(function () {
+          var declaracionId = $(this).val()
+          // Obtener el valor de es_leida directamente desde el atributo data
+          var esLeida = $(this).data('es-leida') === 'False'
+          $(this).prop('checked', esLeida)
+        })
+      }
 
-    // Trigger inicial al cargar la página para asegurar el estado correcto del botón
-    $("#accion").trigger("change");
-
-    // Manejar el cambio en el checkbox "Seleccionar Todos"
-    $("#seleccionarTodosCheckbox").change(function() {
-      // Obtener el estado actual del checkbox
-      var seleccionarTodos = $(this).prop('checked');
-
-      // Marcar o desmarcar todos los checkboxes individuales según el estado actual
-      $("input[name='declaracion_leidos']").prop("checked", seleccionarTodos);
-
-      // Simular el cambio en el select para actualizar el modal
-      $("#accion").trigger("change");
-    });
-
-    // Manejar el cambio en los checkboxes individuales
-    $("input[name='declaracion_leidos']").change(function() {
-      // Verificar si todos los checkboxes están marcados y actualizar el estado del checkbox "Seleccionar Todos"
-      var todosMarcados = $("input[name='declaracion_leidos']:checked").length === $("input[name='declaracion_leidos']").length;
-      $("#seleccionarTodosCheckbox").prop("checked", todosMarcados);
-
-      // Simular el cambio en el select para actualizar el modal
-      $("#accion").trigger("change");
-    });
-  });
+    })
 </script>
-
 {% endblock %}

@@ -907,15 +907,32 @@ def leerDeclaracionJurada(request):
 
         # Aplicar cambios a todas las declaraciones
         for declaracion in declaraciones:
-            declaracion.es_leida = es_leida
-            declaracion.fecha_lectura = fecha_lectura
-            declaracion.save()
+            if declaracion.es_leida != es_leida: 
+                declaracion.es_leida = es_leida
+                declaracion.fecha_lectura = fecha_lectura
+                declaracion.save()
 
         messages.success(request, f'Declaraciones Juradas {"leídas" if es_leida else "marcadas como no leídas"} con éxito.')
         return redirect('mutual:periodo_vigente_detalle')
 
     return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
+
+
+
+def verificar_todas_leidas(request, periodo_pk):
+    print("estoyen verificarPeriodo")
+    #Obtengo el periodo
+    
+
+    # declaraciones = DeclaracionJurada.objects.all()
+    # # declaraciones = DeclaracionJurada.objects.filter(periodo=periodo_actual)
+
+    # # Verifica si todas las declaraciones están marcadas como leídas
+    # todas_leidas = all(declaracion.es_leida for declaracion in declaraciones)
+
+    # Devuelve el resultado en formato JSON
+    # return JsonResponse({'todas_leidas': todas_leidas})
 
     # declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
     # declaracion.es_leida = True
@@ -1020,6 +1037,7 @@ def periodoVigenteDetalle(request):
     # Obtenemos el ultimo periodo que no tiene fecha de fin
     periodo = Periodo.objects.filter(fecha_fin__isnull=True).first()
 
+    titulo = 'Periodo Vigente'
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
     declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
 
@@ -1048,6 +1066,7 @@ def periodoVigenteDetalle(request):
         'periodo': periodo,
         'page_obj': page_obj,
         'mutuales': mutuales,
+        'titulo': titulo,
         'form': form,
     }
     return render(request, 'periodo_vigente_detalle.html', context)
