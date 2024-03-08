@@ -60,80 +60,73 @@
               <option value="2">Marcar como no leído</option>
           </select>
       </div>
+      <div class="me-2">
 
+      <label class="form-check-label negrita" for="seleccionarTodosCheckbox">Seleccionar Todos</label>
+      <input type="checkbox" id="seleccionarTodosCheckbox" class="form-check-input">
+      </div>
       <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">
         Realizar acción
       </button>
-
-      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmación</h1>
-              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-              <p>¿Estás seguro que quieres "<span id="nombreAccionSeleccionada"></span>" las declaraciones de las siguientes mutuales?</p>
-            
-              <ul id="modalDeclaraciones">
-
-                </ul
-              >
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary btn-sm btn-detalle" data-bs-dismiss="modal">Close</button>
-              <button type="submit" class="btn btn-success btn-sm btn-detalle">Confirmar</button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {% include "modal_confirmacion_lectura.html" %}
 
     </div>
-    <br>
+
+      <br>
+
     <div class=" table-responsive">
       <table class="table table-sm  table-striped table-hover ">
+      
         <thead>
           <tr>
-          <th>#</th>
+            <th>#</th>
             <th>Mutual</th>
             <th class="text-center">Leido</th>
             <th>Fecha de lectura</th>
+            <th class="text-center">Rectificativa</th>
+
+            <th class="text-center">    
+              <label class="form-check-label" for="seleccionarTodosCheckbox">Marcar todos:</label>
+              <input type="checkbox" id="seleccionarTodosCheckbox" class="form-check-input">
+            </th>
             <th></th>
-           <th>Rectificativa</th>
-           <th></th>
           </tr>
         </thead>
+        
         <tbody>
           {% for declaracion in page_obj %}
-          <tr>
-            <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
-            <td> {{ declaracion.mutual }}</td>
-            <td class="text-center">
-              {% if declaracion.es_leida %}
-              <i class="fa-solid fa-check" style="color: #004200;"></i>              
-              {% else %}
-              <i class="fa-solid fa-x" style="color: #6a0606;"></i>
-              {% endif %}
-            </td>
+            <tr>
+              <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
+              <td> {{ declaracion.mutual }}</td>
+              <td class="text-center">
+                {% if declaracion.es_leida %}
+                <i class="fa-solid fa-check" style="color: #004200;"></i>              
+                {% else %}
+                <i class="fa-solid fa-x" style="color: #6a0606;"></i>
+                {% endif %}
+              </td>
 
-            <td>
-              {% if declaracion.es_leida %}
-                {declaracion.fecha_lectura}
-              {% else %}
-                No ha sido leido aún
-              {% endif %}
-            </td>
-            <td></td>
-            <td>
-              {{declaracion.rectificativa}}
-            </td>
+              <td>
+                {% if declaracion.es_leida %}
+                  {declaracion.fecha_lectura}
+                {% else %}
+                  No ha sido leido aún
+                {% endif %}
+              </td>
+            
+              <td class="text-center">
+                {{declaracion.rectificativa}}
+              </td>
 
-            <td class="text-center d-flex justify-content-between">
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
-                <i class="fa-regular fa-eye"></i> Ver
-            </button>
-              {% include "detalle_declaracion_jurada.html" %}
-              <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}">
+              <td class="text-center">
+                <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}">
+              </td>
+
+              <td class="text-end">
+                <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
+                  <i class="fa-regular fa-eye"></i> Ver
+                </button>
+                {% include "detalle_declaracion_jurada.html" %}
               <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
                 <i class="fa-solid fa-download"></i>
               </a>
@@ -224,8 +217,29 @@
 
     // Trigger inicial al cargar la página para asegurar el estado correcto del botón
     $("#accion").trigger("change");
+
+    // Manejar el cambio en el checkbox "Seleccionar Todos"
+    $("#seleccionarTodosCheckbox").change(function() {
+      // Obtener el estado actual del checkbox
+      var seleccionarTodos = $(this).prop('checked');
+
+      // Marcar o desmarcar todos los checkboxes individuales según el estado actual
+      $("input[name='declaracion_leidos']").prop("checked", seleccionarTodos);
+
+      // Simular el cambio en el select para actualizar el modal
+      $("#accion").trigger("change");
+    });
+
+    // Manejar el cambio en los checkboxes individuales
+    $("input[name='declaracion_leidos']").change(function() {
+      // Verificar si todos los checkboxes están marcados y actualizar el estado del checkbox "Seleccionar Todos"
+      var todosMarcados = $("input[name='declaracion_leidos']:checked").length === $("input[name='declaracion_leidos']").length;
+      $("#seleccionarTodosCheckbox").prop("checked", todosMarcados);
+
+      // Simular el cambio en el select para actualizar el modal
+      $("#accion").trigger("change");
+    });
   });
 </script>
-
 
 {% endblock %}
