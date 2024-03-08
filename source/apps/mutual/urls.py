@@ -7,14 +7,10 @@ urlpatterns = [
     path('crearMutual/',MutualCreateView.as_view(), name="mutual_crear"),
     path('mutuales/listado', MutualesListView.as_view(), name="listado_mutual"),
 
-
     path('declaracionjurada/crear/<str:accion>/', DeclaracionJuradaCreateView.as_view(), name="declaracion_jurada"),
     path('declaracionjurada/historialDeclarado',DeclaracionJuradaDeclaradoListView.as_view(), name="declaracion_jurada_declarado_listado"),
     
-    
-    path('declaracionjurada/leer/',leerDeclaracionJurada , name="leer_declaracion_jurada"),
-
-
+    path('declaracionjurada/leer',leerDeclaracionJurada , name="leer_declaracion_jurada"),
 
     path('declaracionjurada/historico',HistoricoView.as_view(), name="historico"),
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),
@@ -23,9 +19,7 @@ urlpatterns = [
     # path('crearDj/',DeclaracionJuradaCreateView.as_view(), name="dj_crear"),
 
     path('periodos/periodo/crear', PeriodoCreateView.as_view(), name="periodo_crear"),
-
     path('periodos/periodo/vigente', periodoVigenteDetalle , name="periodo_vigente_detalle"),
-
 
     path('exito/', mutual_exito, name='mutual_exito'),
     path('prueba/', tu_vista, name='t_vista'),

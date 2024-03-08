@@ -26,7 +26,7 @@
     <div class="row g-7">
       <div class="col-md-3">
           <label class="form-label negrita">Mutual:</label>
-          <select name="enc_cliente" id="enc_cliente">
+          <select name="enc_mutual" id="enc_mutual">
             <option value="0"> Todas las mutuales </option>
             {% for mutual in mutuales %}
               <option value="{{mutual.id}}">{{mutual.nombre}} </option>
@@ -60,8 +60,34 @@
               <option value="2">Marcar como no leído</option>
           </select>
       </div>
-      
-      <button type="submit" id="realizarAccionBtn" class="btn btn-primary btn-sm" disabled>Realizar acción</button>
+
+      <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Realizar acción
+      </button>
+
+      <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h1 class="modal-title fs-5" id="exampleModalLabel">Confirmación</h1>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <p>¿Estás seguro que quieres "<span id="nombreAccionSeleccionada"></span>" las declaraciones de las siguientes mutuales?</p>
+            
+              <ul id="modalDeclaraciones">
+
+                </ul
+              >
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary btn-sm btn-detalle" data-bs-dismiss="modal">Close</button>
+              <button type="submit" class="btn btn-success btn-sm btn-detalle">Confirmar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
     <br>
     <div class=" table-responsive">
@@ -71,7 +97,9 @@
           <th>#</th>
             <th>Mutual</th>
             <th class="text-center">Leido</th>
-            <th class="text-center">Fecha de lectura</th>
+            <th>Fecha de lectura</th>
+            <th></th>
+           <th>Rectificativa</th>
            <th></th>
           </tr>
         </thead>
@@ -91,12 +119,18 @@
             <td>
               {% if declaracion.es_leida %}
                 {declaracion.fecha_lectura}
+              {% else %}
+                No ha sido leido aún
               {% endif %}
+            </td>
+            <td></td>
+            <td>
+              {{declaracion.rectificativa}}
             </td>
 
             <td class="text-center d-flex justify-content-between">
               <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
-                <i class="fa-regular fa-eye"></i> ver
+                <i class="fa-regular fa-eye"></i> Ver
             </button>
               {% include "detalle_declaracion_jurada.html" %}
               <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}">
@@ -138,34 +172,60 @@
             </li>
         {% endif %}
     </ul>
-</nav>
+  </nav>
 
 </div>
+
 <script type="text/javascript">
   $('.django-select2').on("change", () => console.log("hola"));
 </script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
 <script>
   $(function () {
-    $("#enc_cliente").select2();
+    $("#enc_mutual").select2();
   });
-
+  
   $(document).ready(function() {
     // Manejar el cambio en el select
     $("#accion").change(function() {
       // Obtener el valor seleccionado del select
-      var accionSeleccionada = $("#accion").val();
+      var accionSeleccionada = $("#accion option:selected").text();
+
+      // Actualizar el texto en el span del modal
+      $("#nombreAccionSeleccionada").text(accionSeleccionada);
+
+      // Obtener las declaraciones marcadas
+      var declaracionesMarcadas = [];
+      $("input[name='declaracion_leidos']:checked").each(function() {
+        declaracionesMarcadas.push($(this).val());
+      });
+
+      // Mostrar las declaraciones en la lista del modal
+      var listaDeclaraciones = $("#modalDeclaraciones");
+      listaDeclaraciones.empty();
+      $.each(declaracionesMarcadas, function(index, value) {
+        listaDeclaraciones.append("<li>Declaracion " + value + "</li>");
+      });
 
       // Habilitar o deshabilitar el botón según la selección
-      if (accionSeleccionada === '------------------') {
+      if (accionSeleccionada === '------------------' || declaracionesMarcadas.length === 0) {
         $("#realizarAccionBtn").prop("disabled", true);
       } else {
         $("#realizarAccionBtn").prop("disabled", false);
       }
     });
+
+    // Manejar el cambio en los checkboxes
+    $("input[name='declaracion_leidos']").change(function() {
+      // Simular el cambio en el select para actualizar el modal
+      $("#accion").trigger("change");
+    });
+
+    // Trigger inicial al cargar la página para asegurar el estado correcto del botón
+    $("#accion").trigger("change");
   });
 </script>
+
 
 {% endblock %}

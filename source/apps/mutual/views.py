@@ -183,7 +183,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
     model = DetalleDeclaracionJurada
     form_class = FormularioDJ
     template_name = "dj_alta.html"
-    # success_url = reverse_lazy('mutual:declaracion_jurada')
+    success_url = reverse_lazy('mutual:declaracion_jurada', args=['accion=declarar'])
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         if 'confirmacion' in request.POST:
@@ -898,30 +898,23 @@ from django.http import JsonResponse
 
 def leerDeclaracionJurada(request):
     if request.method == 'POST':
-
-        accion = request.POST.get('accion', None)
-
-        if accion == '1':
-            # Marcar como leído
-            declaracion_leida_ids = request.POST.getlist('declaracion_leidos')
-            declaraciones = DeclaracionJurada.objects.filter(id__in=declaracion_leida_ids)
-
-            for declaracion in declaraciones:
-                declaracion.es_leida = True
-                declaracion.fecha_lectura = datetime.now()
-                declaracion.save()
-            
-            messages.success(request, f'Declaraciones Juradas marcadas como leidas con exito.')
-            return redirect('mutual:declaracion_jurada_declarado_listado')
+        declaracion_id_check = request.POST.getlist('declaracion_leidos')
+        declaraciones = DeclaracionJurada.objects.filter(id__in=declaracion_id_check)
         
-        elif accion == '2':
-            print("SOY ACCION 2")
-        else:
-            print("NO SOY NADA")
+        # Establecer valores comunes independientemente de la acción
+        es_leida = True if request.POST.get('accion') == '1' else False
+        fecha_lectura = datetime.now() if es_leida else None
 
-        return JsonResponse({'status': 'success'})
-    else:
-        return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
+        # Aplicar cambios a todas las declaraciones
+        for declaracion in declaraciones:
+            declaracion.es_leida = es_leida
+            declaracion.fecha_lectura = fecha_lectura
+            declaracion.save()
+
+        messages.success(request, f'Declaraciones Juradas {"leídas" if es_leida else "marcadas como no leídas"} con éxito.')
+        return redirect('mutual:periodo_vigente_detalle')
+
+    return JsonResponse({'status': 'error', 'message': 'Método no permitido'}, status=405)
 
 
     # declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
@@ -1053,7 +1046,7 @@ def periodoVigenteDetalle(request):
 
     context = {
         'periodo': periodo,
-        'declaraciones': page_obj,
+        'page_obj': page_obj,
         'mutuales': mutuales,
         'form': form,
     }
