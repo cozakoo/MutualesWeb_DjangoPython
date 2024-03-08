@@ -18,8 +18,11 @@ Including another URLconf
 from django.views.generic import RedirectView
 from django.contrib import admin
 from django.urls import path, include
+from django.conf.urls import handler404
 from mutualWeb.views import *
 from .views import *
+
+
 
 urlpatterns = [
     #PRIINCIPALES
@@ -27,10 +30,12 @@ urlpatterns = [
     path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
     path('admin/', admin.site.urls),
     path('dashboard/', dashboard, name='dashboard'),
-
+    
     #APLICACIONES
     path('dashboard/clientes/', include('apps.clientes.urls')),
     path('dashboard/mutual/', include('apps.mutual.urls')),
     path('dashboard/personas/', include('apps.personas.urls')),
-    path('', include('apps.users.urls'))
+    path('', include('apps.users.urls')),
 ]
+
+handler404 = "mutualWeb.views.pagina_no_encontrada"

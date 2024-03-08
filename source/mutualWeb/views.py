@@ -1,4 +1,5 @@
-from django.shortcuts import render
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
 from django.contrib.auth.views import LoginView
 from .forms import CustomLoginForm
 from django.contrib.auth.decorators import login_required
@@ -27,6 +28,9 @@ def dashboard(request):
         return render(request, 'dashboardAdministrador.html',contexto)
              
 
+
+def pagina_no_encontrada(request, exception):
+   return redirect('dashboard')
 
 
 
