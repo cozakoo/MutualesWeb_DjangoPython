@@ -802,13 +802,22 @@ def generate_pdf(declaracion):
     return buffer
 
 def descargarDeclaracion(request, pk):
+    print("entre descarga declara")
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
     buffer = generate_pdf(declaracion)
 
     return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
 
 
-
+def descargarArchivo(request, pk):
+    print("IDDDDDDD")
+    print(pk)
+    detalle = get_object_or_404(DetalleDeclaracionJurada, pk=pk)
+    
+    with detalle.archivo.open('rb') as archivo:
+        response = HttpResponse(archivo.read(), content_type='application/octet-stream')
+        response['Content-Disposition'] = f'attachment; filename="{detalle.archivo.name}"'
+    return response
 
 class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = Mutual

@@ -15,6 +15,7 @@ urlpatterns = [
 
     path('declaracionjurada/historico',HistoricoView.as_view(), name="historico"),
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),
+    path('DeclaracionJurada/archivo/<int:pk>/', descargarArchivo, name="descargarArchivo"),
 
     # path('declararReclamo/',DeclaracionJuradaReclamo.as_view(), name="declarar_reclamo"),
     # path('crearDj/',DeclaracionJuradaCreateView.as_view(), name="dj_crear"),

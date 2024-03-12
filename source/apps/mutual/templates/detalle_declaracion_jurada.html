@@ -19,6 +19,9 @@
                                 Registros: {{ detalle.total_registros }}
                             </li>
                         </ul>
+
+                        <a class="btn" href="{% url 'mutual:descargarArchivo' detalle.pk %}"><i class="fa-solid fa-download"></i> Descargar</a>
+                       
                     </div>
                 {% else %}
                     <div class="detalle-reclamo">
@@ -31,6 +34,7 @@
                                 Registros: {{ detalle.total_registros }}
                             </li>
                         </ul>
+                        <a class="btn" href="{% url 'mutual:descargarArchivo' detalle.pk %}"><i class="fa-solid fa-download"></i> Descargar</a>
                     </div>
                 {% endif %}
             {% endfor %}

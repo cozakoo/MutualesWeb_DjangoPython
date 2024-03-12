@@ -7,7 +7,11 @@
 
 {% block contenedor %}
 <div class="container cuadrado-background">
-  <h1 class="text-center">{{ titulo }}</h1>
+
+ <div>
+   <h3 class="text-center">{{ titulo }}</h3>
+   <br><br>
+</div>
   
   <div class="row">
     <div class="col">
@@ -20,10 +24,7 @@
       {{ periodo.mes_anio|date:'Y/m' }}
     </div>
     
-    <div class="col">
-      {% comment %} <a href="{% url 'mutual:verificar_declaraciones_todas_leidas periodo_pk=periodo.pk' %}" class="btn btn-outline-secondary">Finalizar Periodo</a> {% endcomment %}
-    </div>
-    
+   
   </div>
   <br />
     <hr />
@@ -50,7 +51,13 @@
             Filtrar
           </button>
         </div>
+        <div align="right" class="col">
+      <a href="#" class="btn btn-danger">Finalizar Periodo</a>
       </div>
+
+
+      </div>
+
       
     </form>
 
@@ -106,6 +113,9 @@
               <th class="text-center">Leido</th>
               <th>Fecha de lectura</th>
               <th class="text-center">Rectificativa</th>
+              <th class="text-center">Seleccionar</th>
+              <th class="text-center">Archivos cargados</th>
+              <th class="text-center">Declaracion jurada</th>
               <th></th>
             </tr>
           </thead>
@@ -114,7 +124,9 @@
             {% for declaracion in page_obj %}
               <tr>
                 <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                
                 <td>{{ declaracion.mutual }}</td>
+                
                 <td class="text-center">
                   {% if declaracion.es_leida %}
                     <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
@@ -133,13 +145,19 @@
 
                 <td class="text-center">{{ declaracion.rectificativa }}</td>
 
-                <td class="text-end">
-                  <input type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />
-                  <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
-                  {% include 'detalle_declaracion_jurada.html' %}
-                  <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
+                <td class="text-center">
+                  <input  type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />         
                 </td>
-              </tr>
+
+                <td class="text-center">
+                
+               <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
+               {% include 'detalle_declaracion_jurada.html' %}
+                </td>
+            
+              <td class="text-center">
+              <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
+              </td>
             {% endfor %}
           </tbody>
         </table>
