@@ -1,0 +1,19 @@
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Finalizar Periodo</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          ¿Deseas finalizar el periodo? Para finalizar el periodo tienen que estar <strong>todas las declaraciones juradas leidas.</strong>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+          
+          <a href="{% url 'mutual:finalizar_periodo' pk=periodo.pk %}" class="btn btn-outline-success"> Finalizar </a>
+          <a href="{% url 'mutual:finalizar_periodo_crear_nuevo' pk=periodo.pk %}" class="btn btn-outline-success"> Finalizar y crear uno nuevo </a>
+        </div>
+      </div>
+    </div>
+  </div>
