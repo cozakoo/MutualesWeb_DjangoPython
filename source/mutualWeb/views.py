@@ -1,13 +1,6 @@
-from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.contrib.auth.views import LoginView
-from .forms import CustomLoginForm
 from django.contrib.auth.decorators import login_required
 from apps.users.models import UserRol
-from django.contrib.auth.models import User
-
-
-
 @login_required(login_url='users:login')
 
 # @permission_required(".add_choice", raise_exception=True)
@@ -26,14 +19,7 @@ def dashboard(request):
  
     if userRol.rol.persona.es_admin:
         return render(request, 'dashboardAdministrador.html',contexto)
-             
 
 
 def pagina_no_encontrada(request, exception):
    return redirect('dashboard')
-
-
-
-
-# class CustomLoginView(LoginView):
-#     form_class = CustomLoginForm

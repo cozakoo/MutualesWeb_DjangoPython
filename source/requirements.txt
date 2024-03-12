@@ -9,8 +9,10 @@ numpy==1.26.4
 pillow==10.2.0
 psycopg2==2.9.3
 pycparser==2.21
+python-dateutil==2.9.0.post0
 python-decouple==3.8
 reportlab==4.1.0
+six==1.16.0
 sqlparse==0.4.4
 timezonefinder==6.2.0
 typing_extensions==4.10.0

@@ -1,116 +1,113 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}
-  Iniciar Sesión | Mutuales
+Iniciar Sesión | Mutuales
 {% endblock %} 
 
 {% block extra_css %}
-  {% load static %}
-  <style>
+<link href="{% static 'Libs/css/login_acceso.css' %}" rel="stylesheet" />
+<style>
+#background-container {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  background: url("{% static 'images/montaña.jpg' %}") no-repeat center center fixed;
+  background-size: cover;
+  transition: filter 0.9s ease-in-out, background 0.9s ease-in-out;
+}
 
-    #background-container {
-      position: relative;
-      height: 100vh;
-      overflow: hidden;
-      background: url("{% static 'images/montaña.jpg' %}") no-repeat center center fixed;
-      background-size: cover;
-      transition: filter 0.9s ease-in-out, background 0.9s ease-in-out;
-    }
+#background-container.blur-background::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url("{% static 'images/montaña.jpg' %}") no-repeat center center fixed;
+  background-size: cover;
+  filter: blur(10px); /* Ajusta el valor según sea necesario */
+}
 
-    #background-container.blur-background::before {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url("{% static 'images/montaña.jpg' %}") no-repeat center center fixed;
-      background-size: cover;
-      filter: blur(10px); /* Ajusta el valor según sea necesario */
-    }
+#welcome-message,
+#login-form {
+  opacity: 1;
+  border-radius: 10px;
+  padding: 20px;
+  transition: opacity 0.9s ease-in-out;
+}
 
-    #welcome-message,
-    #login-form {
-      opacity: 1;
-      border-radius: 10px;
-      padding: 20px;
-      transition: opacity 0.9s ease-in-out;
-    }
+#login-form {
+  opacity: 0;
+  pointer-events: none; /* Desactiva eventos del mouse cuando está oculto */
+  background-color: rgba(255, 255, 255, 0.4);
+  padding: 20px;
+  border-radius: 10px;
+  width: 300px;
+  text-align: center;
+}
 
-    #login-form {
-      opacity: 0;
-      pointer-events: none; /* Desactiva eventos del mouse cuando está oculto */
-      background-color: rgba(255, 255, 255, 0.4);
-      padding: 20px;
-      border-radius: 10px;
-      width: 300px;
-      text-align: center;
-    }
+#welcome-message, 
+#login-form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
 
-    #welcome-message, 
-    #login-form {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-    }
+button {
+  margin-top: 10px;
+}
 
-    button {
-      margin-top: 10px;
-    }
+label{
+  margin-top: 5%;
+}
 
-    label{
-      margin-top: 5%;
-    }
-
-    #welcome-message{
-      background-color: rgba(236, 240, 241, 0.9);
-      width: 30%;
-      text-align: center;
-      padding-top: 35px;
-      padding-bottom: 35px;
-    }
+#welcome-message{
+  background-color: rgba(236, 240, 241, 0.9);
+  width: 30%;
+  text-align: center;
+  padding-top: 35px;
+  padding-bottom: 35px;
+}
 
 
-    h1{
-      margin-top: 0;
-      margin-bottom: 0;
-    }
+h1{
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
-    img{
-      margin-top: 8%;
-      margin-bottom: 8%;
-    }
-    p{
-      margin-bottom: 0px;
-    }
+img{
+  margin-top: 8%;
+  margin-bottom: 8%;
+}
+p{
+  margin-bottom: 0px;
+}
 
-    #iniciar-session{
-      margin-bottom: 10px;
-    }
+#iniciar-session{
+  margin-bottom: 10px;
+}
 
-  </style>
+
+</style>
 {% endblock %}
+
+
 {% block content %}
 <div id="background-container">
-  
+  {% include "message.html" %}
   <div id="welcome-message" style="text-align: center;">
-
     <h1 class="text-center">¡Bienvenido al Sistema de Gestión de Mutuales!</h1>
-  
-  
-      <img src="{% static 'images/escudo.ico' %}" alt="Descripción de la imagen" style="width: 30%;">
-  
+    <img src="{% static 'images/escudo.ico' %}" alt="Descripción de la imagen" style="width: 30%;">
         <p>Si eres un empleado público o estás vinculado a una mutual, inicia sesión para acceder a tus servicios.</p>
-  
-  
   <button class="btn btn-primary" onclick="showLoginForm()" style="margin-top: 20px; background-color: #00a0e3;">Iniciar Sesión</button>  
   </div>
-  
 
   <form id="login-form" method="post">
     {% csrf_token %}
-    <h4 id="iniciar-session"> Iniciar Sessión </h4>
+    <h4 id="iniciar-session"> Iniciar Sesión </h4>
+    <br>
     <input type="{{ form.username.widget.type }}" name="{{ form.username.name }}" placeholder="{{ form.username.label }}" {% if form.username.value %}value="{{ form.username.value }}"{% endif %} class="form-control text-center" required>
     <br>
     <div class="password-input-container">

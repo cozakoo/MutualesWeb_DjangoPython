@@ -4,6 +4,8 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView
 from django.views import View
 
+from mutualWeb.utils.mensajes import mensaje_error
+
 
 from ..administradores.models import Administrador
 from .forms import CustomLoginForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
@@ -24,6 +26,12 @@ from django.contrib.auth import logout
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib import messages
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+from django.views import View
+from django.contrib.auth.views import LoginView
+from .forms import CustomLoginForm  # Asegúrate de importar tu formulario correctamente
 
 
 def obtenerPermiso(name):
@@ -89,6 +97,10 @@ class CustomLoginView(LoginView, View):
         if request.user.is_authenticated:
            return redirect('dashboard')
         return super().get(request, *args, **kwargs)
+    
+    def form_invalid(self, form):
+        mensaje_error(self.request, '')
+        return super().form_invalid(form)
     
 class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name ='registrar_usuario_mutual.html'
