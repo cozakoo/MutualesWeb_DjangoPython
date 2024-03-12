@@ -1,5 +1,6 @@
 from io import BytesIO
 import io
+from multiprocessing import context
 from apps.personas.forms import FormularioPersona
 from reportlab.pdfgen import canvas
 from django.shortcuts import get_object_or_404
@@ -603,11 +604,19 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
-        context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')
-
+        print("estoy en el get ")
+        print(context)
+        
+        if not 'detalle_prestamo' in context:
+            print("no tengo valores iniciales ")
+            context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
+            context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')
+            
+            
+            
         context['titulo'] = 'Alta de Mutual'
+        
+        # print(context)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -624,29 +633,25 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
 
             print("---------------cierro post------------------------------")
             
-            print(detalle_prestamo, detalle_reclamo)
+            # print(detalle_prestamo, detalle_reclamo)
             print("impresion validaciones",form.is_valid() , detalle_prestamo.is_valid() , detalle_reclamo.is_valid())
             if form.is_valid() and detalle_prestamo.is_valid() and detalle_reclamo.is_valid():
                 return self.form_valid(form, detalle_reclamo, detalle_prestamo)
             else:
                 print("LLLLLLLLLLformularios invalidosLLLLLLLLL")
-                return self.form_invalid(form)
+                return self.form_invalid(form,detalle_prestamo, detalle_reclamo)
     
  
     # def form_invalid(self, form):
     #     """If the form is invalid, render the invalid form."""
     #     return self.render_to_response(self.get_context_data(form=form, ))
     
+    def form_invalid(self, form, detalle_p, detalle_r):
+        return self.render_to_response(self.get_context_data(form=form, detalle_prestamo = detalle_p, detalle_reclamo = detalle_r))
     
     def form_valid(self, form, d_reclamo, d_prestam):
             
-            
-            campo_existente = form.cleaned_data['cuit']
-            if Mutual.objects.filter(cuit = campo_existente).exists():
-                messages.error(self.request,"El cuit ya existe")
-                return self.render_to_response(self.get_context_data(form=form))
-        
-        
+           
             
             # Si no existe, guarda el objeto y realiza las acciones necesarias
             with transaction.atomic():    
@@ -820,6 +825,7 @@ def descargarArchivo(request, pk):
     return response
 
 class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    login_url = "/login/"
     model = Mutual
     template_name = "mutuales_listado.html"
     paginate_by = 10# Número de elementos por página

@@ -8,20 +8,36 @@ class FormDetalle(forms.Form):
     concep1 = forms.IntegerField()
     concep2 = forms.IntegerField(initial=0, required=False)
     
-    # concep1 = forms.IntegerField()
-    # concep2 = forms.IntegerField()
+    
+    
+    # def __init__(self, *args, **kwargs):
+    #     # Obtener los datos del contexto pasados como argumentos
+    #     contexto = kwargs.pop('context', None)
+    #     if contexto == None :
+    #         print("no econtre context")
+    #     else: 
+    #         print("si encontre")
+    #         super(FormDetalle, self).__init__(*args, **kwargs)
+    #         if contexto:
+    #         # Usar los datos del contexto para inicializar el formulario
+    #             self.fields['origen'] = forms.CharField(initial=contexto['origen'])
+    #             self.fields['destino'] = forms.CharField(initial=contexto['destino'])
+    #             self.fields['concep1'] = forms.IntegerField(initial=contexto['concep1'])
+    #             self.fields['concep2'] = forms.IntegerField(initial=contexto['concep2'])      
 
-    # def clean_concep1(self):
-    #     concep1 = self.cleaned_data.get('concep1')
-    #     if concep1 is not None and concep1 <= 0:
-    #         raise forms.ValidationError("El valor debe ser mayor que 0.")
-    #     return concep1
 
-    # def clean_concep2(self):
-    #     concep2 = self.cleaned_data.get('concep2')
-    #     if concep2 is not None and concep2 <= 0:
-    #         raise forms.ValidationError("El valor debe ser mayor que 0.")
-    #     return concep2
+    def clean_concep1(self):
+        concep1 = self.cleaned_data.get('concep1')
+        if concep1 is not None and concep1 <= 0:
+            raise forms.ValidationError("El valor debe ser mayor que 0.")
+        return concep1
+
+    def clean_concep2(self):
+        # if self.clean_concep1(self) != :
+        concep2 = self.cleaned_data.get('concep2')
+        if concep2 is not None and concep2 < 0:
+            raise forms.ValidationError("El valor debe ser mayor o igual que 0.")
+        return concep2
 
 class FormularioMutual(forms.ModelForm):
     class Meta:
@@ -33,11 +49,35 @@ class FormularioMutual(forms.ModelForm):
             'cuit': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         
+        
+    def clean_nombre(self):
+        print(self.cleaned_data)
+        nombre = self.cleaned_data['nombre']
+        if Mutual.objects.filter(nombre__iexact = nombre).exists():
+          raise forms.ValidationError('Existe una mutual con el mismo nombre')
+        else:
+          return nombre
+      
+      
+        # # raise forms.ValidationError('Existe una mutual con el mismo nombre')
+        # try:
+        #     m = Mutual.objects.filter(nombre = nombre).exists()
+        #     raise forms.ValidationError('Existe una mutual con el mismo nombre')
+        # except:
+            # return nombre
+    
+    
     def clean_cuit(self):
         cuit = self.cleaned_data['cuit']
         if len(cuit) != 11 or not cuit.isdigit():
             raise forms.ValidationError('El CUIT debe tener 11 dígitos numéricos.')
-        return cuit
+    
+        if Mutual.objects.filter(cuit__iexact = cuit).exists():
+            raise forms.ValidationError('El CUIT ya existe ---------------')
+        else:
+            return cuit
+        
+        
        
 from django import forms
 from datetime import datetime
