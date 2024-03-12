@@ -124,8 +124,21 @@ def obtenerPeriodoVigente(self):
     # # DeclaracionJurada.objects.get()
     # return  obtener_mes_y_anio_actual()
 
+from dateutil.relativedelta import relativedelta
+import datetime
+from datetime import datetime
 
+def fecha_es_mayor_por_meses(fecha2):
+    MESES = 2
+    fecha1 = datetime.now()
+
+    # Convierte fecha2 a un objeto datetime para la comparación
+    fecha2_datetime = datetime.combine(fecha2, datetime.min.time())
     
+    nueva_fecha = fecha2_datetime + relativedelta(months=MESES)
+    
+    # Compara la nueva fecha con la fecha1
+    return nueva_fecha < fecha1
 #-----------------CONFIRMACION DJ---------------------------
 class ConfirmacionView(TemplateView):
     template_name = 'confirmacion.html'
@@ -968,7 +981,7 @@ def es_siguiente_mes(periodo_anterior, periodo_creado):
 
 class PeriodoCreateView(CreateView):
     model = Periodo
-    form_class = FormularioPersona
+    form_class = FormularioPeriodo
     template_name = 'periodo_alta.html'
     success_url = reverse_lazy('mutual:mutual_crear')
     
@@ -992,32 +1005,36 @@ class PeriodoCreateView(CreateView):
         return context
 
     def form_valid(self, form):
+
         periodos = Periodo.objects.all()
         fecha_inicio = form.cleaned_data["fecha_inicio"]
 
         if periodos.exists():
+
             #Obtengo el ultimo periodo creado por fecha de inicio
             ultimo_periodo = periodos.latest('fecha_inicio')
             #obtengo el mes de inicio
-            print(ultimo_periodo.mes_anio)
             #compario si el mes_anio del ultimo periodo es igual del mes anio que mi fecha de creacion
-            if (ultimo_periodo.mes_anio.month == fecha_inicio.month ):
-                if (ultimo_periodo.mes_anio.month == 12 ):
-                    mes_anio = datetime(ultimo_periodo.mes_anio.year+1, 1, 1 ).date()
-                else:
-                    mes_anio = datetime(ultimo_periodo.mes_anio.year, ultimo_periodo.mes_anio.month+1 , 1 ).date()
-            else:
-                # Si son distintos, entonces comparo si el siguiente mes corresponde al mes de mi fecha de inicio
-                if (ultimo_periodo.mes_anio.month == 12 ):
-                    
-                    if (fecha_inicio.month == 1 ):
-                        mes_anio = datetime(ultimo_periodo.mes_anio.year+1, 1 , 1 ).date()
-                else:
-                    if (ultimo_periodo.mes_anio.month + 1 == fecha_inicio.month ):
-                        mes_anio = datetime(ultimo_periodo.mes_anio.year, fecha_inicio.month , 1 ).date()
+            if not fecha_es_mayor_por_meses(ultimo_periodo.mes_anio):
+                if (ultimo_periodo.mes_anio.month == fecha_inicio.month ):
+                    if (ultimo_periodo.mes_anio.month == 12 ):
+                        mes_anio = datetime(ultimo_periodo.mes_anio.year+1, 1, 1 ).date()
                     else:
-                        messages.error(self.request, 'La fecha de inicio no sigue una correlacion con el periodo anterior.')
-                        return super().form_invalid(form)
+                        mes_anio = datetime(ultimo_periodo.mes_anio.year, ultimo_periodo.mes_anio.month+1 , 1 ).date()
+                else:
+                    # Si son distintos, entonces comparo si el siguiente mes corresponde al mes de mi fecha de inicio
+                    if (ultimo_periodo.mes_anio.month == 12 ):
+                        
+                        if (fecha_inicio.month == 1 ):
+                            mes_anio = datetime(ultimo_periodo.mes_anio.year+1, 1 , 1 ).date()
+                    else:
+                        if (ultimo_periodo.mes_anio.month + 1 == fecha_inicio.month ):
+                            mes_anio = datetime(ultimo_periodo.mes_anio.year, fecha_inicio.month , 1 ).date()
+                        else:
+                            messages.error(self.request, 'La fecha de inicio no sigue una correlacion con el periodo anterior.')
+                            return super().form_invalid(form)
+            else:
+                mes_anio = datetime(fecha_inicio.year, fecha_inicio.month , 1 ).date()
  
         else:
             mes_anio = datetime(fecha_inicio.year, fecha_inicio.month , 1 ).date()
@@ -1035,7 +1052,6 @@ class PeriodoCreateView(CreateView):
         messages.error(self.request, 'Ha ocurrido un error al momento de completar el formulario.')
         return super().form_invalid(form)
 
-
 class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
     es_leida = forms.BooleanField(
         required=False,
@@ -1051,6 +1067,11 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 def periodoVigenteDetalle(request):
     # Obtenemos el ultimo periodo que no tiene fecha de fin
     periodo = Periodo.objects.filter(fecha_fin__isnull=True).first()
+
+    # Si no hay un periodo, redirige a una página específica
+    if not periodo:
+        messages.warning(request, "No tiene un periodo vigente.")
+        return redirect('mutual:periodo_crear')  # Reemplaza 'nombre_de_la_vista_o_ruta' con la vista o ruta a la que deseas redirigir
 
     titulo = 'Periodo Vigente'
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
@@ -1085,3 +1106,37 @@ def periodoVigenteDetalle(request):
         'form': form,
     }
     return render(request, 'periodo_vigente_detalle.html', context)
+
+def validar_declaraciones_leidas(request, declaraciones, redirect_url):
+    for declaracion in declaraciones:
+        if not declaracion.es_leida:
+            messages.error(request, "El periodo vigente tiene declaraciones que no han sido leídas aún.")
+            return redirect(redirect_url)
+
+def finalizar_periodo(request, pk, crear_nuevo=False):
+    periodo = get_object_or_404(Periodo, pk=pk)
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+
+    validar_declaraciones_leidas(request, declaraciones, 'mutual:periodo_vigente_detalle')
+
+    periodo.fecha_fin = datetime.today()
+    periodo.save()
+
+    if crear_nuevo:
+        fecha_inicio = periodo.fecha_fin
+        mes_anio = fecha_inicio + relativedelta(months=1)
+
+        periodo_nuevo = Periodo(fecha_inicio=fecha_inicio, mes_anio=mes_anio)
+        periodo_nuevo.save()
+
+        messages.info(request, "Periodo finalizado y se ha creado un periodo nuevo.")
+        return redirect('mutual:periodo_vigente_detalle')
+
+    messages.info(request, "Periodo finalizado con éxito.")
+    return redirect('mutual:historico')
+
+def finalizarPeriodo(request, pk):
+    return finalizar_periodo(request, pk)
+
+def finalizarPeriodoCrearNuevo(request, pk):
+    return finalizar_periodo(request, pk, crear_nuevo=True)

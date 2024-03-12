@@ -22,6 +22,8 @@ urlpatterns = [
 
     path('periodos/periodo/crear', PeriodoCreateView.as_view(), name="periodo_crear"),
     path('periodos/periodo/vigente', periodoVigenteDetalle , name="periodo_vigente_detalle"),
+    path('periodos/periodo/vigente/<int:pk>/finalizar', finalizarPeriodo , name="finalizar_periodo"),
+    path('periodos/periodo/vigente/<int:pk>/finalizar_crear_nuevo', finalizarPeriodoCrearNuevo , name="finalizar_periodo_crear_nuevo"),
 
     path('exito/', mutual_exito, name='mutual_exito'),
     path('prueba/', tu_vista, name='t_vista'),

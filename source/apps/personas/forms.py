@@ -10,4 +10,3 @@ class FormularioPersona(forms.ModelForm):
         exclude = ['es_cliente', 'es_admin', 'es_empleado_publico']
         
         
-        

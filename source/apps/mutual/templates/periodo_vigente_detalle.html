@@ -7,13 +7,10 @@
 
 {% block contenedor %}
 <div class="container cuadrado-background">
+  <h3 class="text-center">{{ titulo }}</h3>
+  <br>
 
- <div>
-   <h3 class="text-center">{{ titulo }}</h3>
-   <br><br>
-</div>
-  
-  <div class="row">
+  <div class="row text-center">
     <div class="col">
       <strong>Fecha de inicio:</strong>
       {{ periodo.fecha_inicio }}
@@ -23,47 +20,48 @@
       <strong>Periodo:</strong>
       {{ periodo.mes_anio|date:'Y/m' }}
     </div>
-    
-   
   </div>
-  <br />
-    <hr />
+  
+  <hr />
 
-    <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
-      {% csrf_token %}
+  <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
+    {% csrf_token %}
 
-      <div class="row g-7">
-        <div class="col-md-3">
-          <label class="form-label negrita">Mutual:</label>
-          <select name="enc_mutual" id="enc_mutual">
-            <option value="0">Todas las mutuales</option>
-            {% for mutual in mutuales %}
-              <option value="{{ mutual.id }}">{{ mutual.nombre }}</option>
-            {% endfor %}
-          </select>
-        </div>
-
-        <div class="col-md-1">{{ form.as_p }}</div>
-
-        <div class="col mb-2">
-          <button type="submit" class="btn btn-primary btn-sm">
-            <i class="fa-solid fa-filter"></i>
-            Filtrar
-          </button>
-        </div>
-        <div align="right" class="col">
-      <a href="#" class="btn btn-danger">Finalizar Periodo</a>
+    <div class="row text-center">
+      <div class="col">
+        <label class="form-label negrita">Mutual:</label>
+        <select name="enc_mutual" id="enc_mutual">
+          <option value="0">Todas las mutuales</option>
+          {% for mutual in mutuales %}
+            <option value="{{ mutual.id }}">{{ mutual.nombre }}</option>
+          {% endfor %}
+        </select>
       </div>
 
-
+      <div class="col">
+        {{ form.as_p }}
       </div>
 
-      
-    </form>
+      <div class="col">
+        <button type="submit" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-filter"></i>
+          Filtrar
+        </button>
+      </div>
 
-    <hr />
+      <div align="right" class="col">
 
-    <form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
+        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+          Finalizar periodo 
+        </button>
+      </div>
+      {% include 'modal_confirmar_fin_periodo.html'%}
+    </div>
+  </form>
+
+  <hr />
+
+  <form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
       {% csrf_token %}
       <div class="d-flex align-items-center justify-content-center" >
         <label for="accion" class="form-label negrita me-2">Acción:</label>
@@ -103,7 +101,6 @@
       </div>
 
       <br />
-
       <div class="table-responsive">
         <table class="table table-sm table-striped table-hover">
           <thead>

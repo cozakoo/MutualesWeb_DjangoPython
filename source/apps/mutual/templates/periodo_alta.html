@@ -20,8 +20,10 @@
         <div class="form-group">
             <label for="id_fecha_inicio" class="negrita">Inicio del periodo:</label>
             <input type="date" id="{{ form.fecha_inicio.id_for_label }}" name="{{ form.fecha_inicio.name }}" required class="form-control" value="{{ form.fecha_inicio.value|default:'' }}" min="{{ current_date }}" />
+            
             <small class="error-text" style="color: red;">{{ form.fecha_inicio.errors }}</small>
             <small class="form-text text-muted">{{ form.fecha_inicio.help_text }}</small>
+
         </div>
         <br />
         <div class="text-center"> <!-- Centra el botón horizontalmente -->
