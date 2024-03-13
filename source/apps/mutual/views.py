@@ -713,7 +713,7 @@ class HistoricoView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Historico'
+        context['titulo'] = 'Histórico'
         return context
     
     def get_queryset(self):
@@ -828,8 +828,6 @@ def descargarDeclaracion(request, pk):
 
 
 def descargarArchivo(request, pk):
-    print("IDDDDDDD")
-    print(pk)
     detalle = get_object_or_404(DetalleDeclaracionJurada, pk=pk)
     
     with detalle.archivo.open('rb') as archivo:
@@ -852,8 +850,6 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_queryset(self):
         # Filtrar los objetos según tu lógica
         queryset = Mutual.objects.all()
-        print("LISTADO DE MUTUALES")
-        print(queryset)
         # Devolver el queryset filtrado
         return queryset
 
@@ -866,7 +862,7 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Historico'
+        context['titulo'] = 'Histórico'
         context['mutuales'] = Mutual.objects.all()
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
         return context

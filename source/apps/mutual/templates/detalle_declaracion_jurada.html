@@ -6,37 +6,28 @@
           <h1 class="modal-title fs-5">{{declaracion.mutual}}</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
+
         <div class="modal-body" style="text-align: left;">
             {% for detalle in declaracion.detalles.all %}
-                {% if detalle.tipo == 'P' %}
-                    <div class="detalle-prestamo">
-                        <h5 class="detalle-tipo">Prestamo</h5>
-                        <ul class="detalle-lista">
-                            <li>
-                                Importe: ${{ detalle.importe }}
-                            </li>
-                            <li>
-                                Registros: {{ detalle.total_registros }}
-                            </li>
-                        </ul>
 
-                        <a class="btn" href="{% url 'mutual:descargarArchivo' detalle.pk %}"><i class="fa-solid fa-download"></i> Descargar</a>
-                       
-                    </div>
-                {% else %}
-                    <div class="detalle-reclamo">
-                        <h5 class="detalle-tipo">Reclamo</h5>
-                        <ul class="detalle-lista">
-                            <li>
-                                Importe: ${{ detalle.importe }}
-                            </li>
-                            <li>
-                                Registros: {{ detalle.total_registros }}
-                            </li>
-                        </ul>
-                        <a class="btn" href="{% url 'mutual:descargarArchivo' detalle.pk %}"><i class="fa-solid fa-download"></i> Descargar</a>
-                    </div>
-                {% endif %}
+                <h5 class="detalle-tipo">
+                    {% if detalle.tipo == 'P' %}Prestamo
+                    {% else %}Reclamo
+                    {% endif %}
+                </h5>
+
+                <div class="detalle-prestamo">
+                    <ul class="detalle-lista">
+                        <li>
+                            Importe: ${{ detalle.importe }}
+                        </li>
+                        <li>
+                            Registros: {{ detalle.total_registros }}
+                        </li>
+                    </ul>
+                    <a class="btn" href="{% url 'mutual:descargarArchivo' detalle.pk %}"><i class="fa-solid fa-download"></i> Descargar</a>
+                </div>
+                <hr>
             {% endfor %}
         </div>
         <div class="modal-footer">
