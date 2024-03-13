@@ -1,29 +1,25 @@
 {% extends 'dashboardEmpleadoPublico.html' %}
 {% load static %}
 
-
 {% block extra_css_nivel %}
   <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" />
 {% endblock %}
 
-
 {% block contenedor %}
+<div class="container cuadrado-background ">
+  <h3 class="text-center">{{ titulo }}</h3>
 
-<div class="container">
-   
-  {% comment %} <h1 class="text-center">{{ titulo }}</h1> {% endcomment %}
   <div class="table-responsive">
-
-  <table class="table table-sm  table-striped table-hover table-borderless">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>Cuit</th>
-        <th>Nombre</th>
-        <th>Estado</th>
-        <th>Detalle</th>
-        <th>Opcion</th>
-      </tr>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Cuit</th>
+          <th>Nombre</th>
+          <th class="text-center">Estado</th>
+          <th></th>
+          <th></th>
+        </tr>
     </thead>
     <tbody>
       {% for mutual in page_obj %}
@@ -31,27 +27,18 @@
           <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
           <td>{{ mutual.cuit }}</td>
           <td>{{ mutual.nombre }}</td>
-          <td>
-            {% if mutual.activo %}
-            Activo
+          <td class="text-center">
+            {% if  mutual.activo %}
+            <i class="fa-regular fa-circle-check" style="color: #306b00;"></i>
             {% else %}
-            Inactivo
+            <i class="fa-regular fa-circle-xmark" style="color: #7a0000;"></i>
             {% endif %}
           <td>
-
-            {% for detalle in mutual.detalle.all %}
-              {{ detalle.tipo }} -  
-              Origen: {{ detalle.origen }}.txt - 
-              Destino: {{ detalle.destino }}.txt - 
-              Concepto: {{ detalle.concepto_1 }} y
-              {{ detalle.concepto_2 }}
-              <br />
-            {% endfor %}
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              <i class="fa-solid fa-circle-info"></i>              Detalle
+            </button>
           </td>
-          <td class="text-end">
-            <a class="btn btn-secondary" href="{% url 'mutual:listado_mutual' %}">
-               detalle</a>
-          </td>
+            {% include "modal_detalle_declaracion_jurada.html" %}
         </tr>
       {% endfor %}
     </tbody>
