@@ -1148,5 +1148,31 @@ def finalizar_periodo(request, pk, crear_nuevo=False):
 def finalizarPeriodo(request, pk):
     return finalizar_periodo(request, pk)
 
+def EditarMutal(request, pk):
+     if request.method == 'POST':
+        data = request.POST
+        print(data)
+        m = Mutual.objects.get(pk = pk)
+        m.cuit = data.get('cuit')
+        m.nombre = data.get('nombre')
+        activo = True
+        if data.get('activo') == "on":
+            activo = True
+        else: 
+            activo = False
+        
+        if m.activo != activo:
+           m.activo = activo
+        
+        m.save()
+        messages.info(request, "datos de mutual modificados con exito")
+        return redirect('mutual:listado_mutual')
+            
+         
+
+
+
+
 def finalizarPeriodoCrearNuevo(request, pk):
     return finalizar_periodo(request, pk, crear_nuevo=True)
+

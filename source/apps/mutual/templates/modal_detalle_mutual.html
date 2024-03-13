@@ -1,0 +1,59 @@
+<div class="modal fade" id="modalMutual" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="exampleModalLabel">Datos de Mutual</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+              <form method="post" action="{% url 'mutual:editar_mutual' pk=mutual.id %}">
+              {% csrf_token %}
+                <div class="form-group">
+                  <label>Nombre:</label>
+                  <input type="text" class="form-control" id="nombre" name="nombre" aria-describedby="emailHelp" value="{{mutual.nombre}}">
+                </div>  
+                <div class="form-group">
+                  <label >Cuit:</label>
+                  <input type="number" class="form-control" id="cuit" name="cuit" aria-describedby="emailHelp" value="{{mutual.cuit}}">
+                </div>
+                </br>
+                
+                  {% if form.errors.activo or form.errors.inactivo %}
+                  <!-- Mostrar un mensaje de error si ninguno de los checkboxes está marcado -->
+                      <p>Debes marcar al menos uno de los checkboxes.</p>
+                  {% endif %}
+
+                <div class="form-check">
+                <label class="form-check-label" for="exampleCheck1">Activo</label>
+                  <input type="checkbox" 
+                  class="form-check-input"
+                   id="activo" 
+                   name="activo" 
+                  
+                   {% if mutual.activo %} checked {% endif %}
+                   >
+                </div>
+
+                <div class="form-check">
+                <label class="form-check-label" for="exampleCheck1">Inactivo</label>
+                  <input type="checkbox" 
+                  name="inactivo"
+                  id="inactivo" 
+                  class="form-check-input" 
+                  id="activo"  name="activo"
+                  {% if not mutual.activo %} checked {% endif %}>
+                  
+                </div>
+
+                </br>
+              <div class="modal-footer">
+          <button type="submit" class="btn btn-primary mb-2">Actualizar informacion</button>
+        </div>
+          </form>
+          
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  

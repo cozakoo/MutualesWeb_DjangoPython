@@ -38,7 +38,23 @@
               <i class="fa-solid fa-circle-info"></i>              Detalle
             </button>
           </td>
+
+          <td>
+            <button type="button" class="btn btn-sm btn-outline-secundary" data-bs-toggle="modal" data-bs-target="#modalMutual">
+              <i class="fa-solid fa-circle-info"></i>              editar
+            </button>
+          </td>
+
+           <td>
+           <a href="{% url 'mutual:actualizar' pk=mutual.id %}" class="btn btn-sm btn-outline-secundary" > </a>
+            Abrir Modal
+            </button>
+            <a href="{% url 'mutual:actualizar' pk=mutual.id %}" class="btn btn-outline-success"> Finalizar </a>
+           </td>
+             
+             {% include "modal_ajax.html" %}
             {% include "modal_detalle_declaracion_jurada.html" %}
+             {% include "modal_detalle_mutual.html" %}
         </tr>
       {% endfor %}
     </tbody>
@@ -74,4 +90,10 @@
     </ul>
   </nav>
 </div>
+
+
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 {% endblock %}
