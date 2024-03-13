@@ -32,4 +32,5 @@ urlpatterns = [
     path('visualizar_errores/', VisualizarErroresView.as_view(), name='visualizarE'),
     path('msj_informativo/', MsjInformativo.as_view(), name='msj_info'),
     # path('dj_confirmacion/', , name='t_vista'),
+    path('actualizar/<int:pk>/', MutualUpdateView.as_view(), name='actualizar'),
 ]

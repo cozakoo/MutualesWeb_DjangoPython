@@ -12,7 +12,7 @@ import os
 from typing import Any
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from django.views.generic import CreateView , TemplateView , DetailView
+from django.views.generic import CreateView , TemplateView , DetailView , UpdateView
 from .models import DeclaracionJuradaDetalles, Mutual , DeclaracionJurada, Periodo
 from .forms import *
 from django.urls import reverse_lazy
@@ -602,6 +602,20 @@ class DetalleMutualView(LoginRequiredMixin,PermissionRequiredMixin, DetailView):
       userRol = UserRol.objects.get(user = self.request.user )
       id = userRol.rol.cliente.mutual.id
       return Mutual.objects.get(id = id)
+        
+        
+        
+        
+class MutualUpdateView(UpdateView):
+    model = Mutual
+    fields = ['nombre', 'cuit' ,'activo']
+    template_name = 'mutual_update_form.html'  
+    success_url="/dashboard/"   
+        
+        
+        
+        
+        
         
 class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Mutual

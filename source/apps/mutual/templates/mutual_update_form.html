@@ -1,0 +1,45 @@
+{% extends 'dashboardCliente.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+  <style>
+    .detalle {
+        list-style: none;
+        padding: 0;
+    }
+
+    .detalle li strong {
+        display: inline-block;
+        width: 140px; /* Ajusta el ancho según sea necesario */
+    }
+</style>
+{% endblock %}
+
+{% block contenedor %}
+  <div class="container cuadrado-background">
+
+   <form method="post">{% csrf_token %}
+
+   
+
+      <div class="form-group">
+        <label>Nombre:</label>
+        <input type="text" class="form-control" id="{{form.nombre.id}}" name="{{form.nombre.name}}" aria-describedby="emailHelp" value="{{form.nombre.value}}">
+      </div>  
+      <div class="form-group">
+        <label >Cuit:</label>
+        <input type="number" class="form-control" id="{{form.cuit.id}}" name="{{form.cuit.name}}" aria-describedby="emailHelp" value="{{form.cuit.value}}">
+      </div>
+      </br>
+      <div class="form-group"> 
+        <label >Activo: </label> 
+        {{form.activo}}
+      </div>
+      </br>
+    <button type="submit" class="btn btn-primary mb-2">Actualizar informacion</button>
+  </form>
+</div>
+
+{% endblock %}
+  
