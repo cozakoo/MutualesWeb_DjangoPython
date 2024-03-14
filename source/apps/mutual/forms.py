@@ -3,12 +3,10 @@ from apps.mutual.models import DetalleDeclaracionJurada, Mutual, Periodo
 
 
 class FormDetalle(forms.Form):
-    origen = forms.CharField(max_length=100, initial='')
-    destino = forms.CharField(max_length=100, initial='')
-    concep1 = forms.IntegerField()
-    concep2 = forms.IntegerField(initial=0, required=False)
-    
-    
+    origen = forms.CharField(max_length=100, initial='', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    destino = forms.CharField(max_length=100, initial='', widget=forms.TextInput(attrs={'class': 'form-control'}))
+    concep1 = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    concep2 = forms.IntegerField(initial=0, required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
     
     # def __init__(self, *args, **kwargs):
     #     # Obtener los datos del contexto pasados como argumentos

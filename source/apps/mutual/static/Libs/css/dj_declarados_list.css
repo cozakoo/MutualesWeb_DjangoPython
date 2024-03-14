@@ -10,3 +10,16 @@ h1 {
   /* Alinea el texto al centro */
   text-align: center;
 }
+
+.btn-circle {
+  border-radius: 50%;
+  width: 35px;
+  /* Ajusta el tamaño del círculo según tus preferencias */
+  height: 35px;
+  /* Ajusta el tamaño del círculo según tus preferencias */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0;
+}

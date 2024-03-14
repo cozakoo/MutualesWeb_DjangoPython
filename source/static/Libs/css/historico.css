@@ -4,6 +4,21 @@
 
 
 .small-btn {
-    font-size: 12px; /* Ajusta el tamaño de fuente según sea necesario */
-    padding: 4px 8px; /* Ajusta el espaciado interno según sea necesario */
-  }
+    font-size: 12px;
+    /* Ajusta el tamaño de fuente según sea necesario */
+    padding: 4px 8px;
+    /* Ajusta el espaciado interno según sea necesario */
+}
+
+.btn-circle {
+    border-radius: 50%;
+    width: 35px;
+    /* Ajusta el tamaño del círculo según tus preferencias */
+    height: 35px;
+    /* Ajusta el tamaño del círculo según tus preferencias */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 0;
+}

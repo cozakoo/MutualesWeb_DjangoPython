@@ -1,19 +1,15 @@
 <div class="modal fade" id="detallePrestamoModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="detallePrestamo">Detalle de Préstamo</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      {% comment %} <div class="modal-body"> {% endcomment %}
-       <div class="container cuadrado-background">
-       <div class="form-group">
-        {{detalle_prestamo.as_p}}
-       </div>
-       </div>
-      {% comment %} </div> {% endcomment %}
+      <div class="modal-body">
+            {{detalle_prestamo.as_p}}
+      </div>
       <div class="modal-footer d-flex justify-content-center">
-        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Guardar</button>
+        <button type="button" class="btn btn-outline-success" data-bs-dismiss="modal">Guardar</button>
       </div>
     </div>
   </div>

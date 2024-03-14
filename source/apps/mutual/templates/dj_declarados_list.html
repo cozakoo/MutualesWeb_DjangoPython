@@ -2,45 +2,50 @@
 {% load static %}
 
 {% block extra_css_nivel %}
-  <link href="{% static 'Libs/css/dj_declarados_list.css' %}" rel="stylesheet" />
+  <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block contenedor %}
 <div class=" container cuadrado-background">
-
   <h3 class="text-center">{{ titulo }}</h3>
-  <br>
-
+  <hr>
 
   <form method="get" class="mb-7">
     {% csrf_token %}
+    <div class="container">
+      <div class="row">
 
-    <div class="row g-7">
-        <div class="col-md-3">
-          <label class="form-label negrita">Mutual:</label>
-          <select name="enc_cliente" id="enc_cliente">
+        <div class="col d-flex align-items-center">
+          <select name="enc_mutual" id="enc_mutual" style="width: 100%;">
             <option value="0"> Todas las mutuales </option>
             {% for mutual in mutuales %}
-              <option value="{{mutual.id}}">{{mutual.nombre}} </option>
+            <option value="{{mutual.id}}">{{mutual.nombre}} </option>
             {% endfor %}
           </select>
         </div>
-        <div class="col-md-3 ">
-            <label for="{{ filter_form.periodo.id_for_label }}" class="form-label negrita">Periodo:</label>
-            {{ filter_form.periodo }}
-          </div>
-          
-          <div class="col mb-2">
-          <button type="submit" class="btn btn-primary btn-sm btn-detalle">
-            <i class="fa-solid fa-filter"></i>
-            Filtrar</button>
+        
+        <div class="col d-flex align-items-center">
+
+          <select name="enc_periodo" id="enc_periodo" style="width: 100%;">
+            <option value="0"> Todos los periodos </option>
+            {% for periodo in periodos %}
+            <option value="{{ periodo.id }}">{{ periodo.mes_anio|date:'Y/m' }} | {{ periodo.mes_anio|date:'F Y' }}</option>
+            {% endfor %}
+          </select>
         </div>
+            
+        <div class="col">
+          <button type="submit" class="btn btn-sm btn-primary btn-circle">
+            <i class="fa-solid fa-filter"></i>
+          </button>
+        </div>
+      </div>
     </div>
   </form>
 
-<hr>
-  
-<form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
+  <hr>
+
+  <form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
   {% csrf_token %}
     <div class=" table-responsive">
       <table class="table table-sm  table-striped table-hover ">
@@ -61,12 +66,12 @@
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td> {{ declaracion.periodo.mes_anio|date:'Y/m' }}</td>
             <td> {{ declaracion.mutual.cuit }}</td>
-            <td> {{ declaracion.mutual }}</td>
+            <td> {{ declaracion.mutual.nombre }}</td>
             <td> {{ declaracion.fecha_lectura }}</td>
             <td class="text-center"> {{ declaracion.rectificativa }}</td>
             
             <td class="text-end">
-              <button type="button" class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
+              <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
                 <i class="fa-regular fa-eye"></i> ver
               </button>
               {% include "detalle_declaracion_jurada.html" %}
@@ -81,34 +86,7 @@
     </div>
   </form>
 
-  <nav aria-label="...">
-    <ul class="pagination justify-content-center">
-      {% if page_obj.has_previous %}
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page=1">&laquo; first</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
-        </li>
-      {% endif %}
-  
-        
-      {% for num in page_obj.paginator.page_range %}
-        <li class="page-item {% if num == page_obj.number %}active{% endif %}">
-          <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
-        </li>
-      {% endfor %}
-  
-      {% if page_obj.has_next %}
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
-        </li>
-        <li class="page-item">
-          <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-        </li>
-      {% endif %}
-    </ul>
-  </nav>
+  {% include "pagination_listado.html" %}
 
 </div>
 <script type="text/javascript">
@@ -119,7 +97,10 @@
 
 <script>
   $(function () {
-    $("#enc_cliente").select2();
+    $("#enc_mutual").select2();
+  });
+  $(function () {
+    $("#enc_periodo").select2();
   });
 </script>
 
