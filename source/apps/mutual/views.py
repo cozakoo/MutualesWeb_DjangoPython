@@ -1106,7 +1106,7 @@ def periodoVigenteDetalle(request):
     titulo = 'Periodo Vigente'
 
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
-    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False)
 
     # Obtenemos las mutuales asociadas a esas declaraciones juradas
     mutuales_en_declaraciones = declaraciones.values_list('mutual', flat=True).distinct()
