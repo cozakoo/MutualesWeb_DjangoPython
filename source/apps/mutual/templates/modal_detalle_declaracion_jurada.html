@@ -1,20 +1,34 @@
-<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalDetalle_{{mutual.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" >
       <div class="modal-content">
         <div class="modal-header">
-          <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+          <h1 class="modal-title fs-5" id="exampleModalLabel">{{mutual.nombre}}</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
             {% for detalle in mutual.detalle.all %}
-            {{ detalle.tipo }} -  
-            Origen: {{ detalle.origen }}.txt - 
-            Destino: {{ detalle.destino }}.txt - 
-            Concepto: {{ detalle.concepto_1 }} y
-            {{ detalle.concepto_2 }}
-            <br />
+            <h5 class="detalle-tipo">
+                {% if detalle.tipo == 'P' %}Prestamo
+                {% else %}Reclamo
+                {% endif %}
+            </h5>
+            <ul>
+                <li>
+                    Origen: {{ detalle.origen }}.txt
+                </li>
+                <li>
+                    Destino: {{ detalle.destino }}.txt
+                </li>
+                <li>
+                    Concepto: {{ detalle.concepto_1 }} 
+                    {% if detalle.concepto_2 != 0 %}
+                    y  {{ detalle.concepto_2 }}
+                    {% endif %}
+                </li>
+            </ul>
+            <hr />
           {% endfor %}
-          
+
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

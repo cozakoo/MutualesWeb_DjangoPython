@@ -1,5 +1,5 @@
-<div class="modal fade" id="modalMutual" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+<div class="modal fade" id="modalMutual_{{mutual.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
       <div class="modal-content">
         <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Datos de Mutual</h1>
@@ -8,7 +8,9 @@
         <div class="modal-body">
               <form method="post" action="{% url 'mutual:editar_mutual' pk=mutual.id %}">
               {% csrf_token %}
-                <div class="form-group">
+                    
+
+                 <div class="form-group">
                   <label>Nombre:</label>
                   <input type="text" class="form-control" id="nombre" name="nombre" aria-describedby="emailHelp" value="{{mutual.nombre}}">
                 </div>  
@@ -45,7 +47,35 @@
                   
                 </div>
 
-                </br>
+                {% for detalle in mutual.detalle.all %}
+                      {% if detalle.tipo == 'P' %}
+                          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Prestamo </h1>
+                         
+                            <label>Origen:</label>
+                            <input type="text" class="form-control" id="origen_p" name="origen_p" aria-describedby="emailHelp" value="{{detalle.origen}}">
+                            <label>Destino:</label>
+                            <input type="text" class="form-control" id="detalle_p" name="detalle_p" aria-describedby="emailHelp" value="{{detalle.destino}}">
+                            <label>Concepto 1:</label>
+                            <input type="text" class="form-control" id="concep1_p" name="concep1_p" aria-describedby="emailHelp" value="{{detalle.concepto_1}}">
+                            <label>Concepto 2:</label>
+                            <input type="text" class="form-control" id="concep2_p" name="concep2_p" aria-describedby="emailHelp" value="{{detalle.concepto_2}}">
+                      {% else %}                      
+                          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Reclamo </h1>
+                            <label>Origen:</label>
+                            <input type="text" class="form-control" id="origen_r" name="origen_r" aria-describedby="emailHelp" value="{{detalle.origen}}">
+                            <label>Destino:</label>
+                            <input type="text" class="form-control" id="detalle_r" name="detalle_r" aria-describedby="emailHelp" value="{{detalle.destino}}">
+                            <label>Concepto 1:</label>
+                            <input type="text" class="form-control" id="concep1_r" name="concep1_r" aria-describedby="emailHelp" value="{{detalle.concepto_1}}">
+                            <label>Concepto 2:</label>
+                            <input type="text" class="form-control" id="concep2_r" name="concep2_r" aria-describedby="emailHelp" value="{{detalle.concepto_2}}">
+                     {% endif %}
+                      
+                      
+            
+              {% endfor %}
+               
+
               <div class="modal-footer">
           <button type="submit" class="btn btn-primary mb-2">Actualizar informacion</button>
         </div>

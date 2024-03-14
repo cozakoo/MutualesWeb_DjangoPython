@@ -8,51 +8,80 @@
 {% block contenedor %}
 <div class="container cuadrado-background ">
   <h3 class="text-center">{{ titulo }}</h3>
+  <hr>
+  
+  <form method="get" class="mb-7">
+    {% csrf_token %}
+    <div class="row">
+      <div class="col d-flex align-items-center">
+        <select name="enc_mutual" id="enc_mutual" >
+          <option value="0"> Todas las mutuales </option>
+          {% for mutual in object_list  %}
+            <option value="{{mutual.id}}">{{mutual.nombre}} </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col">
+        {{ filter_form.cuit }}
+      </div>
+
+      <div class="col">
+        {{ filter_form.concepto }}
+      </div>
+      
+      <div class="col d-flex align-items-center">
+        <span class="mr-2">Activo </span> 
+        {{ filter_form.activo }}
+      </div>
+      
+      <div class="col">
+        <button type="submit" class="btn btn-primary">Filtrar</button>
+      </div>
+    </div>
+
+    <hr>
+  </form>
 
   <div class="table-responsive">
-    <table class="table">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Cuit</th>
-          <th>Nombre</th>
-          <th class="text-center">Estado</th>
-          <th></th>
-          <th></th>
-        </tr>
-    </thead>
-    <tbody>
-      {% for mutual in page_obj %}
-        <tr>
-          <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
-          <td>{{ mutual.cuit }}</td>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Cuit</th>
+            <th>Nombre</th>
+            <th class="text-center">Estado</th>
+            <th></th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for mutual in page_obj %}
+          <tr>
+            <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
+            <td>{{ mutual.cuit }}</td>
           <td>{{ mutual.nombre }}</td>
           <td class="text-center">
             {% if  mutual.activo %}
-            <i class="fa-regular fa-circle-check" style="color: #306b00;"></i>
+            <i class="fa-solid fa-building-circle-check" style="color: #306b00;"></i>
             {% else %}
-            <i class="fa-regular fa-circle-xmark" style="color: #7a0000;"></i>
+            <i class="fa-solid fa-building-circle-xmark" style="color: #7a0000;"></i>
             {% endif %}
+
           <td>
-            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{mutual.pk}}" >
               <i class="fa-solid fa-circle-info"></i>              Detalle
             </button>
           </td>
 
           <td>
-            <button type="button" class="btn btn-sm btn-outline-secundary" data-bs-toggle="modal" data-bs-target="#modalMutual">
-              <i class="fa-solid fa-circle-info"></i>              editar
+            <button type="button" class="btn btn-sm btn-outline-secundary" data-bs-toggle="modal" data-bs-target="#modalMutual_{{mutual.pk}}">
+              <i class="fa-solid fa-pen-to-square"></i>           editar
             </button>
           </td>
 
-           <td>
-           <a href="{% url 'mutual:actualizar' pk=mutual.id %}" class="btn btn-sm btn-outline-secundary" > </a>
-            Abrir Modal
-            </button>
-            <a href="{% url 'mutual:actualizar' pk=mutual.id %}" class="btn btn-outline-success"> Finalizar </a>
-           </td>
+      
              
-             {% include "modal_ajax.html" %}
             {% include "modal_detalle_declaracion_jurada.html" %}
              {% include "modal_detalle_mutual.html" %}
         </tr>
@@ -64,6 +93,7 @@
   <nav aria-label="...">
     <ul class="pagination justify-content-center">
       {% if page_obj.has_previous %}
+
         <li class="page-item">
           <a class="page-link small-btn" href="?page=1">&laquo; first</a>
         </li>
@@ -93,7 +123,19 @@
 
 
 
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script type="text/javascript">
+  $('.django-select2').on("change", () => console.log("hola"));
+</script>
+<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+
+<script>
+  $(function () {
+    $("#enc_mutual").select2();
+  });
+</script>
+
 
 
 {% endblock %}

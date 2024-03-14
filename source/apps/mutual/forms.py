@@ -133,3 +133,20 @@ class FormularioPeriodo(forms.ModelForm):
             self.add_error('fecha_inicio', "La fecha debe ser igual o posterior a la fecha actual.")
 
         return fecha_inicio
+    
+
+class MutualFilterForm(forms.ModelForm):
+    concepto = forms.IntegerField(label='Concepto', required=False)
+    cuit = forms.IntegerField(label='Cuit', required=False)
+
+    class Meta:
+        model = Mutual
+        fields = ['activo']
+        widgets = {
+            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['concepto'].widget.attrs.update({'placeholder': 'Concepto', 'class': 'form-control'})
+        self.fields['cuit'].widget.attrs.update({'placeholder': 'Cuit', 'class': 'form-control'})

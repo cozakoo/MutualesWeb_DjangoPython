@@ -48,6 +48,7 @@
           <tr>
             <th>#</th>
             <th>Período</th>
+            <th>Cuit</th>
             <th>Mutual</th>
             <th>Fecha lectura</th>
             <th class="text-center">Rectificativa</th>
@@ -59,6 +60,7 @@
           <tr>
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td> {{ declaracion.periodo.mes_anio|date:'Y/m' }}</td>
+            <td> {{ declaracion.mutual.cuit }}</td>
             <td> {{ declaracion.mutual }}</td>
             <td> {{ declaracion.fecha_lectura }}</td>
             <td class="text-center"> {{ declaracion.rectificativa }}</td>

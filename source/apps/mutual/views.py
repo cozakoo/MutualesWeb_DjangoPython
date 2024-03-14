@@ -859,12 +859,31 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Mutuales'
+        context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
+
         return context
     
     def get_queryset(self):
-        # Filtrar los objetos según tu lógica
-        queryset = Mutual.objects.all()
-        # Devolver el queryset filtrado
+        queryset = super().get_queryset()
+        filter_form = MutualFilterForm(self.request.GET)
+        if filter_form.is_valid():
+            concepto = filter_form.cleaned_data.get('concepto')
+            activo = filter_form.cleaned_data.get('activo')
+            
+            if concepto is not None:
+                queryset = queryset.filter(detalle__concepto_1=concepto)
+
+
+
+        print("")
+        print("")
+        print("")
+        print("")
+        print("QUEEYSET")
+        print(queryset)
+        print("")
+        print("")
+
         return queryset
 
 class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMixin,ListView):
@@ -917,6 +936,8 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
             # Filtrar por periodo
             if periodo:
                 queryset = queryset.filter(periodo=periodo)
+        
+            queryset = queryset.order_by('periodo__mes_anio', 'mutual__cuit', 'fecha_lectura')
 
         return queryset
 
@@ -1072,6 +1093,8 @@ class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
     class Meta:
         model = DeclaracionJurada
         fields = ['es_leida']
+
+
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def periodoVigenteDetalle(request):
