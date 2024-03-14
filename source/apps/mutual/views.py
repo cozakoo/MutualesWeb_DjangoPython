@@ -1,10 +1,7 @@
 from io import BytesIO
 import io
-from multiprocessing import context
-from apps.personas.forms import FormularioPersona
 from reportlab.pdfgen import canvas
 from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
 from django.http import FileResponse
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
@@ -13,7 +10,7 @@ from typing import Any
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView , UpdateView
-from .models import DeclaracionJuradaDetalles, Mutual , DeclaracionJurada, Periodo
+from .models import Mutual , DeclaracionJurada, Periodo
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -28,6 +25,7 @@ from django.utils.translation import gettext as _
 from datetime import date
 from django.views.generic import ListView
 from django.urls import reverse
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 
 
@@ -631,19 +629,12 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        print("estoy en el get ")
-        print(context)
-        
+
         if not 'detalle_prestamo' in context:
-            print("no tengo valores iniciales ")
             context['detalle_prestamo'] = FormDetalle(prefix='d_prestamo')
             context['detalle_reclamo'] = FormDetalle(prefix='d_reclamo')
-            
-            
-            
-        context['titulo'] = 'Alta de Mutual'
         
-        # print(context)
+        context['titulo'] = 'Alta de Mutual'
         return context
 
     def post(self, request, *args, **kwargs):
@@ -849,6 +840,9 @@ def descargarArchivo(request, pk):
         response['Content-Disposition'] = f'attachment; filename="{detalle.archivo.name}"'
     return response
 
+from django.db.models import Q
+
+
 class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     login_url = "/login/"
     model = Mutual
@@ -859,6 +853,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Mutuales'
+        context["mutuales"] = Mutual.objects.all()
         context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
 
         return context
@@ -866,23 +861,32 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_queryset(self):
         queryset = super().get_queryset()
         filter_form = MutualFilterForm(self.request.GET)
+        
         if filter_form.is_valid():
             concepto = filter_form.cleaned_data.get('concepto')
             activo = filter_form.cleaned_data.get('activo')
+            cuit = filter_form.cleaned_data.get('cuit')
+
+            mutual_id = self.request.GET.get('enc_mutual')
             
-            if concepto is not None:
-                queryset = queryset.filter(detalle__concepto_1=concepto)
+            try:
+                mutual_id = int(mutual_id)
 
+                if mutual_id != 0: 
+                    queryset = queryset.filter(pk=mutual_id)
 
+            except (ValueError, TypeError):
+                mutual_id = None
 
-        print("")
-        print("")
-        print("")
-        print("")
-        print("QUEEYSET")
-        print(queryset)
-        print("")
-        print("")
+            finally:
+                if concepto is not None:
+                    queryset = queryset.filter(
+                        Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
+                    )
+                if activo:
+                    queryset = queryset.filter(activo=activo)
+                if cuit is not None:
+                    queryset = queryset.filter(cuit=cuit)
 
         return queryset
 
@@ -897,7 +901,12 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
         context['mutuales'] = Mutual.objects.all()
+        periodos_sin_fecha_fin = Periodo.objects.filter(fecha_fin__isnull=False)
+
+        context['periodos'] = periodos_sin_fecha_fin
+        
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
+
         return context
 
     def get_queryset(self):
@@ -907,47 +916,35 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         # Obtener los datos del formulario enviado por el usuario
         filter_form = DeclaracionJuradaFilterForm(self.request.GET)
         
-        mutual_id = self.request.GET.get('enc_cliente')
+        mutual_id = self.request.GET.get('enc_mutual')
+        periodo_id = self.request.GET.get('enc_periodo')
 
         # Convertir mutual_id a entero si es posible
         try:
             mutual_id = int(mutual_id)
+            periodo_id = int(periodo_id)
+
+            if mutual_id != 0: 
+                queryset = queryset.filter(mutual__pk=mutual_id)
+            
+            if periodo_id != 0:
+                queryset = queryset.filter(periodo__pk=periodo_id)
+
         except (ValueError, TypeError):
             mutual_id = None
 
-        # Inicializar la variable mutual fuera del bloque condicional
-        mutual = None
         
         if filter_form.is_valid() :
             es_borrador = filter_form.cleaned_data.get('es_borrador')
-            periodo = filter_form.cleaned_data.get('periodo')
 
-            # if mutual_id != 0: 
-                # mutual = get_object_or_404(Mutual, pk=mutual_id)
-
-            # Aplicar filtros al queryset
             if es_borrador is not None:
                 queryset = queryset.filter(es_borrador=es_borrador)
 
-            # Filtrar por mutual
-            # if mutual_id != 0:
-                # queryset = queryset.filter(mutual=mutual)
-
-            # Filtrar por periodo
-            if periodo:
-                queryset = queryset.filter(periodo=periodo)
-        
             queryset = queryset.order_by('periodo__mes_anio', 'mutual__cuit', 'fecha_lectura')
 
         return queryset
 
 class DeclaracionJuradaFilterForm(forms.Form):
-    periodo = forms.ModelChoiceField(
-        queryset=Periodo.objects.all(),
-        required=False,
-        empty_label="Todos los periodos",
-        widget=forms.Select(attrs={'class': 'form-select-sm'})
-    )
     es_borrador = forms.BooleanField(required=False)
 
 
@@ -1095,27 +1092,46 @@ class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
         fields = ['es_leida']
 
 
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 def periodoVigenteDetalle(request):
-    # Obtenemos el ultimo periodo que no tiene fecha de fin
-    periodo = Periodo.objects.filter(fecha_fin__isnull=True).first()
 
+    # Obtenemos el último periodo que no tiene fecha de fin
+    periodo = Periodo.objects.filter(fecha_fin__isnull=True).first()
+    
     # Si no hay un periodo, redirige a una página específica
     if not periodo:
         messages.warning(request, "No tiene un periodo vigente.")
-        return redirect('mutual:periodo_crear')  # Reemplaza 'nombre_de_la_vista_o_ruta' con la vista o ruta a la que deseas redirigir
+        return redirect('mutual:periodo_crear')
 
     titulo = 'Periodo Vigente'
+
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
     declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+
+    # Obtenemos las mutuales asociadas a esas declaraciones juradas
+    mutuales_en_declaraciones = declaraciones.values_list('mutual', flat=True).distinct()
+
+    # Luego, puedes obtener los objetos de las mutuales correspondientes
+    mutuales_presentes = Mutual.objects.filter(id__in=mutuales_en_declaraciones)
+
+    # mutuales = [declaracion.mutual for declaracion in page_obj]
+
 
     # Handle form submission
     if request.method == 'POST':
         form = PeriodoVigenteDeclaracionFilterForm(request.POST)
         if form.is_valid():
             es_leida_value = form.cleaned_data['es_leida']
-            declaraciones = declaraciones.filter(es_leida=es_leida_value)
+            mutual_id = request.POST.get('enc_mutual')
+            try:
+                mutual_id = int(mutual_id)
+                if mutual_id != 0: 
+                    declaraciones = declaraciones.filter(mutual__pk=mutual_id)
+            except (ValueError, TypeError):
+                mutual_id = None
+            finally:
+                if es_leida_value:
+                    declaraciones = declaraciones.filter(es_leida=es_leida_value)
     else:
         form = PeriodoVigenteDeclaracionFilterForm()
 
@@ -1129,12 +1145,11 @@ def periodoVigenteDetalle(request):
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
 
-    mutuales = [declaracion.mutual for declaracion in page_obj]
 
     context = {
         'periodo': periodo,
         'page_obj': page_obj,
-        'mutuales': mutuales,
+        'mutuales': mutuales_presentes,
         'titulo': titulo,
         'form': form,
     }

@@ -13,31 +13,25 @@
       {% csrf_token %}
       <div class="form-group">
         {{ form.as_p }}
-        {% include "modal_detalle_prestamo.html" %}
-         {% include "modal_detalle_reclamo.html" %}
         
         <div class="row">
-          
-          <div class="col">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detallePrestamoModal">Detalle Préstamo.</button>
+          <div class="col text-start">
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detallePrestamoModal">Detalle Préstamo.</button>
           </div>
-
-          <div class="col">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detalleReclamoModal">Detalle Reclamo</button>
+          
+          <div class="col text-end" >
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#detalleReclamoModal">Detalle Reclamo</button>
           </div>
         </div>
         
         <br />
-       
-
-
-        <button type="submit" class="btn btn-success">Crear Mutual</button>
-      
-
-
+        
+        <div align="center" class="col">
+          <button type="submit" class="btn btn-success">Crear</button>
+        </div>
       </div>
-
-      
+      {% include "modal_detalle_prestamo.html" %}
+       {% include "modal_detalle_reclamo.html" %}
     </form>
     <div />
 </div>

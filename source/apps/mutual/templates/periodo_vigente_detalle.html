@@ -22,173 +22,148 @@
     </div>
   </div>
   
-  <hr />
-
+  
   <form method="post" action="{% url 'mutual:periodo_vigente_detalle' %}">
     {% csrf_token %}
-
-    <div class="row text-center">
-      <div class="col">
-        <label class="form-label negrita">Mutual:</label>
-        <select name="enc_mutual" id="enc_mutual">
-          <option value="0">Todas las mutuales</option>
-          {% for mutual in mutuales %}
-            <option value="{{ mutual.id }}">{{ mutual.nombre }}</option>
-          {% endfor %}
-        </select>
-      </div>
-
-      <div class="col">
-        {{ form.as_p }}
-      </div>
-
-      <div class="col">
-        <button type="submit" class="btn btn-primary btn-sm">
-          <i class="fa-solid fa-filter"></i>
-          Filtrar
-        </button>
-      </div>
-
-      <div align="right" class="col">
-
-        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-          Finalizar periodo 
-        </button>
-      </div>
-      {% include 'modal_confirmar_fin_periodo.html'%}
-    </div>
-  </form>
-
-  <hr />
-
-  <form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
-      {% csrf_token %}
-      <div class="d-flex align-items-center justify-content-center" >
-        <label for="accion" class="form-label negrita me-2">Acción:</label>
-        <div class="me-2">
-          <select id="accion" name="accion" class="form-select form-select-sm" aria-label="Small select example">
-            <option selected>------------------</option>
-            <option value="1">Marcar como leído</option>
-            <option value="2">Marcar como no leído</option>
-          </select>
-        </div>
-
-        <div class="btn-group dropend me-2">
-          <div class="btn border-info btn-sm bg-info bg-opacity-10 border">
-            <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
-            <label class="form-check-label" for="flexCheckDefault"></label>
+    <div class="container">
+      <hr />
+      <div class="row justify-content-center"> <!-- Agrega la clase justify-content-center para centrar horizontalmente -->
+          <div class="col d-flex align-items-center">
+              <select name="enc_mutual" id="enc_mutual" style="width: 100%;">
+                  <option value="0">Todas las mutuales</option>
+                  {% for mutual in mutuales %}
+                  <option value="{{ mutual.id }}">{{ mutual.nombre }}</option>
+                  {% endfor %}
+              </select>
           </div>
 
-          <button type="button" class="btn border-info bg-info bg-opacity-10 border dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"><span class="visually-hidden">Toggle Dropend</span></button>
-          <ul class="dropdown-menu">
-            <li>
-              <a class="dropdown-item" href="#">Todas</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Ninguna</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">Leídas</a>
-            </li>
-            <li>
-              <a class="dropdown-item" href="#">No leídas</a>
-            </li>
-          </ul>
+          <div class="col-auto d-flex align-items-center">
+              {{ form.as_p }}
+          </div>
+
+          <div class="col">
+              <button type="submit" class="btn btn-sm btn-primary btn-circle">
+                  <i class="fa-solid fa-filter"></i>
+              </button>
+          </div>
+
+          <div align="right" class="col">
+              <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+                  Finalizar periodo 
+              </button>
+          </div>
+          {% include 'modal_confirmar_fin_periodo.html'%}
+      </div>
+    </div>
+  </form>
+  
+  
+  <form method="post" action="{% url 'mutual:leer_declaracion_jurada' %}" class="mb-3" id="miFormulario">
+    {% csrf_token %}
+    <div class="container">
+      <hr />
+      <div class="d-flex align-items-center justify-content-center" >
+        <label for="accion" class="form-label negrita me-2">Acción:</label>
+          <div class="me-2">
+            <select id="accion" name="accion" class="form-select form-select-sm" aria-label="Small select example">
+              <option selected>------------------</option>
+              <option value="1">Marcar como leído</option>
+              <option value="2">Marcar como no leído</option>
+            </select>
+          </div>
+
+          <div class="btn-group dropend me-2">
+            <div class="btn border-info btn-sm bg-info bg-opacity-10 border">
+              <input class="form-check-input" type="checkbox" value="" id="flexCheckDefault" />
+              <label class="form-check-label" for="flexCheckDefault"></label>
+            </div>
+
+            <button type="button" class="btn border-info bg-info bg-opacity-10 border dropdown-toggle dropdown-toggle-split" data-bs-toggle="dropdown" aria-expanded="false"><span class="visually-hidden">Toggle Dropend</span></button>
+            <ul class="dropdown-menu">
+              <li>
+                <a class="dropdown-item" href="#">Todas</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Ninguna</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">Leídas</a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="#">No leídas</a>
+              </li>
+            </ul>
+          </div>
+
+          <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">Realizar acción</button>
+          {% include 'modal_confirmacion_lectura.html' %}
         </div>
 
-        <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">Realizar acción</button>
-        {% include 'modal_confirmacion_lectura.html' %}
-      </div>
-
-      <br />
-      <div class="table-responsive">
-        <table class="table table-sm table-striped table-hover">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Mutual</th>
-              <th class="text-center">Leido</th>
-              <th>Fecha de lectura</th>
-              <th class="text-center">Rectificativa</th>
-              <th class="text-center">Seleccionar</th>
-              <th class="text-center">Archivos cargados</th>
-              <th class="text-center">Declaracion jurada</th>
-              <th></th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {% for declaracion in page_obj %}
+        <br />
+        <div class="table-responsive">
+          <table class="table table-sm table-striped table-hover">
+            <thead>
               <tr>
-                <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                
-                <td>{{ declaracion.mutual }}</td>
-                
+                <th>#</th>
+                <th>Mutual</th>
+                <th class="text-center">Leido</th>
+                <th>Fecha de lectura</th>
+                <th class="text-center">Rectificativa</th>
+                <th class="text-center">Seleccionar</th>
+                <th class="text-center">Archivos cargados</th>
+                <th class="text-center">Declaracion jurada</th>
+                <th></th>
+              </tr>
+            </thead>
+
+            <tbody>
+              {% for declaracion in page_obj %}
+                <tr>
+                  <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                  
+                  <td>{{ declaracion.mutual }}</td>
+                  
+                  <td class="text-center">
+                    {% if declaracion.es_leida %}
+                      <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
+                    {% else %}
+                    <i class="fa-solid fa-circle-exclamation" style="color: #ffa500;"></i>
+                    {% endif %}
+                  </td>
+
+                  <td>
+                    {% if declaracion.es_leida %}
+                      {{ declaracion.fecha_lectura }}
+                    {% else %}
+                      No ha sido leido aún
+                    {% endif %}
+                  </td>
+
+                  <td class="text-center">{{ declaracion.rectificativa }}</td>
+
+                  <td class="text-center">
+                    <input  type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />         
+                  </td>
+
+                  <td class="text-center">
+                  
+                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
+                {% include 'detalle_declaracion_jurada.html' %}
+                  </td>
+              
                 <td class="text-center">
-                  {% if declaracion.es_leida %}
-                    <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
-                  {% else %}
-                  <i class="fa-solid fa-circle-exclamation" style="color: #ffa500;"></i>
-                  {% endif %}
+                <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
                 </td>
-
-                <td>
-                  {% if declaracion.es_leida %}
-                    {{ declaracion.fecha_lectura }}
-                  {% else %}
-                    No ha sido leido aún
-                  {% endif %}
-                </td>
-
-                <td class="text-center">{{ declaracion.rectificativa }}</td>
-
-                <td class="text-center">
-                  <input  type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />         
-                </td>
-
-                <td class="text-center">
-                
-               <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
-               {% include 'detalle_declaracion_jurada.html' %}
-                </td>
-            
-              <td class="text-center">
-              <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
-              </td>
-            {% endfor %}
-          </tbody>
-        </table>
+              {% endfor %}
+            </tbody>
+          </table>
+          <hr>
+        </div>
       </div>
     </form>
+    {% include "pagination_listado.html" %}
 
-    <nav aria-label="...">
-      <ul class="pagination justify-content-center">
-        {% if page_obj.has_previous %}
-          <li class="page-item">
-            <a class="page-link small-btn" href="?page=1">&laquo; first</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
-          </li>
-        {% endif %}
-
-        {% for num in page_obj.paginator.page_range %}
-          <li class="page-item {% if num == page_obj.number %}{% endif %}">
-            <a class="page-link small-btn" href="?page={{ num }}">{{ num }}</a>
-          </li>
-        {% endfor %}
-
-        {% if page_obj.has_next %}
-          <li class="page-item">
-            <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
-          </li>
-          <li class="page-item">
-            <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
-          </li>
-        {% endif %}
-      </ul>
-    </nav>
-  </div>
+</div>
 
   <script type="text/javascript">
     $('.django-select2').on('change', () => console.log('hola'))
