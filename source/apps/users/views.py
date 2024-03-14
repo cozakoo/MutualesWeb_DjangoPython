@@ -104,8 +104,8 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
             messages.error(self.request, 'El correo electrónico debe incluir un signo @.')
             return super().form_invalid(form)
         else:
-            correo = form.cleaned_data["email"]
-            try:
+                correo = form.cleaned_data["email"]
+        
                 with transaction.atomic():
                     p = Persona(
                         correo = correo,
@@ -127,12 +127,10 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
                     form.save() 
 
                     user = User.objects.get(username=form.cleaned_data["username"])
-                    user.user_permissions.add(permiso)
                     permiso = obtenerPermiso("cliente")
                     user.user_permissions.add(permiso)
                     UserRol.objects.create(user = user , rol = c)                
                     return super().form_valid(form)
-            except e:
                 return super().form_invalid(form)
                 
         

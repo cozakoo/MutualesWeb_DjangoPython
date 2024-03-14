@@ -26,26 +26,20 @@
                   {% endif %}
 
                 <div class="form-check">
-                <label class="form-check-label" for="exampleCheck1">Activo</label>
-                  <input type="checkbox" 
-                  class="form-check-input"
-                   id="activo" 
-                   name="activo" 
-                  
-                   {% if mutual.activo %} checked {% endif %}
-                   >
+                  <input class="form-check-input" type="radio" name="activo" id="activo" {% if mutual.activo %} checked {% endif %}>
+                  <label class="form-check-label" for="flexRadioDefault1">
+                     Activo
+                  </label>
+                </div>
+                <div class="form-check">
+                  <input class="form-check-input" type="radio" name="inactivo" id="inactivo" {% if not mutual.activo %} checked {% endif %}>
+                  <label class="form-check-label" for="flexRadioDefault2">
+                    inactivo
+                  </label>
                 </div>
 
-                <div class="form-check">
-                <label class="form-check-label" for="exampleCheck1">Inactivo</label>
-                  <input type="checkbox" 
-                  name="inactivo"
-                  id="inactivo" 
-                  class="form-check-input" 
-                  id="activo"  name="activo"
-                  {% if not mutual.activo %} checked {% endif %}>
-                  
-                </div>
+             
+
 
                 {% for detalle in mutual.detalle.all %}
                       {% if detalle.tipo == 'P' %}
@@ -54,21 +48,21 @@
                             <label>Origen:</label>
                             <input type="text" class="form-control" id="origen_p" name="origen_p" aria-describedby="emailHelp" value="{{detalle.origen}}">
                             <label>Destino:</label>
-                            <input type="text" class="form-control" id="detalle_p" name="detalle_p" aria-describedby="emailHelp" value="{{detalle.destino}}">
+                            <input type="text" class="form-control" id="destino_p" name="destino_p" aria-describedby="emailHelp" value="{{detalle.destino}}">
                             <label>Concepto 1:</label>
-                            <input type="text" class="form-control" id="concep1_p" name="concep1_p" aria-describedby="emailHelp" value="{{detalle.concepto_1}}">
+                            <input type="number" class="form-control" id="concep1_p" name="concep1_p" aria-describedby="emailHelp" value="{{detalle.concepto_1}}">
                             <label>Concepto 2:</label>
-                            <input type="text" class="form-control" id="concep2_p" name="concep2_p" aria-describedby="emailHelp" value="{{detalle.concepto_2}}">
+                            <input type="number" class="form-control" id="concep2_p" name="concep2_p" aria-describedby="emailHelp" value="{{detalle.concepto_2}}">
                       {% else %}                      
                           <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Reclamo </h1>
                             <label>Origen:</label>
                             <input type="text" class="form-control" id="origen_r" name="origen_r" aria-describedby="emailHelp" value="{{detalle.origen}}">
                             <label>Destino:</label>
-                            <input type="text" class="form-control" id="detalle_r" name="detalle_r" aria-describedby="emailHelp" value="{{detalle.destino}}">
+                            <input type="text" class="form-control" id="destino_r" name="destino_r" aria-describedby="emailHelp" value="{{detalle.destino}}">
                             <label>Concepto 1:</label>
                             <input type="text" class="form-control" id="concep1_r" name="concep1_r" aria-describedby="emailHelp" value="{{detalle.concepto_1}}">
                             <label>Concepto 2:</label>
-                            <input type="text" class="form-control" id="concep2_r" name="concep2_r" aria-describedby="emailHelp" value="{{detalle.concepto_2}}">
+                            <input type="number" class="form-control" id="concep2_r" name="concep2_r" aria-describedby="emailHelp" value="{{detalle.concepto_2}}">
                      {% endif %}
                       
                       
@@ -87,3 +81,30 @@
     </div>
   </div>
   
+             <script>
+                  // Obtener todos los radios con el atributo name "grupo1"
+                  var radios1 = document.querySelectorAll('input[name="activo"]');
+                  var radios2 = document.querySelectorAll('input[name="inactivo"]');
+                  // Agregar evento de clic a cada radio del grupo 1
+                  radios1.forEach(function(radio) {
+                      radio.addEventListener('click', function() {
+                          // Deseleccionar todos los radios del grupo 1, excepto el que se ha seleccionado
+                          radios2.forEach(function(radio) {
+                            radio.checked = false;
+                        });
+                          this.checked = true;
+                      });
+                  });
+
+                  radios2.forEach(function(radio) {
+                      radio.addEventListener('click', function() {
+                          // Deseleccionar todos los radios del grupo 1, excepto el que se ha seleccionado
+                          radios1.forEach(function(radio) {
+                            radio.checked = false;
+                        });
+                          this.checked = true;
+                      });
+                  });
+
+
+              </script>

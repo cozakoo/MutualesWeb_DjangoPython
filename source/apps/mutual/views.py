@@ -13,7 +13,7 @@ from typing import Any
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView , UpdateView
-from .models import DeclaracionJuradaDetalles, Mutual , DeclaracionJurada, Periodo
+from .models import DeclaracionJuradaDetalles, DetalleMutual, Mutual , DeclaracionJurada, Periodo
 from .forms import *
 from django.urls import reverse_lazy
 from django.contrib import messages
@@ -1174,11 +1174,17 @@ def finalizarPeriodo(request, pk):
 def EditarMutal(request, pk):
      if request.method == 'POST':
         data = request.POST
-        print(data)
+        # print(data)
         m = Mutual.objects.get(pk = pk)
         m.cuit = data.get('cuit')
         m.nombre = data.get('nombre')
         activo = True
+        origenr = data.get('origen_r')
+        destinor = data.get('destino_r')
+        concep1r = data.get('concep1_r')
+        concep2r = data.get('concep2_r')
+        
+  
         if data.get('activo') == "on":
             activo = True
         else: 
@@ -1186,6 +1192,20 @@ def EditarMutal(request, pk):
         
         if m.activo != activo:
            m.activo = activo
+        
+        if data.get('origen_r') :
+           print("entre")
+           try:
+              reclamo = m.detalle.all().get(tipo = 'R')
+              print(data.get('concep1_r'))
+              reclamo.origen = data.get('origen_r')
+              if reclamo.destino != data.get('destino_r') : reclamo.destino = data.get('destino_r')
+              reclamo.concepto_1 = int(data.get('concep1_r'))
+              if reclamo.concepto_2 != data.get('concep2_r') : reclamo.concepto_1 = data.get('concep2_r')
+              reclamo.save()
+           except:
+              print("exept") 
+            
         
         m.save()
         messages.info(request, "datos de mutual modificados con exito")
