@@ -58,6 +58,7 @@
             <th>Nombre</th>
             <th class="text-center">Estado</th>
             <th></th>
+            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -78,10 +79,18 @@
                 Detalle
               </button>
             </td>
+            <td>
+              <button type="button" class="btn btn-sm btn-outline-secundary" data-bs-toggle="modal" data-bs-target="#modalMutual_{{mutual.pk}}">
+                <i class="fa-solid fa-pen-to-square"></i>
+                Editar
+              </button>
+            </td>
+
+            
           </tr>
-
-
           {% include "modal_detalle_declaracion_jurada.html" %}
+          {% include "modal_detalle_mutual.html" %}
+
           {% endfor %}
         </tbody>
       </table>
@@ -89,6 +98,7 @@
       {% include "pagination_listado.html" %}
     </div>
 </div>
+
 
 
 <script type="text/javascript">
@@ -103,6 +113,7 @@
     $("#enc_mutual").select2();
   });
 </script>
+
 
 
 {% endblock %}

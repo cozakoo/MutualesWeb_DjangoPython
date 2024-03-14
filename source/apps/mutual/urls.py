@@ -6,6 +6,7 @@ app_name = "mutual"
 urlpatterns = [
     path('crearMutual/',MutualCreateView.as_view(), name="mutual_crear"),
     path('mutuales/listado', MutualesListView.as_view(), name="listado_mutual"),
+    path('mutuales/editar/<int:pk>', EditarMutal, name="editar_mutual"),
 
     path('declaracionjurada/crear/<str:accion>/', DeclaracionJuradaCreateView.as_view(), name="declaracion_jurada"),
     path('declaracionjurada/historialDeclarado',DeclaracionJuradaDeclaradoListView.as_view(), name="declaracion_jurada_declarado_listado"),
