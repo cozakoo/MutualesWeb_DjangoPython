@@ -15,10 +15,9 @@
         <tr>
           <th>#</th>
           <th>Periodo</th>
-          <th>Detalle Prestamo y/o Reclamo</th>
           <th class="text-center">Leido</th>
-          <th>Fecha de subida</th>
           <th class="text-center">Rectificatica</th>
+          <th>Fecha de subida</th>
           <th></th>
         </tr>
       </thead>
@@ -27,32 +26,32 @@
           <tr>
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td>{{ declaracion.periodo.mes_anio|date:'Y/m' }}</td>
-            <td>
-              {% for detalle in declaracion.detalles.all %}
-                {{ detalle.tipo }} - ${{ detalle.importe }} - {{ detalle.total_registros }} Registros
-                <br />
-              {% endfor %}
-            </td>
             <td class="text-center">
               {% if declaracion.es_leida %}
-              <i class="fa-solid fa-check" style="color: #004200;"></i>              
+              <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
               {% else %}
-              <i class="fa-solid fa-x" style="color: #6a0606;"></i>
+              <i class="fa-solid fa-circle-exclamation" style="color: #ffa500;"></i>
               {% endif %}
             </td>
-
-            <td>{{ declaracion.fecha_subida|date:"Y/m/d H:i:s" }}</td>
             <td class="text-center"> {{ declaracion.rectificativa }}</td>
-
+            <td>{{ declaracion.fecha_subida|date:"Y/m/d H:i:s" }}</td>
+            
             <td class="text-end">
+              <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDeclaracionPresentada_{{declaracion.pk}}">
+                <i class="fa-solid fa-eye"></i>
+                Detalle
+              </button>
               {% if not declaracion.es_leida %}
-              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' accion='rectificar' %}">Rectificar</a>
+              <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' accion='rectificar' %}">
+                <i class="fa-solid fa-rotate-right"></i>
+                Rectificar</a>
               {% endif %}
               <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}">
-                 <i class="fa-solid fa-download"></i>
-                </a>
+                <i class="fa-solid fa-download"></i>
+              </a>
             </td>
           </tr>
+          {% include "modal_detalle_declaracion_presentada.html" %}
         {% endfor %}
       </tbody>
     </table>

@@ -2,7 +2,7 @@ from pyexpat.errors import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView
 from django.views import View
-from mutualWeb.utils.mensajes import mensaje_error
+from mutualWeb.utils.mensajes import mensaje_error, mensaje_exito
 from ..administradores.models import Administrador
 from .forms import CustomLoginForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
 from django.urls import reverse_lazy
@@ -19,6 +19,8 @@ from django.contrib.auth import logout
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib import messages
+from django.views.generic import ListView
+
 
 def obtenerPermiso(name):
     # Precondicion: {name} Exits in {"administador","cliente","empleadoPublico"}
@@ -62,6 +64,11 @@ class Menu(LoginRequiredMixin,PermissionRequiredMixin,TemplateView):
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Creación de usuarios'
+        return context
+
 
 class CustomLoginView(LoginView, View):
     template_name = 'login_acceso.html'
@@ -80,13 +87,17 @@ class CustomLoginView(LoginView, View):
 class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name ='registrar_usuario_mutual.html'
     form_class = RegisterUserMutualForm
-    success_url = reverse_lazy('users:register_userM_exito')
+    success_url = reverse_lazy('users:usuarios_listado')
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Registro Usuario Mutual'
+        context['titulo'] = 'Registro de usuario para una Mutual'
+        
+        mutuales = Mutual.objects.all().filter(activo=True)
+        context['mutuales'] = mutuales
+
         return context
     
     def post(self, request, *args, **kwargs):
@@ -104,51 +115,52 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
             messages.error(self.request, 'El correo electrónico debe incluir un signo @.')
             return super().form_invalid(form)
         else:
-                correo = form.cleaned_data["email"]
-        
-                with transaction.atomic():
-                    p = Persona(
-                        correo = correo,
-                        es_cliente = True
-                    )
+            correo = form.cleaned_data["email"]
+    
+            with transaction.atomic():
+                p = Persona(
+                    correo = correo,
+                    es_cliente = True
+                )
 
-                    p.save()
+                p.save()
 
-                    nombre = form.cleaned_data["mutual"]
-                    e = Mutual.objects.get(nombre = nombre)
+                nombre = form.cleaned_data["mutual"]
+                e = Mutual.objects.get(nombre = nombre)
 
-                    c = Cliente (
-                        persona = p,
-                        mutual = e,
-                        tipo = Cliente.TIPO
-                    )
-                    c.register
-                    c.save()
-                    form.save() 
+                c = Cliente (
+                    persona = p,
+                    mutual = e,
+                    tipo = Cliente.TIPO
+                )
+                c.register
+                c.save()
+                form.save() 
 
-                    user = User.objects.get(username=form.cleaned_data["username"])
-                    permiso = obtenerPermiso("cliente")
-                    user.user_permissions.add(permiso)
-                    UserRol.objects.create(user = user , rol = c)                
-                    return super().form_valid(form)
-                return super().form_invalid(form)
-                
+                user = User.objects.get(username=form.cleaned_data["username"])
+                permiso = obtenerPermiso("cliente")
+                user.user_permissions.add(permiso)
+                UserRol.objects.create(user = user , rol = c)                
+                mensaje_exito(self.request, f'Usuario creado para una mutual con exito.')                
+                return super().form_valid(form)
+            
         
     def form_invalid(self, form):
         print("Errores del formulario en form_invalid:", form.errors)
+        mensaje_error(self.request, f'Ha ocurrido un error al momento de procesar la operación')
         return super().form_invalid(form)
 
 
 class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin , CreateView):
-    template_name ='registrar_usuario_empleado_publico.html'
+    template_name ='registrar_usuario.html'
     form_class = RegisterUserEmpleadoPublicoForm
-    success_url = reverse_lazy('users:register_userM_exito')
+    success_url = reverse_lazy('users:usuarios_listado')
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Registro Usuario Empleado Publico'
+        context['titulo'] = 'Registro de Usuario Empleado Publico'
         return context
     
     def post(self, request, *args, **kwargs):
@@ -188,6 +200,8 @@ class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin ,
                     permiso = obtenerPermiso("empleadoPublico")
                     user.user_permissions.add(permiso)
                     UserRol.objects.create(user = user , rol = e)
+                    mensaje_exito(self.request, f'Usuario creado con exito.')                
+
                     return super().form_valid(form)
             except e:
                return super().form_invalid(form)
@@ -198,9 +212,9 @@ class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin ,
 
 
 class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
-        template_name ='registrar_usuario_administrador.html'
+        template_name ='registrar_usuario.html'
         form_class = RegisterUserEmpleadoPublicoForm
-        success_url = reverse_lazy('users:register_userM_exito')
+        success_url = reverse_lazy('users:usuarios_listado')
         login_url = '/login/'
         permission_required = "administradores.permission_administrador"
 
@@ -247,6 +261,7 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
                         permiso = obtenerPermiso("empleadoPublico")
                         user.user_permissions.add(permiso)
                         UserRol.objects.create(user = user , rol = e)
+                        mensaje_exito(self.request, f'Usuario creado con exito.')                
                         return super().form_valid(form)
                 except e:
                   return super().form_invalid(form)
@@ -254,3 +269,14 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
         def form_invalid(self, form):
             print("Errores del formulario en form_invalid:", form.errors)
             return super().form_invalid(form)
+        
+
+
+class UserListView(ListView):
+    model = User
+    template_name ='listado_usuarios.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['titulo'] = 'Listado de usuarios'
+        return context

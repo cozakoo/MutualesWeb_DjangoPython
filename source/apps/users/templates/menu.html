@@ -7,12 +7,27 @@
 
 
 {% block contenedor %}
-<div class="container-xxl" align = "center">
-{% comment %} <div class="container  cuadrado-background"   align = "center"> {% endcomment %}
-<div class="d-grid gap-2 col-6 mx-auto">
-  <button onclick="window.location.href={% url 'users:register_U_M' %}" class="btn btn-primary btn-lg" type="button">crear usuario Mutual</button>
-  <button onclick="window.location.href={% url 'users:register_E_P' %}"class="btn btn-primary btn-lg" type="button">crear usuario Empleado Publico</button>
-  <button onclick="window.location.href={% url 'users:register_A' %}" class="btn btn-primary btn-lg" type="button">crear usuario Administrador</button>
+<div class="container cuadrado-background">
+  <h2 class="text-center">{{ titulo }}</h2>
+  <div class="d-grid  mx-auto">
+  <br>
+  <button onclick="window.location.href={% url 'users:register_U_M' %}" class="btn btn-outline-primary btn-lg" type="button">
+    <i class="fa-solid fa-building-user"></i>
+    Usuario Mutual
+  </button>
+  
+  <br>
+  <button onclick="window.location.href={% url 'users:register_E_P' %}"class="btn btn-outline-primary btn-lg" type="button">
+    <i class="fa-regular fa-user"></i>
+    Usuario Empleado
+  </button>
+  
+  <br>
+  <button onclick="window.location.href={% url 'users:register_A' %}" class="btn btn-outline-primary btn-lg" type="button">
+    <i class="fa-solid fa-user-shield"></i>
+        Usuario Administrador
+  </button>
+  <br>
 </div>
 
 <div/>

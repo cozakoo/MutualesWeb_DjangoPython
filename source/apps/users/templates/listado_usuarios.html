@@ -1,0 +1,49 @@
+{% extends 'dashboardAdministrador.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" />
+{% endblock %}
+
+
+{% block contenedor %}
+<div class=" container cuadrado-background">
+  <h3 class="text-center">{{ titulo }}</h3>
+  <hr>
+
+  <div class=" table-responsive">
+    <table class="table table-sm  table-striped table-hover ">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Ultima conexion</th>
+          <th class="text-center">Es administrador</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in object_list %}
+        <tr>
+            <td class="negrita">{{ forloop.counter }}</td>
+            <td>{{ user.username }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.date_joined }}</td>
+            <td class="text-center">{% if obj.is_staff %}Sí{% else %}No{% endif %}</td>
+
+            <td>
+                <a href="{% url 'users:cambiar_contrasena' %}" class="btn btn-sm btn-outline-secondary">
+                    <i class="fa-solid fa-lock"></i>
+                    Cambiar contraseña
+                </a>
+            </td>
+
+        </tr>
+        {% endfor %}
+
+      </tbody>
+    </table>
+  </div>
+
+{% endblock %}

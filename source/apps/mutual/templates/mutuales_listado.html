@@ -58,7 +58,6 @@
             <th>Nombre</th>
             <th class="text-center">Estado</th>
             <th></th>
-            <th></th>
           </tr>
         </thead>
         <tbody>
@@ -73,14 +72,12 @@
             {% else %}
             <i class="fa-solid fa-building-circle-xmark" style="color: #7a0000;"></i>
             {% endif %}
-            <td>
+            <td class="text-end">
               <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{mutual.pk}}">
                 <i class="fa-solid fa-building-circle-exclamation"></i>
                 Detalle
               </button>
-            </td>
-            <td>
-              <button type="button" class="btn btn-sm btn-outline-secundary" data-bs-toggle="modal" data-bs-target="#modalMutual_{{mutual.pk}}">
+              <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalMutual_{{mutual.pk}}">
                 <i class="fa-solid fa-pen-to-square"></i>
                 Editar
               </button>

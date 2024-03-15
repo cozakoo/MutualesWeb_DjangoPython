@@ -890,6 +890,10 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
         return queryset
 
+def obtenerPeriodosFinalizados():
+    return Periodo.objects.filter(fecha_fin__isnull=False)
+
+    
 class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMixin,ListView):
     model = DeclaracionJurada
     template_name = "dj_declarados_list.html"
@@ -901,17 +905,15 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
         context['mutuales'] = Mutual.objects.all()
-        periodos_sin_fecha_fin = Periodo.objects.filter(fecha_fin__isnull=False)
-
-        context['periodos'] = periodos_sin_fecha_fin
-        
+        context['periodos'] = obtenerPeriodosFinalizados()
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
 
         return context
 
     def get_queryset(self):
-        # Obtener el queryset original sin filtrar
-        queryset = DeclaracionJurada.objects.all()
+
+        # Filtrar el queryset de DeclaracionJurada basado en los periodos sin fecha de fin
+        queryset = DeclaracionJurada.objects.filter(periodo__in=obtenerPeriodosFinalizados())
 
         # Obtener los datos del formulario enviado por el usuario
         filter_form = DeclaracionJuradaFilterForm(self.request.GET)
@@ -1223,7 +1225,7 @@ def EditarMutal(request, pk):
             
         
         m.save()
-        messages.info(request, "datos de mutual modificados con exito")
+        messages.info(request, "Mutual actualizada éxito")
         return redirect('mutual:listado_mutual')
             
          
