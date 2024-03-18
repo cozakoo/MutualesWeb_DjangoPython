@@ -19,7 +19,8 @@
           <th>Username</th>
           <th>Email</th>
           <th>Ultima conexion</th>
-          <th class="text-center">Es administrador</th>
+          <th>Estado</th>
+          <th></th>
           <th></th>
         </tr>
       </thead>
@@ -30,12 +31,19 @@
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.date_joined }}</td>
-            <td class="text-center">{% if obj.is_staff %}Sí{% else %}No{% endif %}</td>
-
+            
+            <td>{% if user.is_active %} Activo {% else %} Inactivo {% endif %}</td>
             <td>
                 <a href="{% url 'users:cambiar_contrasena' %}" class="btn btn-sm btn-outline-secondary">
                     <i class="fa-solid fa-lock"></i>
                     Cambiar contraseña
+                </a>
+            </td>
+
+             <td>
+                <a href="{% url 'users:cambiar_contrasena' %}" class="btn btn-sm btn-outline-danger">
+                    <i class="fa-solid fa-trash"></i>
+                    Eliminar
                 </a>
             </td>
 

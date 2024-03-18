@@ -20,6 +20,15 @@ from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib import messages
 from django.views.generic import ListView
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy
+from django.views.generic import FormView
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.views.generic import View
+from django.http import JsonResponse
 
 
 def obtenerPermiso(name):
@@ -260,6 +269,7 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
                         user.user_permissions.add(permiso)
                         permiso = obtenerPermiso("empleadoPublico")
                         user.user_permissions.add(permiso)
+                      
                         UserRol.objects.create(user = user , rol = e)
                         mensaje_exito(self.request, f'Usuario creado con exito.')                
                         return super().form_valid(form)
@@ -280,3 +290,25 @@ class UserListView(ListView):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Listado de usuarios'
         return context
+
+
+
+
+
+
+class CambiarPasswordView(LoginRequiredMixin, FormView):
+
+    def post(self, request, user_id):
+        # Obtener el usuario específico
+        usuario = get_object_or_404(User, id=user_id)
+
+        # Obtener la nueva contraseña del formulario (en este ejemplo, asumimos que la contraseña se pasa en el cuerpo de la solicitud)
+        nueva_password = request.POST.get('nueva_password')
+
+        # Cambiar la contraseña del usuario
+        usuario.set_password(nueva_password)
+        usuario.save()
+
+        return JsonResponse({'mensaje': 'Contraseña cambiada con éxito'})
+
+

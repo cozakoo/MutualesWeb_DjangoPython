@@ -11,26 +11,28 @@
   <h2 class="text-center">{{ titulo }}</h2>
   <div class="d-grid  mx-auto">
   <br>
-  <button onclick="window.location.href={% url 'users:register_U_M' %}" class="btn btn-outline-primary btn-lg" type="button">
+ 
+  <a href="{% url 'users:register_U_M' %}" class="btn btn-outline-primary btn-lg" type="a">
     <i class="fa-solid fa-building-user"></i>
     Usuario Mutual
-  </button>
+  </a>
+
   
   <br>
-  <button onclick="window.location.href={% url 'users:register_E_P' %}"class="btn btn-outline-primary btn-lg" type="button">
+  <a href="{% url 'users:register_E_P' %}"class="btn btn-outline-primary btn-lg" type="a">
     <i class="fa-regular fa-user"></i>
     Usuario Empleado
-  </button>
+  </a>
   
   <br>
-  <button onclick="window.location.href={% url 'users:register_A' %}" class="btn btn-outline-primary btn-lg" type="button">
+  <a href="{% url 'users:register_A' %}" class="btn btn-outline-primary btn-lg" type="a">
     <i class="fa-solid fa-user-shield"></i>
         Usuario Administrador
-  </button>
+  </a>
   <br>
 </div>
 
-<div/>
+</div>
 
 {% endblock %}
 

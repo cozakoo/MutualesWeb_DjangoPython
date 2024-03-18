@@ -1214,14 +1214,36 @@ def EditarMutal(request, pk):
            print("entre")
            try:
               reclamo = m.detalle.all().get(tipo = 'R')
-              print(data.get('concep1_r'))
               reclamo.origen = data.get('origen_r')
-              if reclamo.destino != data.get('destino_r') : reclamo.destino = data.get('destino_r')
-              reclamo.concepto_1 = int(data.get('concep1_r'))
-              if reclamo.concepto_2 != data.get('concep2_r') : reclamo.concepto_1 = data.get('concep2_r')
+              if reclamo.destino != data.get('destino_r') : 
+                  reclamo.destino = data.get('destino_r')
+              reclamo.concepto_1 = data.get('concep1_r')
+              print(reclamo.concepto_1)
+            
+              if reclamo.concepto_2 != data.get('concep2_r') :
+                  reclamo.concepto_2 = data.get('concep2_r')
+              
               reclamo.save()
            except:
               print("exept") 
+        
+        if data.get('origen_p') :
+           print("entre")
+           try:
+              reclamo = m.detalle.all().get(tipo = 'P')
+              reclamo.origen = data.get('origen_p')
+              if reclamo.destino != data.get('destino_p') : 
+                  reclamo.destino = data.get('destino_p')
+              reclamo.concepto_1 = data.get('concep1_p')
+              print(reclamo.concepto_1)
+            
+              if reclamo.concepto_2 != data.get('concep2_p') :
+                  reclamo.concepto_2 = data.get('concep2_p')
+              
+              reclamo.save()
+           except:
+              print("exept") 
+              
             
         
         m.save()
