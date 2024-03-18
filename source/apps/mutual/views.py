@@ -697,7 +697,8 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         
             # url = reverse('mutual_exito')
             # return HttpResponseRedirect(url)
-            return redirect('mutual:mutual_exito')
+            messages.success(self.request, 'Mutual creada con exito')
+            return redirect('mutual:mutual_crear')
     
     
     

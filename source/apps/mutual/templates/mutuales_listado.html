@@ -45,6 +45,7 @@
           <i class="fa-solid fa-filter"></i>
         </button>
       </div>
+      
     </div>
     <hr>
   </form>
@@ -57,6 +58,7 @@
             <th>Cuit</th>
             <th>Nombre</th>
             <th class="text-center">Estado</th>
+            <th></th>
             <th></th>
           </tr>
         </thead>
@@ -77,6 +79,9 @@
                 <i class="fa-solid fa-building-circle-exclamation"></i>
                 Detalle
               </button>
+
+            </td>   
+            <td class="text-center">
               <button type="button" class="btn btn-sm btn-outline-dark" data-bs-toggle="modal" data-bs-target="#modalMutual_{{mutual.pk}}">
                 <i class="fa-solid fa-pen-to-square"></i>
                 Editar
@@ -87,6 +92,7 @@
           </tr>
           {% include "modal_detalle_declaracion_jurada.html" %}
           {% include "modal_detalle_mutual.html" %}
+
 
           {% endfor %}
         </tbody>

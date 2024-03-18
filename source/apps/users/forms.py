@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
+
+from mutualWeb.utils.mensajes import mensaje_advertencia
 from ..mutual.models import Mutual
 
 class CustomLoginForm(AuthenticationForm):
@@ -20,7 +22,17 @@ class RegisterUserMutualForm(UserCreationForm):
     class Meta:
         model = User  
         fields = UserCreationForm.Meta.fields + ('email',)
+    
+    
+    def clean_username(self):
         
+        username = self.cleaned_data.get('username')
+        if User.objects.filter(username = username).exists():
+            print("existo")
+            raise forms.ValidationError("Este nombre de usuario ya esta en uso. Por favor, elige otro.")
+        return username    
+
+    
     def clean_email(self):
         email = self.cleaned_data.get('email')
         print("asdasd")

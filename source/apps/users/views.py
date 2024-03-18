@@ -109,23 +109,14 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
 
         return context
     
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if not form.is_valid():
-            return self.form_invalid(form)
-        else:
-            return self.form_valid(form)
+
           
     def form_valid(self,form):
         # Verifica si el correo electrónico no contiene el símbolo "@"
-        if 'email' in form.errors and 'El correo electrónico debe incluir un signo @.' in form.errors['email']:
-            messages.error(self.request, 'El correo electrónico debe incluir un signo @.')
-            return super().form_invalid(form)
-        else:
-            correo = form.cleaned_data["email"]
-    
+
+  
+        correo = form.cleaned_data["email"]
+        try:
             with transaction.atomic():
                 p = Persona(
                     correo = correo,
@@ -144,20 +135,20 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
                 )
                 c.register
                 c.save()
-                form.save() 
-
+                # form.save() 
+                
                 user = User.objects.get(username=form.cleaned_data["username"])
                 permiso = obtenerPermiso("cliente")
                 user.user_permissions.add(permiso)
                 UserRol.objects.create(user = user , rol = c)                
                 mensaje_exito(self.request, f'Usuario creado para una mutual con exito.')                
                 return super().form_valid(form)
+        except Exception:   
+            mensaje_error(self.request, f'No se pudo crear el usuario')
+            return super().form_invalid(form)
             
-        
-    def form_invalid(self, form):
-        print("Errores del formulario en form_invalid:", form.errors)
-        mensaje_error(self.request, f'Ha ocurrido un error al momento de procesar la operación')
-        return super().form_invalid(form)
+            
+
 
 
 class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin , CreateView):
@@ -172,22 +163,11 @@ class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin ,
         context['titulo'] = 'Registro de Usuario Empleado Publico'
         return context
     
-    def post(self, request, *args, **kwargs):
-        self.object = None
-        form_class = self.get_form_class()
-        form = self.get_form(form_class)
-        if not form.is_valid():
-            return self.form_invalid(form)
-        else:
-            return self.form_valid(form)
-          
+   
           
     def form_valid(self,form):
-        # Verifica si el correo electrónico no contiene el símbolo "@"
-        if 'email' in form.errors and 'El correo electrónico debe incluir un signo @.' in form.errors['email']:
-            messages.error(self.request, 'El correo electrónico debe incluir un signo @.')
-            return super().form_invalid(form)
-        else:
+
+     
             correo = form.cleaned_data["email"]
             try:   
                 with transaction.atomic(): 
@@ -212,13 +192,11 @@ class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin ,
                     mensaje_exito(self.request, f'Usuario creado con exito.')                
 
                     return super().form_valid(form)
-            except e:
+            except Exception:
+               mensaje_error(self.request, f'No se pudo crear el usuario')
                return super().form_invalid(form)
                 
-    def form_invalid(self, form):
-        print("Errores del formulario en form_invalid:", form.errors)
-        return super().form_invalid(form)
-
+   
 
 class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
         template_name ='registrar_usuario.html'
@@ -231,15 +209,6 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
             context = super().get_context_data(**kwargs)
             context['titulo'] = 'Registro Usuario Adminsitrador'
             return context
-        
-        def post(self, request, *args, **kwargs):
-            self.object = None
-            form_class = self.get_form_class()
-            form = self.get_form(form_class)
-            if not form.is_valid():
-                return self.form_invalid(form)
-            else:
-                return self.form_valid(form)
             
             
         def form_valid(self,form):
@@ -273,12 +242,10 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
                         UserRol.objects.create(user = user , rol = e)
                         mensaje_exito(self.request, f'Usuario creado con exito.')                
                         return super().form_valid(form)
-                except e:
+                except Exception:
+                  mensaje_error(self.request, f'No se pudo crear el usuario')
                   return super().form_invalid(form)
               
-        def form_invalid(self, form):
-            print("Errores del formulario en form_invalid:", form.errors)
-            return super().form_invalid(form)
         
 
 
