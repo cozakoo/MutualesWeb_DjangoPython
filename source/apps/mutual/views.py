@@ -1194,9 +1194,30 @@ def EditarMutal(request, pk):
         data = request.POST
         # print(data)
         m = Mutual.objects.get(pk = pk)
-        m.cuit = data.get('cuit')
-        m.nombre = data.get('nombre')
-        activo = True
+        
+        nombre = data.get('nombre')
+        cuit = data.get('cuit')
+        if len(cuit) != 11:
+            messages.warning(request, "Cuit invalido, debe tener 11 caracteres")
+            return redirect('mutual:listado_mutual')
+        else:
+            m.cuit = cuit
+            
+            
+        
+        if m.nombre != nombre:
+            try: 
+               Mutual.objects.get(nombre = nombre)
+               messages.warning(request, "El Nombre de mutual ya existe")
+               return redirect('mutual:listado_mutual')
+            except Mutual.DoesNotExist:
+               m.nombre = nombre
+               
+    
+       
+      
+            
+         
         origenr = data.get('origen_r')
         destinor = data.get('destino_r')
         concep1r = data.get('concep1_r')
@@ -1248,7 +1269,7 @@ def EditarMutal(request, pk):
             
         
         m.save()
-        messages.info(request, "Mutual actualizada éxito")
+        messages.info(request, "Mutual actualizada éxitosamente")
         return redirect('mutual:listado_mutual')
             
          
