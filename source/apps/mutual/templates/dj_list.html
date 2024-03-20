@@ -37,10 +37,10 @@
             <td>{{ declaracion.fecha_subida|date:"Y/m/d H:i:s" }}</td>
             
             <td class="text-end">
-              <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#modalDeclaracionPresentada_{{declaracion.pk}}">
-                <i class="fa-solid fa-eye"></i>
-                Detalle
+              <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
+                <i class="fa-regular fa-eye"></i> ver
               </button>
+              
               {% if not declaracion.es_leida %}
               <a class="btn btn-warning btn-sm" href="{% url 'mutual:declaracion_jurada' accion='rectificar' %}">
                 <i class="fa-solid fa-rotate-right"></i>
@@ -51,7 +51,7 @@
               </a>
             </td>
           </tr>
-          {% include "modal_detalle_declaracion_presentada.html" %}
+          {% include "detalle_declaracion_jurada.html" %}
         {% endfor %}
       </tbody>
     </table>

@@ -13,8 +13,8 @@ urlpatterns = [
   path('usuarios/usuario/mutual/crear', RegisterUserMutalView.as_view(), name='register_U_M'), 
   path('usuarios/usuario/emplpublico/crear', RegistereEmpleadoPublicoView.as_view(), name='register_E_P'),
   path('usuarios/usuario/administrador/crear', RegistereAdministradorView.as_view(), name='register_A'),
-  
-  path('usuarios/usuario/cambiarcontrasenia', CambiarPasswordView.as_view(), name='cambiar_contrasena'),
+  path('cambiar-password/', CustomPasswordChangeView.as_view(), name='cambiar_password'),
+  # path('usuarios/usuario/cambiarcontrasenia', CambiarPasswordViewUsers.as_view(), name='cambiar_contrasena'),
   
   # path('exitoM/', register_user_mutual_exito, name='register_userM_exito'),
 ]

@@ -1,9 +1,24 @@
 from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
 from mutualWeb.utils.mensajes import mensaje_advertencia
 from ..mutual.models import Mutual
+
+
+
+
+
+class CustomPasswordChangeForm(PasswordChangeForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        # Personaliza los campos si es necesario
+        self.fields['old_password'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Contraseña actual'})
+        self.fields['new_password1'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Nueva contraseña'})
+        self.fields['new_password2'].widget = forms.PasswordInput(attrs={'class': 'form-control', 'placeholder': 'Confirmar nueva contraseña'})
+
 
 class CustomLoginForm(AuthenticationForm):
     username = forms.CharField(label='Usuario', widget=forms.TextInput(attrs={'autofocus': True}))

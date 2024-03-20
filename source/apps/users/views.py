@@ -1,10 +1,10 @@
 from pyexpat.errors import messages
 from django.shortcuts import render, redirect
-from django.contrib.auth.views import LoginView
+from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.views import View
 from mutualWeb.utils.mensajes import mensaje_error, mensaje_exito
 from ..administradores.models import Administrador
-from .forms import CustomLoginForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
+from .forms import CustomLoginForm, CustomPasswordChangeForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 from .views import LoginView
@@ -28,7 +28,7 @@ from django.views.generic import FormView
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.views.generic import View
-from django.http import JsonResponse
+from django.http import HttpResponse, JsonResponse
 
 
 def obtenerPermiso(name):
@@ -264,9 +264,17 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
 
 
+class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
+    form_class = CustomPasswordChangeForm
+    template_name = 'cambiar_password.html'  # Template donde mostrar el formulario
+    success_url = reverse_lazy('sec2:home')
+    login_url = '/login/'
+    
+    def form_valid(self, form):
+        mensaje_exito(self.request, f'Contraseña cambiada con exito.')
+        return super().form_valid(form)
 
-
-class CambiarPasswordView(LoginRequiredMixin,  FormView):
+class CambiarPasswordViewUsers(LoginRequiredMixin,  FormView):
 
     def post(self, request, user_id):
         # Obtener el usuario específico

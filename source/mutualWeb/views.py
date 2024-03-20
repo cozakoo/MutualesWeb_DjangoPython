@@ -1,8 +1,8 @@
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from apps.users.models import UserRol
-@login_required(login_url='users:login')
 
+@login_required(login_url='users:login')
 # @permission_required(".add_choice", raise_exception=True)
 def dashboard(request):
     userRol = UserRol.objects.get(user = request.user )

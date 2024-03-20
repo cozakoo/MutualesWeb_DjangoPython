@@ -38,10 +38,15 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-lg-start">
           <li>
+             <a class="dropdown-item" href="{% url 'users:cambiar_password' %}">
+              <i class="fa-solid fa-lock"></i>
+              cambiar contraseña </a>
+          </li>
             <a class="dropdown-item" href="{% url 'users:cerrar_session' %}">
               <i class="fa-solid fa-lock"></i>
               Cerrar Sesión</a>
           </li>
+
         </ul>
       </div>
     </div>

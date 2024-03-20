@@ -26,6 +26,8 @@ from datetime import date
 from django.views.generic import ListView
 from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.contrib.auth.decorators import permission_required, login_required
+from django.http import JsonResponse
 
 
 
@@ -213,17 +215,17 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 print("omite")
             
             try:
-                    
-                    dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
-                    dj.es_borrador = False
-                    dj.rectificativa = nroRectificativa
-                    dj.fecha_subida = datetime.now()
-                    dj.save()
-                    messages.success(self.request, "Declaracion Jurada confirmada")
-                    return redirect('mutual:historico')
+                        
+                        dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
+                        dj.es_borrador = False
+                        dj.rectificativa = nroRectificativa
+                        dj.fecha_subida = datetime.now()
+                        dj.save()
+                        messages.success(self.request, "Declaracion Jurada confirmada")
+                        return redirect('mutual:historico')
 
             except DeclaracionJurada.DoesNotExist:
-                return redirect('dashboard')
+                    return redirect('dashboard')
            
            
            return redirect('dashboard')
@@ -391,7 +393,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     declaracionJurada = DeclaracionJurada.objects.create(
                         mutual = mutual,
                         fecha_creacion = datetime.now(),
-                        periodo = periodoActual
+                        periodo = periodoActual,
+                        es_borrador = True
                     )
                     
                     # Crear un objeto DetalleDeclaracionJurada con los valores adecuados
@@ -415,7 +418,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                             archivo=archivoReclamo,
                             total_registros=total_registros_r,
                         )
-
+                    
                     print("entre en valid")
                     return super().form_valid(form)
                 
@@ -495,9 +498,16 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             listErrores.append(f"Archivo invalido no puede ser leido: {e}")
             return False, 0, last_line_number, listErrores
 
-
+    
+    
+    def convertirFechaEntero(fecha:date):
+        return fecha.year + fecha.day  
+    
+    
     def validar_fechas_prestamo(self, line_content, line_number, fecha_inicio, fecha_fin, listErrores):
-
+        
+        
+        
         try:
             # Convertir la cadena de fecha a un objeto de fecha
             print("FECHA INICIO: ", fecha_inicio)
@@ -511,8 +521,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             periodoActual = obtenerPeriodoVigente(self)
             print(periodoActual.mes_anio)
          
-
-            if fecha_obj_inicio.month != periodoActual.mes_anio.month or fecha_obj_inicio.year != periodoActual.mes_anio.year :
+            
+            if fecha_obj_inicio.month > periodoActual.mes_anio.month and fecha_obj_inicio.year >= periodoActual.mes_anio.year :
                 listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} No corresponde al periodo a declarar. Línea: {line_content}")
 
             if fecha_obj_fin < periodoActual.mes_anio:
@@ -525,6 +535,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         except ValueError:
             mensaje_error = f"Error: La FECHA en la línea {line_number} no es válida. Línea: {line_content}"
             listErrores.append(mensaje_error)
+            
+      
 
     def validar_reclamo(self, form, archivo):
         """Valida el contenido del archivo de RECLAMO."""
@@ -834,6 +846,8 @@ def generate_pdf(declaracion):
     buffer.seek(0)
     return buffer
 
+
+@login_required(login_url="/login/")
 def descargarDeclaracion(request, pk):
     print("entre descarga declara")
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
@@ -852,15 +866,21 @@ def descargarDeclaracion(request, pk):
     
 def descargarArchivo(request, pk):
     detalle = get_object_or_404(DetalleDeclaracionJurada, pk=pk)
-    userRol = UserRol.objects.get(user= request.user)
-    mutual = userRol.rol.cliente.mutual
-    print(mutual)
+    
+    
+    declaracion_jurada = get_object_or_404(DeclaracionJurada, detalles = detalle)
+    
+    mutual = declaracion_jurada.mutual
+ 
+    detalleMutual = mutual.detalle.get(tipo = detalle.tipo)
+    nombre = detalleMutual.destino + ".txt"
+
     # nombre = obtenerNombreDestino(request, detalle.tipo)
     with detalle.archivo.open('rb') as archivo:
         response = HttpResponse(archivo.read(), content_type='application/octet-stream')
         name = detalle.archivo.name.split("/")[-1]
 
-        response['Content-Disposition'] = f'attachment; filename="{name}"'
+        response['Content-Disposition'] = f'attachment; filename="{nombre}"'
     return response
 
 from django.db.models import Q
@@ -975,8 +995,9 @@ class DeclaracionJuradaFilterForm(forms.Form):
 
 
     
-from django.http import JsonResponse
 
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def leerDeclaracionJurada(request):
     if request.method == 'POST':
         declaracion_id_check = request.POST.getlist('declaracion_leidos')
@@ -1000,7 +1021,7 @@ def leerDeclaracionJurada(request):
 
 
 
-
+@login_required(login_url="/login/")
 def verificar_todas_leidas(request, periodo_pk):
     print("estoyen verificarPeriodo")
     #Obtengo el periodo
@@ -1032,11 +1053,13 @@ def es_siguiente_mes(periodo_anterior, periodo_creado):
 
     return periodo_creado.year == periodo_anterior.year and periodo_creado.month == periodo_anterior.month
 
-class PeriodoCreateView(CreateView):
+class PeriodoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     model = Periodo
     form_class = FormularioPeriodo
     template_name = 'periodo_alta.html'
     success_url = reverse_lazy('mutual:mutual_crear')
+    login_url = "/login/"
+    permission_required = "empleadospublicos.permission_empleado_publico"
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -1117,7 +1140,8 @@ class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
         fields = ['es_leida']
 
 
-
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def periodoVigenteDetalle(request):
 
     # Obtenemos el último periodo que no tiene fecha de fin
@@ -1211,6 +1235,8 @@ def finalizar_periodo(request, pk, crear_nuevo=False):
 def finalizarPeriodo(request, pk):
     return finalizar_periodo(request, pk)
 
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def EditarMutal(request, pk):
      if request.method == 'POST':
         data = request.POST
@@ -1298,7 +1324,8 @@ def EditarMutal(request, pk):
 
 
 
-
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def finalizarPeriodoCrearNuevo(request, pk):
     return finalizar_periodo(request, pk, crear_nuevo=True)
 
