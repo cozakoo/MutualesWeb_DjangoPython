@@ -249,9 +249,12 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
         
 
 
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     model = User
     template_name ='listado_usuarios.html'
+    login_url = '/login/'
+    permission_required = "administradores.permission_administrador"
+
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -263,7 +266,7 @@ class UserListView(ListView):
 
 
 
-class CambiarPasswordView(LoginRequiredMixin, FormView):
+class CambiarPasswordView(LoginRequiredMixin,  FormView):
 
     def post(self, request, user_id):
         # Obtener el usuario específico
