@@ -279,11 +279,20 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             contexto = {'msj': msj}
             return render(request, 'msj_informativo.html', contexto)
         
-        # try:
-        #  dj = DeclaracionJurada.objects.get(es_borrador = False,  periodo = periodo )
-        #  print("aviso se va rectificar")
-        # except DeclaracionJurada.DoesNotExist:
-        #     print("Se puede declarar o rectificar")
+        
+      
+        
+        try:
+            dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), es_borrador = False,  periodo = periodo , es_leida = True  )
+            msj = ("Rectificación de declaración jurada no disponible. Última declaración ya fue leída.")
+            print("aviso se va rectificar")
+            contexto = {'msj': msj}
+            return render(request, 'msj_informativo.html', contexto)
+        except DeclaracionJurada.DoesNotExist:
+            print("Se puede declarar o rectificar")
+        
+        
+        
         contexto = {}
         try:
          dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), es_borrador = True )
@@ -503,8 +512,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             print(periodoActual.mes_anio)
          
 
-            if fecha_obj_inicio > periodoActual.mes_anio:
-                listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} es mayor que la fecha inicial del periodo. Línea: {line_content}")
+            if fecha_obj_inicio.month != periodoActual.mes_anio.month or fecha_obj_inicio.year != periodoActual.mes_anio.year :
+                listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} No corresponde al periodo a declarar. Línea: {line_content}")
 
             if fecha_obj_fin < periodoActual.mes_anio:
                 listErrores.append(f"Error: La FECHA FIN en la línea {line_number} es menor mayor que la fecha inicial del periodo. Línea: {line_content}")
@@ -833,12 +842,25 @@ def descargarDeclaracion(request, pk):
     return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
 
 
+
+
+
+# def obtenerNombreDestino(self, tipo):
+#     if tipo = "P"
+#        m = obtenerMutualVinculada(self)
+    
+    
 def descargarArchivo(request, pk):
     detalle = get_object_or_404(DetalleDeclaracionJurada, pk=pk)
-    
+    userRol = UserRol.objects.get(user= request.user)
+    mutual = userRol.rol.cliente.mutual
+    print(mutual)
+    # nombre = obtenerNombreDestino(request, detalle.tipo)
     with detalle.archivo.open('rb') as archivo:
         response = HttpResponse(archivo.read(), content_type='application/octet-stream')
-        response['Content-Disposition'] = f'attachment; filename="{detalle.archivo.name}"'
+        name = detalle.archivo.name.split("/")[-1]
+
+        response['Content-Disposition'] = f'attachment; filename="{name}"'
     return response
 
 from django.db.models import Q

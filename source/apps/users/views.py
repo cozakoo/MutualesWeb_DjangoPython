@@ -135,7 +135,7 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
                 )
                 c.register
                 c.save()
-                # form.save() 
+                form.save() 
                 
                 user = User.objects.get(username=form.cleaned_data["username"])
                 permiso = obtenerPermiso("cliente")
