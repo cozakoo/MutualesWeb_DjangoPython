@@ -537,6 +537,38 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             listErrores.append(mensaje_error)
             
       
+    def validar_fechas_reclamo(self, line_content, line_number, fecha_inicio, fecha_fin, listErrores):
+        
+        
+        
+        try:
+            # Convertir la cadena de fecha a un objeto de fecha
+            print("FECHA INICIO: ", fecha_inicio)
+            fecha_obj_inicio = datetime.strptime(fecha_inicio, "%d%m%Y").date()
+            print("Fecha INICIO CONVERTIDA: ",fecha_obj_inicio)
+
+            print("FECHA FIN: ", fecha_fin)
+            fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
+            print("Fecha FIN CONVERTIDA: ",fecha_obj_fin)
+            
+            periodoActual = obtenerPeriodoVigente(self)
+            print(periodoActual.mes_anio)
+         
+            
+            if fecha_obj_inicio >= periodoActual.mes_anio:
+                listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} Fecha de inicio del reclamo no es válida. Debe ser anterior al período declarativo actual. Línea: {line_content}")
+
+           
+
+            if fecha_obj_inicio > fecha_obj_fin:
+               listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} es mayor que la FECHA FIN. Línea: {line_content}")
+            
+        
+        except ValueError:
+            mensaje_error = f"Error: La FECHA en la línea {line_number} no es válida. Línea: {line_content}"
+            listErrores.append(mensaje_error)
+            
+
 
     def validar_reclamo(self, form, archivo):
         """Valida el contenido del archivo de RECLAMO."""
@@ -564,8 +596,11 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO, listErrores)
                     validar_numero(self, line_content, line_number, 20, 31, "IMPORTE",listErrores)
                     total_importe += obtenerImporte(self, line_content, 20, 31)
-                    self.validar_fecha_reclamo(line_content, line_number, 31, 39, "FECHA INICIO",listErrores)
-                    self.validar_fecha_reclamo:(line_content, line_number, 39, 47, "FECHA FIN", listErrores) # type: ignore
+                    fecha_str_inicio = line_content[31:39]
+                    fecha_str_fin = line_content[39:47]
+                    self.validar_fechas_reclamo(line_content, line_number, fecha_str_inicio, fecha_str_fin,listErrores)
+                    
+                    
                     validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
                     validar_numero(self,line_content, line_number, 54, 57, "CUOTA", listErrores)
                     last_line_number = line_number  # Actualizar el último line_number
@@ -587,27 +622,6 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
           listErrores.append(f"Archivo invalido no puede ser leido {e}")
           return False, 0, last_line_number
 
-    def validar_fecha_reclamo(self, line_content, line_number, inicio, fin, tipo_fecha, listErrores):
-        fecha_str = line_content[inicio:fin]
-        mensaje = f"{tipo_fecha}: {fecha_str}"
-        print(mensaje)
-
-        try:
-            # Convertir la cadena de fecha a un objeto de fecha
-            fecha_obj = datetime.strptime(fecha_str, "%d%m%Y").date()
-            print(fecha_obj)
-
-            # Obtener la fecha actual
-            fecha_actual = date.today()
-
-            # Comparar si la fecha de la línea está después de la fecha actual
-            if fecha_obj > fecha_actual:
-                mensaje_error = f"Error: La {tipo_fecha} en la línea {line_number} es posterior a la fecha actual. Línea: {line_content}"
-                listErrores.append(mensaje_error)
-
-        except ValueError:
-            listErrores.append(f"Error: La {tipo_fecha.lower()} en la línea {line_number} no es válida. Línea: {line_content}")
-            # messages.warning(self.request, mensaje_error)
 
 
 class DetalleMutualView(LoginRequiredMixin,PermissionRequiredMixin, DetailView):

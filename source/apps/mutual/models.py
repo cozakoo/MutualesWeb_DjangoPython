@@ -23,7 +23,7 @@ class DetalleMutual(models.Model):
 
 class Mutual(models.Model):
 
-    nombre = models.CharField(max_length=100)
+    nombre = models.CharField(max_length=300)
     cuit = models.CharField(max_length=11)
     activo = models.BooleanField(default=True)
     # fecha_subida = models.DateField(auto_now_add=True, blank=True)
