@@ -19,7 +19,9 @@
           <select name="enc_mutual" id="enc_mutual" style="width: 100%;" >
             <option value="0"> Todas las mutuales </option>
             {% for mutual in mutuales  %}
-              <option value="{{mutual.id}}">{{mutual.nombre}} </option>
+              {% comment %} <option value="{{mutual.id}}">{{mutual.nombre}} </option> {% endcomment %}
+              <option value="{{mutual.id}}">{{mutual.nombre|truncatechars:50 }} </option>
+              
             {% endfor %}
           </select>
         </div>
@@ -67,7 +69,8 @@
           <tr>
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td>{{ mutual.cuit }}</td>
-          <td>{{ mutual.nombre }}</td>
+           <td> {{ mutual.nombre|truncatechars:50 }} </td>
+          {% comment %} <td >{{ mutual.nombre }}</td> {% endcomment %}
           <td class="text-center">
             {% if  mutual.activo %}
             <i class="fa-solid fa-building-circle-check" style="color: #306b00;"></i>
