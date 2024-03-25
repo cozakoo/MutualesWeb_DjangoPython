@@ -314,12 +314,23 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
          return render(request, 'confirmacion.html', contexto)
         except DeclaracionJurada.DoesNotExist:
           print("NO EXIST BORRADOR")
+          
           return super().get(request, *args, **kwargs)
         
         
     # def get_success_url(self):
     #     return reverse_lazy('declaracion_jurada')
 
+
+
+
+    def presentaDetalle(detalle:DetalleMutual):
+        return detalle.origen != "*" and detalle.destino != "*" and detalle.concepto_1 > 1 
+    
+
+    
+    
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         accion = self.kwargs.get('accion')
@@ -331,9 +342,17 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         
         mutual = obtenerMutualVinculada(self)
         periodoActual = obtenerPeriodoVigente(self)
+        
+
+        context['existe_prestamo'] = self.presentaDetalle(mutual.detalle.get(tipo='P'))
+        context['existe_reclamo'] = self.presentaDetalle(mutual.detalle.get(tipo='R'))
+        
         print("PERIODO ACTUAAAL")
         print(periodoActual)
         # locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        
+        
+        
         context['periodoActual'] = periodoActual
         context['periodo'] =  ""
         
@@ -674,10 +693,12 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
             form = self.get_form(form_class)
             detalle_reclamo  = FormDetalle(request.POST, prefix='d_reclamo')
             detalle_prestamo = FormDetalle(request.POST, prefix='d_prestamo')
-
+            
+            
             if form.is_valid() and detalle_prestamo.is_valid() and detalle_reclamo.is_valid():
                 return self.form_valid(form, detalle_reclamo, detalle_prestamo)
             else:
+                print("invalid")
                 return self.form_invalid(form,detalle_prestamo, detalle_reclamo)
     
  

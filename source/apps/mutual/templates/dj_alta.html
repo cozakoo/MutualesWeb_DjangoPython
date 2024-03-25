@@ -70,16 +70,19 @@
 
     <form method="post" enctype="multipart/form-data" id="declaracionForm">
       {% csrf_token %}
-
+      {% if existe_prestamo %}
       <div class="mb-3">
           <h5>Prestamo</h5>
           <input class="form-control" type="file" name="{{ form.archivo_p.name }}" id="{{ form.archivo_p.id_for_label }}" />
         </div>
-  
+      {% endif %}
+
+      {% if existe_reclamo %}
       <div class="mb-3">
           <h5>Reclamo</h5>
           <input class="form-control" type="file" name="{{ form.archivo_r.name }}" id="{{ form.archivo_r.id_for_label }}" />
         </div>
+      {% endif %}
       <br />
       <div class="text-center"> 
         <button type="submit" class="btn btn-success" name="cargarDeclaracion" id="declararBtn" disabled>
