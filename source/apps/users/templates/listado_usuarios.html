@@ -34,14 +34,14 @@
             
             <td>{% if user.is_active %} Activo {% else %} Inactivo {% endif %}</td>
             <td>
-                <a href="{% url 'users:cambiar_contrasena' %}" class="btn btn-sm btn-outline-secondary">
+                <a href="{% url 'users:cambiar_password' %}" class="btn btn-sm btn-outline-secondary">
                     <i class="fa-solid fa-lock"></i>
                     Cambiar contraseña
                 </a>
             </td>
 
              <td>
-                <a href="{% url 'users:cambiar_contrasena' %}" class="btn btn-sm btn-outline-danger">
+                <a href="{% url 'users:cambiar_password' %}" class="btn btn-sm btn-outline-danger">
                     <i class="fa-solid fa-trash"></i>
                     Eliminar
                 </a>

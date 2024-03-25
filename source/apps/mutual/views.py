@@ -919,16 +919,20 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         return context
     
     def get_queryset(self):
-        queryset = super().get_queryset()
+        queryset = super().get_queryset().order_by('alias')  # Ordena por alias de forma predeterminada
         filter_form = MutualFilterForm(self.request.GET)
         
         if filter_form.is_valid():
             concepto = filter_form.cleaned_data.get('concepto')
-            activo = filter_form.cleaned_data.get('activo')
             cuit = filter_form.cleaned_data.get('cuit')
+            estado = filter_form.cleaned_data.get('estado')
+
+            if estado == '2':
+                queryset = queryset.filter(activo=True)
+            elif estado == '3':
+                queryset = queryset.filter(activo=False)
 
             mutual_id = self.request.GET.get('enc_mutual')
-            
             try:
                 mutual_id = int(mutual_id)
 
@@ -943,8 +947,6 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                     queryset = queryset.filter(
                         Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
                     )
-                if activo:
-                    queryset = queryset.filter(activo=activo)
                 if cuit is not None:
                     queryset = queryset.filter(cuit=cuit)
 
