@@ -657,11 +657,7 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     success_url = reverse_lazy('mutual:mutual_exito')
     login_url = "/login/"
     permission_required = "empleadospublicos.permission_empleado_publico"
-    
-    # def form_invalid(self, form):
-    #     form.error.clear()
-    #     return super().form_invalid(form)
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
@@ -678,40 +674,26 @@ class MutualCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
             form = self.get_form(form_class)
             detalle_reclamo  = FormDetalle(request.POST, prefix='d_reclamo')
             detalle_prestamo = FormDetalle(request.POST, prefix='d_prestamo')
-            
-            print("---------------imprimo post------------------------------")
-            
-            print(request.POST)
-            
 
-            print("---------------cierro post------------------------------")
-            
-            # print(detalle_prestamo, detalle_reclamo)
-            print("impresion validaciones",form.is_valid() , detalle_prestamo.is_valid() , detalle_reclamo.is_valid())
             if form.is_valid() and detalle_prestamo.is_valid() and detalle_reclamo.is_valid():
                 return self.form_valid(form, detalle_reclamo, detalle_prestamo)
             else:
-                print("LLLLLLLLLLformularios invalidosLLLLLLLLL")
                 return self.form_invalid(form,detalle_prestamo, detalle_reclamo)
     
  
-    # def form_invalid(self, form):
-    #     """If the form is invalid, render the invalid form."""
-    #     return self.render_to_response(self.get_context_data(form=form, ))
-    
     def form_invalid(self, form, detalle_p, detalle_r):
         return self.render_to_response(self.get_context_data(form=form, detalle_prestamo = detalle_p, detalle_reclamo = detalle_r))
     
     def form_valid(self, form, d_reclamo, d_prestam):
-            
-           
-            
+
             # Si no existe, guarda el objeto y realiza las acciones necesarias
             with transaction.atomic():    
-                m = Mutual.objects.create(nombre=form.cleaned_data["nombre"],
-                        cuit=form.cleaned_data["cuit"],
-                        activo = True,
-                        )
+                m = Mutual.objects.create(
+                    nombre=form.cleaned_data["nombre"],
+                    alias=form.cleaned_data["alias"],
+                    cuit=form.cleaned_data["cuit"],
+                    activo = True,
+                )
                       
                 m.detalle.create(
                     tipo = "P",
@@ -910,7 +892,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Mutuales'
-        context["mutuales"] = Mutual.objects.all()
+        context["mutuales"] = Mutual.objects.all().order_by('alias')
         context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
 
         return context
@@ -1259,14 +1241,14 @@ def EditarMutal(request, pk):
         
         nombre = data.get('nombre')
         cuit = data.get('cuit')
+        alias = data.get('alias')
+
         if len(cuit) != 11:
             messages.warning(request, "Cuit invalido, debe tener 11 caracteres")
             return redirect('mutual:listado_mutual')
         else:
             m.cuit = cuit
-            
-            
-        
+
         if m.nombre != nombre:
             try: 
                Mutual.objects.get(nombre = nombre)
@@ -1275,7 +1257,13 @@ def EditarMutal(request, pk):
             except Mutual.DoesNotExist:
                m.nombre = nombre
                
-    
+        if m.alias != alias:
+            try: 
+               Mutual.objects.get(alias = alias)
+               messages.warning(request, "El alias de mutual ya existe")
+               return redirect('mutual:listado_mutual')
+            except Mutual.DoesNotExist:
+               m.alias = alias
        
       
             
@@ -1331,7 +1319,7 @@ def EditarMutal(request, pk):
             
         
         m.save()
-        messages.info(request, "Mutual actualizada éxitosamente")
+        messages.success(request, "Mutual actualizada éxitosamente")
         return redirect('mutual:listado_mutual')
             
          

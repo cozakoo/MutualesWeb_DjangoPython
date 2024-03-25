@@ -18,10 +18,10 @@
 
     {% if page_obj.has_next %}
       <li class="page-item">
-        <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
+        <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
       </li>
       <li class="page-item">
-        <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+        <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">Último &raquo;</a>
       </li>
     {% endif %}
   </ul>

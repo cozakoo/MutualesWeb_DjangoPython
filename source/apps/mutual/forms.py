@@ -41,9 +41,10 @@ class FormularioMutual(forms.ModelForm):
     class Meta:
         model = Mutual
         fields = '__all__'
-        exclude=['estado','detalle','activo','']
+        exclude=['estado','detalle','activo']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'alias': forms.TextInput(attrs={'class': 'form-control'}),
             'cuit': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         

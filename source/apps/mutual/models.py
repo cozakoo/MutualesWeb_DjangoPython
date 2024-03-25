@@ -23,8 +23,9 @@ class DetalleMutual(models.Model):
 
 class Mutual(models.Model):
 
-    nombre = models.CharField(max_length=300)
-    cuit = models.CharField(max_length=11)
+    nombre = models.CharField(max_length=255) #nombre formal legalemte
+    alias = models.CharField(max_length=50)  # Alias utilizado legalmente
+    cuit = models.CharField(max_length=11,  unique=True)  
     activo = models.BooleanField(default=True)
     # fecha_subida = models.DateField(auto_now_add=True, blank=True)
     detalle = models.ManyToManyField(DetalleMutual) 

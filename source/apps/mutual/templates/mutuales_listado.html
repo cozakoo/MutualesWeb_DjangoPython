@@ -7,8 +7,8 @@
 
 {% block contenedor %}
 <div class="container cuadrado-background ">
-  <h3 class="text-center">{{ titulo }}</h3>
-  
+  <h3 class="text-center titulo">{{ titulo }}</h3>
+
   <form method="get" class="mb-7">
     {% csrf_token %}
     <div class="container">
@@ -20,7 +20,7 @@
             <option value="0"> Todas las mutuales </option>
             {% for mutual in mutuales  %}
               {% comment %} <option value="{{mutual.id}}">{{mutual.nombre}} </option> {% endcomment %}
-              <option value="{{mutual.id}}">{{mutual.nombre|truncatechars:50 }} </option>
+              <option value="{{mutual.id}}">{{mutual.alias }} | {{mutual.nombre|truncatechars:50 }} </option>
               
             {% endfor %}
           </select>
@@ -58,6 +58,7 @@
           <tr>
             <th>#</th>
             <th>Cuit</th>
+            <th>Alias</th>
             <th>Nombre</th>
             <th class="text-center">Estado</th>
             <th></th>
@@ -69,6 +70,7 @@
           <tr>
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td>{{ mutual.cuit }}</td>
+            <td>{{ mutual.alias }}</td>
            <td> {{ mutual.nombre|truncatechars:50 }} </td>
           {% comment %} <td >{{ mutual.nombre }}</td> {% endcomment %}
           <td class="text-center">

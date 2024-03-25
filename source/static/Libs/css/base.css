@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'Satoshi Medium';
+    src: url('../font/Satoshi-Medium.ttf') format('truetype');
+}
+
+.titulo {
+    font-family: 'Satoshi Medium', sans-serif;
+}

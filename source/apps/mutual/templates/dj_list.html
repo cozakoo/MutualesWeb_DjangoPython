@@ -7,7 +7,7 @@
 
 {% block contenedor %}
   <div class="container cuadrado-background ">
-    <h3 class="text-center">{{ titulo }}</h3>
+    <h3 class="text-center titulo">{{ titulo }}</h3>
 
     <div class="table-responsive">
       <table class="table">
@@ -61,10 +61,10 @@
       <ul class="pagination justify-content-center">
         {% if page_obj.has_previous %}
           <li class="page-item">
-            <a class="page-link small-btn" href="?page=1">&laquo; first</a>
+            <a class="page-link small-btn" href="?page=1">&laquo; Primero</a>
           </li>
           <li class="page-item">
-            <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">previous</a>
+            <a class="page-link small-btn" href="?page={{ page_obj.previous_page_number }}">Anterior</a>
           </li>
         {% endif %}
     
@@ -77,10 +77,10 @@
     
         {% if page_obj.has_next %}
           <li class="page-item">
-            <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">next</a>
+            <a class="page-link small-btn" href="?page={{ page_obj.next_page_number }}">Siguiente</a>
           </li>
           <li class="page-item">
-            <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">last &raquo;</a>
+            <a class="page-link small-btn" href="?page={{ page_obj.paginator.num_pages }}">Último &raquo;</a>
           </li>
         {% endif %}
       </ul>
