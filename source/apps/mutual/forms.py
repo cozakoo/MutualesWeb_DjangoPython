@@ -137,15 +137,14 @@ class FormularioPeriodo(forms.ModelForm):
 class MutualFilterForm(forms.ModelForm):
     concepto = forms.IntegerField(label='Concepto', required=False)
     cuit = forms.IntegerField(label='Cuit', required=False)
-
+    estado = forms.ChoiceField(choices=[('1', 'Todas'), ('2', 'Activas'), ('3', 'Inactivas')], label='Estado', required=False)
+    
     class Meta:
         model = Mutual
-        fields = ['activo']
-        widgets = {
-            'activo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
+        fields = []  # Dejar vacío para incluir todos los campos del modelo si no hay restricciones
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['concepto'].widget.attrs.update({'placeholder': 'Concepto', 'class': 'form-control'})
         self.fields['cuit'].widget.attrs.update({'placeholder': 'Cuit', 'class': 'form-control'})
+        self.fields['estado'].widget.attrs.update({'class': 'form-select'})
