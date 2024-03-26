@@ -886,7 +886,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     login_url = "/login/"
     model = Mutual
     template_name = "mutuales_listado.html"
-    paginate_by = 10# Número de elementos por página
+    paginate_by = 10  # Número de elementos por página
     permission_required = "empleadospublicos.permission_empleado_publico"
 
     def get_context_data(self, **kwargs):
@@ -894,22 +894,24 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context['titulo'] = 'Mutuales'
         context["mutuales"] = Mutual.objects.all().order_by('alias')
         context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
-
         return context
     
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('alias')  # Ordena por alias de forma predeterminada
+        queryset = super().get_queryset().order_by('alias')
         filter_form = MutualFilterForm(self.request.GET)
-        
+
         if filter_form.is_valid():
             concepto = filter_form.cleaned_data.get('concepto')
-            cuit = filter_form.cleaned_data.get('cuit')
             estado = filter_form.cleaned_data.get('estado')
+            cuit = filter_form.cleaned_data.get('cuit')
 
             if estado == '2':
                 queryset = queryset.filter(activo=True)
             elif estado == '3':
                 queryset = queryset.filter(activo=False)
+
+            if cuit:
+                queryset = queryset.filter(cuit=cuit)
 
             mutual_id = self.request.GET.get('enc_mutual')
             try:
@@ -924,11 +926,8 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             finally:
                 if concepto is not None:
                     queryset = queryset.filter(
-                        Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
+                        Q(detalle_concepto_1=concepto) | Q(detalle_concepto_2=concepto)
                     )
-                if cuit is not None:
-                    queryset = queryset.filter(cuit=cuit)
-
         return queryset
 
 def obtenerPeriodosFinalizados():
