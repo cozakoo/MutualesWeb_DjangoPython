@@ -29,6 +29,7 @@ from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.views.generic import View
 from django.http import HttpResponse, JsonResponse
+from django.contrib.auth.decorators import permission_required, login_required
 
 
 def obtenerPermiso(name):
@@ -63,6 +64,20 @@ def obtenerPermiso(name):
 def cerrar_session(request):
     logout(request)
     return redirect('users:login')
+
+@login_required(login_url="/login/")
+@permission_required('administradores.permission_administrador', raise_exception=True)
+def cambiarEstado(request, pk):
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(pk = pk)
+            estado = user.is_active
+            user.is_active = not estado 
+            user.save()
+            messages.success(request, "Estado del usuario: "+ str(User.username) +" cambiado.")
+        except User.DoesNotExist:
+            print("no cambiado")
+    return redirect('users:usuarios_listado')
 
 def register_user_mutual_exito(request):
     return render(request,'registrar_usuario_mutual_exito.html')
@@ -261,32 +276,44 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         context['titulo'] = 'Listado de usuarios'
         return context
 
+@login_required(login_url="/login/")
+@permission_required('administradores.permission_administrador', raise_exception=True)
+def PasswordChangeAdmnistrador(request, pk):
+    
+    if request.method == 'POST':
+           data = request.POST  
+           password = data.get('password')
+           print(password)
+           print(str(password))
+           try:
+               
+                user = User.objects.get(pk = pk)   
+                print("soy user:"+ user.username)
+                user.set_password(password)
+                print("cambio con exito")
+                user.save()
+                messages.success(request,"contraseña cambiada correctamente")
+                
+           except User.DoesNotExist:
+               messages.error(request,"no se pude completar operacion")
+               ("NO encontrado")
+            
+    return redirect('users:usuarios_listado')
+    
 
-
+    
+    
 
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     form_class = CustomPasswordChangeForm
     template_name = 'cambiar_password.html'  # Template donde mostrar el formulario
-    success_url = reverse_lazy('sec2:home')
+    success_url = reverse_lazy('dashboard')
     login_url = '/login/'
     
     def form_valid(self, form):
         mensaje_exito(self.request, f'Contraseña cambiada con exito.')
         return super().form_valid(form)
 
-class CambiarPasswordViewUsers(LoginRequiredMixin,  FormView):
 
-    def post(self, request, user_id):
-        # Obtener el usuario específico
-        usuario = get_object_or_404(User, id=user_id)
-
-        # Obtener la nueva contraseña del formulario (en este ejemplo, asumimos que la contraseña se pasa en el cuerpo de la solicitud)
-        nueva_password = request.POST.get('nueva_password')
-
-        # Cambiar la contraseña del usuario
-        usuario.set_password(nueva_password)
-        usuario.save()
-
-        return JsonResponse({'mensaje': 'Contraseña cambiada con éxito'})
 
 

@@ -28,6 +28,8 @@ from django.urls import reverse
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import permission_required, login_required
 from django.http import JsonResponse
+from django.db.models import Q
+
 
 
 
@@ -324,7 +326,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
 
 
 
-    def presentaDetalle(detalle:DetalleMutual):
+    def presentaDetalle(self , detalle:DetalleMutual):
         return detalle.origen != "*" and detalle.destino != "*" and detalle.concepto_1 > 1 
     
 
@@ -1265,13 +1267,14 @@ def EditarMutal(request, pk):
         nombre = data.get('nombre')
         cuit = data.get('cuit')
         alias = data.get('alias')
+        
 
         if len(cuit) != 11:
             messages.warning(request, "Cuit invalido, debe tener 11 caracteres")
             return redirect('mutual:listado_mutual')
         else:
             m.cuit = cuit
-
+          
         if m.nombre != nombre:
             try: 
                Mutual.objects.get(nombre = nombre)
@@ -1312,36 +1315,87 @@ def EditarMutal(request, pk):
               reclamo.origen = data.get('origen_r')
               if reclamo.destino != data.get('destino_r') : 
                   reclamo.destino = data.get('destino_r')
-              reclamo.concepto_1 = data.get('concep1_r')
-              print(reclamo.concepto_1)
+                  
+              concepto = int(data.get('concep1_r'))    
+              if reclamo.concepto_1 != concepto:
+                 print(" soy distinto") 
+                 print( reclamo.concepto_1.object )
+                 print(concepto.object)
+                 if concepto > 1:
+                    if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
+                        messages.error(request, "concepto 1 de detll.reclamo ingresado pertecene a otra mutual")
+                        return redirect('mutual:listado_mutual')
+                 reclamo.concepto_1 = concepto    
+              else:
+                  print("soy igual")      
+                 
+              concepto = int(data.get('concep2_r'))
+              if reclamo.concepto_2 != concepto:
+                 print("soy distinto concepto2 reclamo")
+         
+                 
+                 if concepto == reclamo.concepto_1:
+                     messages.error(request, "Concepto 2 de detalle reclamo no puede ser igual a concepto 1")
+                     return redirect('mutual:listado_mutual')
+                 
+                 
+                 if concepto > 1:
+                    if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
+                        messages.error(request, "Edicion cancelada, el concepto 2 ingresado  detalle reclamo Pertenece a una mutual")
+                        return redirect('mutual:listado_mutual')
+                 reclamo.concepto_2 = concepto
+              else:
+                print("soy igual concepto2 reclamo")
+                                 
             
-              if reclamo.concepto_2 != data.get('concep2_r') :
-                  reclamo.concepto_2 = data.get('concep2_r')
+             
               
               reclamo.save()
            except:
-              print("exept") 
+              print("exept 1") 
         
         if data.get('origen_p') :
            print("entre")
            try:
-              reclamo = m.detalle.all().get(tipo = 'P')
-              reclamo.origen = data.get('origen_p')
-              if reclamo.destino != data.get('destino_p') : 
-                  reclamo.destino = data.get('destino_p')
-              reclamo.concepto_1 = data.get('concep1_p')
-              print(reclamo.concepto_1)
-            
-              if reclamo.concepto_2 != data.get('concep2_p') :
-                  reclamo.concepto_2 = data.get('concep2_p')
+              prestamo = m.detalle.all().get(tipo = 'P')
+              prestamo.origen = data.get('origen_p')
+              if prestamo.destino != data.get('destino_p') : 
+                  prestamo.destino = data.get('destino_p')
               
-              reclamo.save()
-           except:
-              print("exept") 
+              concepto = int(data.get('concep1_p')) 
+              if prestamo.concepto_1 != concepto:
+                 concepto = data.get('concep1_p')
+                 if concepto > 1:
+                    if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
+                        messages.error(request, "Edicion cancelada, el concepto 1 ingresado en detalle reclamo Pertenece a una mutual")
+                        return redirect('mutual:listado_mutual')
+                 prestamo.concepto_1 = concepto    
+                 
+                 
+              concepto = int(data.get('concep2_p'))   
+              if prestamo.concepto_2 != concepto:
+                 print("soy distinto prestamo")
+                 
+                 if concepto == prestamo.concepto_1:
+                     messages.error(request, "Edicion cancelada, el concepto 2 ingresado en detalle prestamo Pertenece a una mutual")
+                     return redirect('mutual:listado_mutual')
+                 if concepto > 1:
+                    print("entre a buscar en filtro")
+                    if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
+                        messages.error(request, "Concepto 2 de detalle prestamo ingresado pertecene a otra mutual")
+                        return redirect('mutual:listado_mutual')
+                 prestamo.concepto_2 = concepto
+              
+              prestamo.save()
+           except Exception:
+               print("except")
+               print(Exception)
+               
               
             
         
         m.save()
+        print("llegue aqui")
         messages.success(request, "Mutual actualizada éxitosamente")
         return redirect('mutual:listado_mutual')
             

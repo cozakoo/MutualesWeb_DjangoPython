@@ -107,12 +107,16 @@ $(document).ready(function() {
       var archivoP = $(this);
       var archivoR = $('#{{ form.archivo_r.id_for_label }}');
       var declararBtn = $('#declararBtn');
+     
 
       if (archivoP.val() || archivoR.val()) {
           declararBtn.prop('disabled', false);
       } else {
           declararBtn.prop('disabled', true);
       }
+
+      
+
   });
 
   $('#{{ form.archivo_r.id_for_label }}').on('change', function() {
@@ -130,12 +134,21 @@ $(document).ready(function() {
 
     document.addEventListener('DOMContentLoaded', function () {
         // Agrega un escucha de evento de clic al botón "Cargar Declaracion"
+
+      
         document.getElementById('declararBtn').addEventListener('click', function () {
             // Deshabilita el botón para evitar clics múltiples
             this.disabled = true;
-            
+          var expl_prestamo = $('#form.archivo_p.id_for_label');
+           var expl_reclamop = $('#form.archivo_r.id_for_label');
+
+             var archivoR = $('#{{ form.archivo_r.id_for_label }}');
+             archivoR.disable = true;
+             
+     
             // Muestra el spinner
             this.querySelector('.spinner').style.display = 'inline-block';
+            
 
             // Envía el formulario
             document.getElementById('declaracionForm').submit();
