@@ -19,9 +19,8 @@
           <th>Username</th>
           <th>Email</th>
           <th>Ultima conexion</th>
-          <th>Estado</th>
-          <th></th>
-          <th></th>
+          <th class="text-center">Estado</th>
+          <th colspan="2"></th>
         </tr>
       </thead>
       <tbody>
@@ -32,7 +31,13 @@
             <td>{{ user.email }}</td>
             <td>{{ user.date_joined }}</td>
             
-            <td>{% if user.is_active %} <i class="fa-solid fa-circle-check" style="color: #17bc01;"></i> Activo {% else %} <i class="fa-solid fa-circle-xmark" style="color: #d20f0f;"></i> Inactivo {% endif %}</td>
+            <td class="text-center">
+              {% if user.is_active %} 
+                <i class="fa-solid fa-circle-check" style="color: #306b00;"></i> 
+              {% else %}
+                <i class="fa-solid fa-circle-xmark" style="color: #7a0000;"></i> 
+              {% endif %}
+              </td>
       
             <td>
                 <a class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalpass_{{user.pk}}">

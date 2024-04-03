@@ -927,6 +927,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             concepto = filter_form.cleaned_data.get('concepto')
             estado = filter_form.cleaned_data.get('estado')
             cuit = filter_form.cleaned_data.get('cuit')
+            print(concepto)
 
             if estado == '2':
                 queryset = queryset.filter(activo=True)
@@ -948,8 +949,9 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
             finally:
                 if concepto is not None:
+                    print("ESTOY AQUI")
                     queryset = queryset.filter(
-                        Q(detalle_concepto_1=concepto) | Q(detalle_concepto_2=concepto)
+                    Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
                     )
         return queryset
 
