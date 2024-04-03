@@ -33,7 +33,7 @@ LOGIN_REDIRECT_URL = 'dashboard'
 SECRET_KEY = 'django-insecure-e-ci_*^+2*7f!n-y33c1s0r1&djna=l&d8wt(r2h!i_-rjvsk)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 
 ALLOWED_HOSTS = ["*"]

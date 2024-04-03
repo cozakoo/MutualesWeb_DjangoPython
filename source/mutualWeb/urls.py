@@ -28,7 +28,7 @@ urlpatterns = [
     #PRIINCIPALES
     # path('', bienvenida , name='index'),
     path('', RedirectView.as_view(url='login/', permanent=False), name='index'),
-    path('admin/', admin.site.urls),
+    path('admin_manager_ministerio/', admin.site.urls),
     path('dashboard/', dashboard, name='dashboard'),
     
     #APLICACIONES
