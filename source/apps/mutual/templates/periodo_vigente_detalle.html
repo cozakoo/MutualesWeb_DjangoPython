@@ -108,10 +108,10 @@
                 <th>Mutual</th>
                 <th class="text-center">Leido</th>
                 <th>Fecha de lectura</th>
-                <th class="text-center">Rectificativa</th>
-                <th class="text-center">Seleccionar</th>
-                <th class="text-center">Archivos cargados</th>
-                <th class="text-center">Declaracion jurada</th>
+                <th class="text-center">Rect</th>
+                <th class="text-center">Sel.</th>
+                <th class="text-center">Arch. Carg.</th>
+                <th class="text-center">DDJJ</th>
               </tr>
             </thead>
 
@@ -120,7 +120,7 @@
                 <tr>
                   <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
                   
-                  <td>{{ declaracion.mutual }}</td>
+                  <td>{{ declaracion.mutual.alias }}</td>
                   
                   <td class="text-center">
                     {% if declaracion.es_leida %}

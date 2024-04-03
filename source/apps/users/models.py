@@ -8,21 +8,7 @@ from django.contrib.auth.models import Permission
 class UserRol(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, blank=True)
-
+    ultimaConexion = models.DateTimeField(null=True, blank=True)  # Nuevo campo para almacenar la última conexión
 
     def __str__(self):
         return f"{self.user.username} "
-    
-    # permiso, creado = Permission.objects.get_or_create(
-    #     codename='permission_admin',
-    #     name='Control total administrador',
-    #     content_type=content_type,
-    # )
-    # if creado:
-    #     print("Permiso de 'Control Total' creado exitosamente.")
-    # else:
-    #     print("El permiso ya existía.")
-        
-    
-    
-

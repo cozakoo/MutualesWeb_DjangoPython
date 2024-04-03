@@ -8,9 +8,10 @@ from apps.users.models import UserRol
 # @permission_required(".add_choice", raise_exception=True)
 def dashboard(request):
     userRol = UserRol.objects.get(user = request.user )
+    
     contexto = {
         'rol': userRol.rol,
-        'ultimaSession':request.user.last_login,
+        'ultimaConexion': userRol.ultimaConexion,
     }
      
     if  userRol.rol.persona.es_cliente: 

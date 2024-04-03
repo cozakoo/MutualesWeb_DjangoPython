@@ -919,7 +919,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Mutuales'
-        # context["mutuales"] = Mutual.objects.all().order_by('alias')
+        context["mutuales"] = Mutual.objects.all().order_by('alias')
         context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
         return context
     
@@ -931,6 +931,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             concepto = filter_form.cleaned_data.get('concepto')
             estado = filter_form.cleaned_data.get('estado')
             cuit = filter_form.cleaned_data.get('cuit')
+            print(concepto)
 
             if estado == '2':
                 queryset = queryset.filter(activo=True)
@@ -952,8 +953,9 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
             finally:
                 if concepto is not None:
+                    print("ESTOY AQUI")
                     queryset = queryset.filter(
-                        Q(detalle_concepto_1=concepto) | Q(detalle_concepto_2=concepto)
+                    Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
                     )
         return queryset
 
@@ -971,7 +973,7 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
-        context['mutuales'] = Mutual.objects.all()
+        context['mutuales'] = Mutual.objects.all().order_by('alias')
         context['periodos'] = obtenerPeriodosFinalizados()
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
 
