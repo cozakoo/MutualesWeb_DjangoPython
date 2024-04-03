@@ -10,8 +10,8 @@ class UserRol(models.Model):
     rol = models.ForeignKey(Rol, on_delete=models.SET_NULL, null=True, blank=True)
 
 
-
-    
+    def __str__(self):
+        return f"{self.user.username} "
     
     # permiso, creado = Permission.objects.get_or_create(
     #     codename='permission_admin',
