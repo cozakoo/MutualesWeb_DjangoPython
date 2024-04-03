@@ -3,7 +3,7 @@ from ..personas.models import Rol
 from django.contrib.auth.models import User
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.auth.models import Permission
-# Este model define el usuario y el Rol que ocupa
+# Este model definew el usuario y el Rol que ocupa
 
 class UserRol(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)

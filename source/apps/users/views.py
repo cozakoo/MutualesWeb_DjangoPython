@@ -63,8 +63,6 @@ def obtenerPermiso(name):
 
 def cerrar_session(request):
     userRol = UserRol.objects.get(user = request.user )
-    print(userRol)
-    print("Ultima conexion: ", request.user.last_login)
     userRol.ultimaConexion = request.user.last_login
     userRol.save()
     logout(request)
