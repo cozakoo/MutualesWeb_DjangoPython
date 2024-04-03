@@ -915,7 +915,7 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Mutuales'
-        # context["mutuales"] = Mutual.objects.all().order_by('alias')
+        context["mutuales"] = Mutual.objects.all().order_by('alias')
         context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
         return context
     
@@ -969,7 +969,7 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
-        context['mutuales'] = Mutual.objects.all()
+        context['mutuales'] = Mutual.objects.all().order_by('alias')
         context['periodos'] = obtenerPeriodosFinalizados()
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
 

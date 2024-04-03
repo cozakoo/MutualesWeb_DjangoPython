@@ -19,7 +19,7 @@
           <select name="enc_mutual" id="enc_mutual" style="width: 100%;">
             <option value="0"> Todas las mutuales </option>
             {% for mutual in mutuales %}
-            <option value="{{mutual.id}}">{{mutual.nombre}} </option>
+            <option value="{{mutual.id}}">{{mutual.alias}} </option>
             {% endfor %}
           </select>
         </div>
