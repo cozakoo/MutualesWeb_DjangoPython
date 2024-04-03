@@ -1,11 +1,11 @@
 from django import forms
-from apps.mutual.models import DetalleDeclaracionJurada, Mutual, Periodo
+from apps.mutual.models import DetalleDeclaracionJurada, DetalleMutual, Mutual, Periodo
 
 
 class FormDetalle(forms.Form):
-    origen = forms.CharField(max_length=100, initial='', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    destino = forms.CharField(max_length=100, initial='', widget=forms.TextInput(attrs={'class': 'form-control'}))
-    concep1 = forms.IntegerField(widget=forms.NumberInput(attrs={'class': 'form-control'}))
+    origen = forms.CharField(max_length=100,initial='', required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    destino = forms.CharField(max_length=100,initial='', required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
+    concep1 = forms.IntegerField(initial=1, widget=forms.NumberInput(attrs={'class': 'form-control'}))
     concep2 = forms.IntegerField(initial=0, required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
     
     # def __init__(self, *args, **kwargs):
@@ -23,16 +23,48 @@ class FormDetalle(forms.Form):
     #             self.fields['concep1'] = forms.IntegerField(initial=contexto['concep1'])
     #             self.fields['concep2'] = forms.IntegerField(initial=contexto['concep2'])      
 
-
+    
+    def clean_origen(self):
+        origen = self.cleaned_data['origen']
+        if origen.strip() == '':
+            return "*"
+        return origen
+    
+    def clean_destino(self):
+        destino = self.cleaned_data['destino']
+        if destino.strip() == '':
+            return "*"
+        return destino
+    
+    def conceptoExiste(self, concepto):
+        return  DetalleMutual.objects.filter(concepto_1 = concepto).exists() or DetalleMutual.objects.filter(concepto_2 = concepto).exists()
+    
+        
     def clean_concep1(self):
         concep1 = self.cleaned_data.get('concep1')
+       
+        if concep1 > 1:
+            if self.conceptoExiste(concep1):
+                raise forms.ValidationError("El concepto ya existe asociado a otra mutual")
+        
         if concep1 is not None and concep1 <= 0:
             raise forms.ValidationError("El valor debe ser mayor que 0.")
+        
         return concep1
 
     def clean_concep2(self):
         # if self.clean_concep1(self) != :
+        concep1 = self.cleaned_data.get('concep1')
         concep2 = self.cleaned_data.get('concep2')
+        
+        if concep2 > 1:
+            if self.conceptoExiste(concep2):
+                raise forms.ValidationError("El concepto ya existe asociado a otra mutual") 
+            
+        if concep2 == concep1:
+            raise forms.ValidationError("Existen 2 conceptos iguales")
+        
+        
         if concep2 is not None and concep2 < 0:
             raise forms.ValidationError("El valor debe ser mayor o igual que 0.")
         return concep2
@@ -48,7 +80,7 @@ class FormularioMutual(forms.ModelForm):
             'cuit': forms.NumberInput(attrs={'class': 'form-control'}),
         }
         
-        
+    
     def clean_nombre(self):
         print(self.cleaned_data)
         nombre = self.cleaned_data['nombre']
@@ -72,7 +104,7 @@ class FormularioMutual(forms.ModelForm):
             raise forms.ValidationError('El CUIT debe tener 11 dígitos numéricos.')
     
         if Mutual.objects.filter(cuit__iexact = cuit).exists():
-            raise forms.ValidationError('El CUIT ya existe ---------------')
+            raise forms.ValidationError('El CUIT ingresado esta vinculado a otra mutual')
         else:
             return cuit
         

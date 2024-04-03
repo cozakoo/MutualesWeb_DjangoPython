@@ -32,23 +32,37 @@
             <td>{{ user.email }}</td>
             <td>{{ user.date_joined }}</td>
             
-            <td>{% if user.is_active %} Activo {% else %} Inactivo {% endif %}</td>
+            <td>{% if user.is_active %} <i class="fa-solid fa-circle-check" style="color: #17bc01;"></i> Activo {% else %} <i class="fa-solid fa-circle-xmark" style="color: #d20f0f;"></i> Inactivo {% endif %}</td>
+      
             <td>
-                <a href="{% url 'users:cambiar_password' %}" class="btn btn-sm btn-outline-secondary">
-                    <i class="fa-solid fa-lock"></i>
+                <a class="btn btn-sm btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#modalpass_{{user.pk}}">
+                     <i class="fa-solid fa-lock"></i>
                     Cambiar contraseña
-                </a>
+                  </a>
+            </td>
+            
+            <td> 
+                 {% if not user.is_active %}  
+                 <a class="btn btn-sm " data-bs-toggle="modal" data-bs-target="#cambiarEstado_{{user.pk}}">
+                      <i class="fa-regular fa-circle-up" style="color: #1dc93f;"></i>
+                    Dar de Alta
+                  </a>
+                  {% else %}
+                  <a class="btn btn-sm " data-bs-toggle="modal" data-bs-target="#cambiarEstado_{{user.pk}}">
+                      <i class="fa-regular fa-circle-down" style="color: #ea1a1a;"></i>
+                    Dar de Baja
+                  </a>
+                {% endif %}
             </td>
 
-             <td>
-                <a href="{% url 'users:cambiar_password' %}" class="btn btn-sm btn-outline-danger">
-                    <i class="fa-solid fa-trash"></i>
-                    Eliminar
-                </a>
-            </td>
+
+
 
         </tr>
+        {% include "modal_cambiar_contrasenia.html" %}
+        {% include "modal_cambiar_estado_user.html" %}
         {% endfor %}
+        
 
       </tbody>
     </table>

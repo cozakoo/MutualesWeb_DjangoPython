@@ -70,16 +70,19 @@
 
     <form method="post" enctype="multipart/form-data" id="declaracionForm">
       {% csrf_token %}
-
+      {% if existe_prestamo %}
       <div class="mb-3">
           <h5>Prestamo</h5>
           <input class="form-control" type="file" name="{{ form.archivo_p.name }}" id="{{ form.archivo_p.id_for_label }}" />
         </div>
-  
+      {% endif %}
+
+      {% if existe_reclamo %}
       <div class="mb-3">
           <h5>Reclamo</h5>
           <input class="form-control" type="file" name="{{ form.archivo_r.name }}" id="{{ form.archivo_r.id_for_label }}" />
         </div>
+      {% endif %}
       <br />
       <div class="text-center"> 
         <button type="submit" class="btn btn-success" name="cargarDeclaracion" id="declararBtn" disabled>
@@ -104,12 +107,16 @@ $(document).ready(function() {
       var archivoP = $(this);
       var archivoR = $('#{{ form.archivo_r.id_for_label }}');
       var declararBtn = $('#declararBtn');
+     
 
       if (archivoP.val() || archivoR.val()) {
           declararBtn.prop('disabled', false);
       } else {
           declararBtn.prop('disabled', true);
       }
+
+      
+
   });
 
   $('#{{ form.archivo_r.id_for_label }}').on('change', function() {
@@ -127,12 +134,21 @@ $(document).ready(function() {
 
     document.addEventListener('DOMContentLoaded', function () {
         // Agrega un escucha de evento de clic al botón "Cargar Declaracion"
+
+      
         document.getElementById('declararBtn').addEventListener('click', function () {
             // Deshabilita el botón para evitar clics múltiples
             this.disabled = true;
-            
+          var expl_prestamo = $('#form.archivo_p.id_for_label');
+           var expl_reclamop = $('#form.archivo_r.id_for_label');
+
+             var archivoR = $('#{{ form.archivo_r.id_for_label }}');
+             archivoR.disable = true;
+             
+     
             // Muestra el spinner
             this.querySelector('.spinner').style.display = 'inline-block';
+            
 
             // Envía el formulario
             document.getElementById('declaracionForm').submit();
