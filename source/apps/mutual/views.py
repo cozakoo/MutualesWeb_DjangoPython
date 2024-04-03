@@ -274,9 +274,13 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         
         periodo = obtenerPeriodoVigente(self)
         
+        mutual = obtenerMutualVinculada(self)
         
-        print(request.user.get_all_permissions)
-          
+        if(not mutual.activo):
+            msj = ("El estado de su mutual está inactivo, por lo tanto, no puede realizar declaraciones juradas en este momento.")
+            contexto = {'msj': msj}
+            return render(request, 'msj_informativo.html', contexto)
+            
         if periodo == None:
             print("redirijo msj")
             msj = ("No existe un Periodo de Declaración Jurada disponible actualmente.")
