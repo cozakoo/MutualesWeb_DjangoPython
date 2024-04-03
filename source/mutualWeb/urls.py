@@ -21,6 +21,7 @@ from django.urls import path, include
 from django.conf.urls import handler404
 from mutualWeb.views import *
 from .views import *
+from mutualWeb import views
 
 
 
@@ -36,6 +37,14 @@ urlpatterns = [
     path('dashboard/mutual/', include('apps.mutual.urls')),
     path('dashboard/personas/', include('apps.personas.urls')),
     path('', include('apps.users.urls')),
+
+    path("select2/", include("django_select2.urls")),
+
+    path('buscar_mutuales/', views.buscar_mutuales, name='buscar_mutuales'),
+
+
+
+
 ]
 
 handler404 = "mutualWeb.views.pagina_no_encontrada"

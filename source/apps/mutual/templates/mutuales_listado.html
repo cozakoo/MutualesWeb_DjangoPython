@@ -14,19 +14,19 @@
     <div class="container">
       <hr>
       <div class="row">
-        <div class="col d-flex align-items-center">
+        {% comment %} <div class="col d-flex align-items-center"> {% endcomment %}
+          <div class="col">
 
-          <select name="enc_mutual" id="enc_mutual" style="width: 100%;" >
-            <option value="0"> Todas las mutuales </option>
-            {% for mutual in mutuales  %}
-              {% comment %} <option value="{{mutual.id}}">{{mutual.nombre}} </option> {% endcomment %}
-              {% comment %} <option value="{{mutual.id}}">{{mutual.alias }} | {{mutual.nombre|truncatechars:50 }} </option> {% endcomment %}
-              <option value="{{mutual.id}}">{{mutual.alias|truncatechars:50 }} </option>
-              
-            {% endfor %}
+          <select name="enc_mutual" id="enc_mutual" class="form-control">
+            <option value="">Todas las mutuales</option>
           </select>
+          
         </div>
 
+        {% comment %} <div class="col"> {% endcomment %}
+          {% comment %} {{ filter_form.mutuales }} {% endcomment %}
+        {% comment %} </div>        {% endcomment %}
+         
         <div class="col">
           {{ filter_form.cuit }}
         </div>
@@ -38,6 +38,8 @@
           {{ filter_form.estado }}
         </div>
 
+
+        
         <div class="col text-end">
           <button type="submit" class="btn btn-sm btn-primary btn-circle">
           <i class="fa-solid fa-filter"></i>
@@ -101,17 +103,32 @@
 
 
 
-<script type="text/javascript">
-  $('.django-select2').on("change", () => console.log("hola"));
-</script>
 <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
 <script>
-  $(function () {
-    $("#enc_mutual").select2();
-  });
+    $(document).ready(function() {
+        $("#enc_mutual").select2({
+            minimumInputLength: 1, // Número mínimo de caracteres para iniciar la búsqueda
+            ajax: {
+                url: "/buscar_mutuales/", // URL del endpoint de búsqueda en el servidor
+                dataType: 'json',
+                delay: 250, // Retraso en milisegundos antes de enviar la solicitud AJAX
+                data: function(params) {
+                    return {
+                        q: params.term // El término de búsqueda proporcionado por el usuario
+                    };
+                },
+                processResults: function(data) {
+                    return {
+                        results: data // Los resultados devueltos por el servidor
+                    };
+                },
+                cache: true
+            }
+        });
+    });
 </script>
 
 
