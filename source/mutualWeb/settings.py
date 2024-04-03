@@ -61,12 +61,10 @@ INSTALLED_APPS = [
 SASS_PROCESSOR_ENABLED = True
 SASS_PROCESSOR_ROOT = os.path.join(BASE_DIR, 'static')
 
-SESSION_COOKIE_AGE = 1800
+SESSION_COOKIE_AGE = 3600
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
 
 LOGIN_URL = 'login'
-LOGIN_URL = 'cerrar_session'
-
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -77,7 +75,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'mutualWeb.middleware.SessionTimeoutMiddleware',
+    'mutualWeb.middleware.SessionTimeoutMiddleware',
 ]
 
 ROOT_URLCONF = 'mutualWeb.urls'
