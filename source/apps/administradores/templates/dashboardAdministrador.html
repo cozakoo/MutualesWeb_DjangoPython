@@ -18,11 +18,9 @@
 
     {% block contenedor %}
       <div class="cuadrado-background">
-        <h1 class="text-center">¡Bienvenido {{ user }}!</h1>
+        <h1 class="text-center titulo">¡Bienvenido {{ user }}!</h1>
 
         <div class="row">
-         
-
           <div class="col-md-8 col-sm-12">
             <h5 class="negrita">{{ rol.cliente.mutual }}</h5>
           </div>
@@ -33,7 +31,7 @@
             <h5>Ultima conexion:</h5>
           </div>
           <div class="col-md-8 col-sm-12">
-            <h5 class="negrita">{{ ultimaConexion }}</h5>
+            <h5>{{ ultimaConexion }}</h5>
           </div>
         </div>
       </div>
