@@ -15,7 +15,7 @@
     <table class="table table-sm  table-striped table-hover ">
       <thead>
         <tr>
-          <th>#</th>
+          <th >#</th>
           <th>Username</th>
           <th>Email</th>
           <th>Ultima conexion</th>
@@ -29,7 +29,7 @@
             <td class="negrita">{{ forloop.counter }}</td>
             <td>{{ user.username }}</td>
             <td>{{ user.email }}</td>
-            <td>{{ user.ultimaConexion }}</td>
+            <td>{{ user.date_joined }}</td>
             
             <td class="text-center">
               {% if user.is_active %} 

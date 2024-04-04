@@ -1,28 +1,28 @@
 <div class="modal fade" id="modalpass_{{user.pk}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document" >
-      <div class="modal-content">
-        <div class="modal-header">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
           <h1 class="modal-title fs-5" id="exampleModalLabel">Cambio de contraseña, usuario: {{user.username}}</h1>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
-              <form id="formulario{{user.pk}}" method="post" action="{% url 'users:cambiar_password_admin' pk=user.id %}">
-              {% csrf_token %}
-                    
-                  <div class="form_group row">
-                    {% comment %} <label for="inputPassword" class="col-sm-2 col-form-label">Contraseña:</label> {% endcomment %}
-                    <div class="col-sm-10">
-                      <input type="password" class="form-control" name="password" id="password" placeholder="ingrese nueva contraseña" required>
-                    </div>
-                  </div>
-                   
-
-              <div class="modal-footer">
-          <button type="submit" class="btn btn-outline-success mb-2">Cambiar Contraseña</button>
-        </div>
-          </form>
+        
+        <form id="formulario{{user.pk}}" method="post" action="{% url 'users:cambiar_password_admin' pk=user.id %}">
+          {% csrf_token %}
           
-        </div>
+          <div class="modal-body">
+            <div class="form_group row">
+            {% comment %} <label for="inputPassword" class="col-sm-2 col-form-label">Contraseña:</label> {% endcomment %}
+              <div class="col-sm-10">
+                <input type="password" class="form-control" name="password" id="password" placeholder="ingrese nueva contraseña" required>
+              </div>
+            </div>
+            <br>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-outline-success mb-2">Cambiar Contraseña</button>
+          </div>
+        </form>
+          
+      </div>
         
       </div>
     </div>
