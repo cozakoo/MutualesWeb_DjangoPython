@@ -1,27 +1,34 @@
+from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
 from apps.mutual.models import Mutual
 from apps.users.models import UserRol
 
-@login_required(login_url='users:login')
-# @permission_required(".add_choice", raise_exception=True)
+@login_required(login_url="/login/")
 def dashboard(request):
-    userRol = UserRol.objects.get(user = request.user )
+  
+    user =  request.user
+    userRol = UserRol.objects.get(user = user )
+    if request.method == 'GET' :
+        if not userRol.ultimaConexion:
+            userRol.ultimaConexion =  timezone.now()
+            
+        contexto = {
+            'rol': userRol.rol,
+            'ultimaConexion': userRol.ultimaConexion,
+        }
+        
+        if  userRol.rol.persona.es_cliente: 
+            return render(request, 'dashboardCliente.html',contexto)
+        
+        if  userRol.rol.persona.es_empleado_publico: 
+            return render(request, 'dashboardEmpleadoPublico.html',contexto)
     
-    contexto = {
-        'rol': userRol.rol,
-        'ultimaConexion': userRol.ultimaConexion,
-    }
-     
-    if  userRol.rol.persona.es_cliente: 
-     return render(request, 'dashboardCliente.html',contexto)
-     
-    if  userRol.rol.persona.es_empleado_publico: 
-     return render(request, 'dashboardEmpleadoPublico.html',contexto)
- 
-    if userRol.rol.persona.es_admin:
-        return render(request, 'dashboardAdministrador.html',contexto)
+        if userRol.rol.persona.es_admin:
+                return render(request, 'dashboardAdministrador.html',contexto)
+        
+        return redirect('users:login')
 
 
 def pagina_no_encontrada(request, exception):

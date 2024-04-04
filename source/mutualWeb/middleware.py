@@ -1,4 +1,6 @@
 # middleware.py
+from django.shortcuts import redirect
+from django.urls import reverse
 from django.utils import timezone
 from django.contrib.sessions.models import Session
 from django.conf import settings
@@ -28,9 +30,9 @@ class SessionTimeoutMiddleware:
     def __call__(self, request):
         print("midelware")
         response = self.get_response(request)
-
+        user = request.user
         # Verificar si el usuario está autenticado
-        if request.user.is_authenticated:
+        if user.is_authenticated and not user.is_superuser:
             # Obtener la última actividad de la sesión
             last_activity = obtenerUltimaActividad(request.user)
             print(last_activity)
@@ -40,11 +42,13 @@ class SessionTimeoutMiddleware:
                 idle_time = timezone.now() - last_activity
                 print("PASE")
                 print(idle_time.total_seconds)
-                if idle_time.total_seconds() > settings.SESSION_COOKIE_AGE:
+                if idle_time.total_seconds() > settings.SESSION_INACTIVITY:
                     # Si el tiempo de inactividad supera la duración de la sesión, cerrar la sesión
                     logout(request)
+                    return redirect('users:login')
 
-            # Actualizar la última actividad en la sesión
+            # Actualizar la última actividad en la sesión            
             ActualizarUltimaActividad(request.user)
-
+        else:
+            print("no entre")
         return response

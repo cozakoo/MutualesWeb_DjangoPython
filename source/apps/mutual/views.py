@@ -1234,29 +1234,34 @@ def validar_declaraciones_leidas(request, declaraciones, redirect_url):
     for declaracion in declaraciones:
         if not declaracion.es_leida:
             messages.error(request, "El periodo vigente tiene declaraciones que no han sido leídas aún.")
-            return redirect(redirect_url)
+            return False
+    return True
 
 def finalizar_periodo(request, pk, crear_nuevo=False):
     periodo = get_object_or_404(Periodo, pk=pk)
     declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
 
-    validar_declaraciones_leidas(request, declaraciones, 'mutual:periodo_vigente_detalle')
+    todas_leidas = validar_declaraciones_leidas(request, declaraciones, 'mutual:periodo_vigente_detalle')
 
-    periodo.fecha_fin = datetime.today()
-    periodo.save()
 
-    if crear_nuevo:
-        fecha_inicio = periodo.fecha_fin
-        mes_anio = fecha_inicio + relativedelta(months=1)
+    if todas_leidas:
+        periodo.fecha_fin = datetime.today()
+        periodo.save()
+        if crear_nuevo:
+            fecha_inicio = periodo.fecha_fin
+            mes_anio = fecha_inicio + relativedelta(months=1)
 
-        periodo_nuevo = Periodo(fecha_inicio=fecha_inicio, mes_anio=mes_anio)
-        periodo_nuevo.save()
+            periodo_nuevo = Periodo(fecha_inicio=fecha_inicio, mes_anio=mes_anio)
+            periodo_nuevo.save()
 
-        messages.info(request, "Periodo finalizado y se ha creado un periodo nuevo.")
+            messages.info(request, "Periodo finalizado y se ha creado un periodo nuevo.")
+            return redirect('mutual:periodo_vigente_detalle')
+
+        messages.info(request, "Periodo finalizado con éxito.")
+        return redirect('mutual:historico')
+    else:
         return redirect('mutual:periodo_vigente_detalle')
 
-    messages.info(request, "Periodo finalizado con éxito.")
-    return redirect('mutual:historico')
 
 def finalizarPeriodo(request, pk):
     return finalizar_periodo(request, pk)
