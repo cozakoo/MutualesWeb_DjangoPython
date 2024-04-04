@@ -9,9 +9,9 @@
 
 {% block opcion_declaracion_jurada %}
 <li>
-  <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada' accion='declaracion' %}">Crear Nueva Declaración</a>
+  <a class="dropdown-item" href="{% url 'mutual:declaracion_jurada' accion='declaracion' %}" data-barba-prevent>Crear Nueva Declaración</a>
 </li>
 <li>
-  <a class="dropdown-item" href="{% url 'mutual:historico' %}">Histórico</a>
+  <a class="dropdown-item" href="{% url 'mutual:historico' %}" data-barba-prevent>Histórico</a>
   </li>
 {% endblock %}
