@@ -39,7 +39,6 @@ urlpatterns = [
     path('', include('apps.users.urls')),
 
     path("select2/", include("django_select2.urls")),
-
     path('buscar_mutuales/', views.buscar_mutuales, name='buscar_mutuales'),
 
 
