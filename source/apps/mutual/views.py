@@ -1190,9 +1190,6 @@ def periodoVigenteDetalle(request):
     mutuales_presentes = Mutual.objects.filter(id__in=mutuales_en_declaraciones)
 
     # mutuales = [declaracion.mutual for declaracion in page_obj]
-
-
-    # Handle form submission
     if request.method == 'POST':
         form = PeriodoVigenteDeclaracionFilterForm(request.POST)
         if form.is_valid():
@@ -1219,7 +1216,6 @@ def periodoVigenteDetalle(request):
         page_obj = paginator.page(1)
     except EmptyPage:
         page_obj = paginator.page(paginator.num_pages)
-
 
     context = {
         'periodo': periodo,

@@ -3,7 +3,6 @@
 
 {% block extra_css_nivel %}
   <link href="{% static 'Libs/css/historico.css' %}" rel="stylesheet" />
-  <link href="{% static 'Libs/css/select2.min.css' %}" rel="stylesheet" />
 {% endblock %}
 
 {% block contenedor %}
@@ -106,20 +105,5 @@
       {% include "pagination_listado.html" %}
     </div>
 </div>
-
-
-
-<script type="text/javascript">
-
-  $('.django-select2').on("change", () => console.log("hola"));
-</script>
-<script>
-  $(function () {
-    $("#enc_mutual").select2();
-  });
-  $(function () {
-    $("#enc_periodo").select2();
-  });
-</script>
 
 {% endblock %}

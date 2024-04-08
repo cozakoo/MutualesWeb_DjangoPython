@@ -275,7 +275,6 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
 
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Listado de usuarios'

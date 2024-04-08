@@ -54,7 +54,6 @@ INSTALLED_APPS = [
     'apps.administradores',
     'apps.users',
     'apps.empleadospublicos',
-    'django_select2',
     'mutualWeb',
 ]
 

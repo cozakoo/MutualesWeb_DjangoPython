@@ -165,14 +165,11 @@ class FormularioPeriodo(forms.ModelForm):
 
         return fecha_inicio
     
-from django_select2.forms import Select2Widget
-from django_select2.forms import Select2Mixin
-
 class MutualFilterForm(forms.Form):
     concepto = forms.IntegerField(label='Concepto', required=False)
     estado = forms.ChoiceField(choices=[('1', 'Todas'), ('2', 'Activas'), ('3', 'Inactivas')], label='Estado', required=False)
     cuit = forms.CharField(label='CUIT', required=False)
-    mutuales = forms.ModelChoiceField(queryset=Mutual.objects.all().order_by('alias'), label='Mutuales', required=False, widget=Select2Widget)
+    mutuales = forms.ModelChoiceField(queryset=Mutual.objects.all().order_by('alias'), label='Mutuales', required=False)
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
