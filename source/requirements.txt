@@ -4,6 +4,7 @@ chardet==5.2.0
 Django==4.1.1
 django-appconf==1.0.6
 django-select2==8.1.2
+django-selectable==1.4.0
 h3==3.7.6
 numpy==1.26.4
 pillow==10.2.0

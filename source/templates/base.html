@@ -1,4 +1,7 @@
 {% load static %}
+{% load selectable_tags %}
+{% include_ui_theme %}
+
 
 <html lang="en">
   <head>
@@ -48,6 +51,10 @@
     <script src="{% static 'Libs/bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'Libs/js/popper.min.js' %}"></script>
     <script src="{% static 'Libs/js/main.js' %}"></script>
+    <script src="{% static 'Libs/js/jquery-ui-1.13.2/jquery-ui.min.js' %}"></script>
+    <script src="{% static 'Libs/js/jquery-ui-1.13.2/jquery-ui.min.css' %}"></script>
+     
+
     
     {% comment %} <script src="{% static 'Libs/DataTables/DataTables-1.13.8/js/jquery.dataTables.js' %}"></script> {% endcomment %}
     {% comment %} <script src="https://cdn.datatables.net/v/bs5/datatables.min.js"></script> {% endcomment %}

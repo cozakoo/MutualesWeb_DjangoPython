@@ -1,6 +1,18 @@
 from django import forms
+from apps.mutual.lookups import MutualLookup
 from apps.mutual.models import DetalleDeclaracionJurada, DetalleMutual, Mutual, Periodo
+from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
 
+
+
+# class MutualFormSearch(forms.Form):
+#     alias = AutoCompleteSelectField(
+#         lookup_class=MutualLookup,
+#         label='buscar mutual',
+#         required=False,
+#         widget=AutoComboboxSelectWidget
+#     )
+    # state = USStateField(widget=USStateSelect, required=False)
 
 class FormDetalle(forms.Form):
     origen = forms.CharField(max_length=100,initial='', required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
@@ -169,8 +181,13 @@ class MutualFilterForm(forms.Form):
     concepto = forms.IntegerField(label='Concepto', required=False)
     estado = forms.ChoiceField(choices=[('1', 'Todas'), ('2', 'Activas'), ('3', 'Inactivas')], label='Estado', required=False)
     cuit = forms.CharField(label='CUIT', required=False)
-    mutuales = forms.ModelChoiceField(queryset=Mutual.objects.all().order_by('alias'), label='Mutuales', required=False)
-
+    alias = AutoCompleteSelectField(
+        lookup_class=MutualLookup,
+        label='buscar mutual',
+        required=False,
+        widget=AutoComboboxSelectWidget
+    )
+    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['concepto'].widget.attrs.update({'placeholder': 'Concepto', 'class': 'form-control'})

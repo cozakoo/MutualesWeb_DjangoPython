@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.empleadospublicos',
     'mutualWeb',
+    'selectable',
 ]
 
 SASS_PROCESSOR_ENABLED = True

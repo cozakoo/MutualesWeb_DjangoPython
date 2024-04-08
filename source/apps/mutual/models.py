@@ -31,7 +31,7 @@ class Mutual(models.Model):
     detalle = models.ManyToManyField(DetalleMutual) 
 
     def __str__(self):
-        return self.nombre
+        return self.alias
 
 ##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DetalleDeclaracionJurada(models.Model):
