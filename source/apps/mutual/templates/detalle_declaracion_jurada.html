@@ -19,7 +19,8 @@
                 <div class="detalle-prestamo">
                     <ul class="detalle-lista">
                         <li>
-                            Importe: ${{ detalle.importe }}
+                            {% comment %} Importe: ${{ detalle.importe }} {% endcomment %}
+                            Importe: ${{ detalle.obtenerImporteConMillares }}
                         </li>
                         <li>
                             Registros: {{ detalle.total_registros }}

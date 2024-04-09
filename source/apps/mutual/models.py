@@ -46,6 +46,10 @@ class DetalleDeclaracionJurada(models.Model):
     archivo = models.FileField(upload_to='documentos/')
     total_registros= models.IntegerField(default=0)  # Nuevo campo
 
+    def obtenerImporteConMillares(self):
+        miles_translator = str.maketrans(".,", ",.")
+        # self.importe = "{:,}".format(self.importe).translate(miles_translator)
+        return "{:,}".format(self.importe).translate(miles_translator)
 
 @receiver(pre_delete, sender=DetalleDeclaracionJurada)
 def eliminar_archivo(sender, instance, **kwargs):
