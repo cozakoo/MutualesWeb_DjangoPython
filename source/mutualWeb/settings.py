@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'apps.mutual',
     'apps.clientes',
     'apps.personas',
+    'apps.reportes',
     'apps.administradores',
     'apps.users',
     'apps.empleadospublicos',

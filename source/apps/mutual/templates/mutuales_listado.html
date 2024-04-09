@@ -74,6 +74,11 @@
                 <i class="fa-solid fa-pen-to-square"></i>
                 Editar
               </button>
+              <a class="btn btn-sm btn-outline-info" href="{% url 'reportes:reporte_mutual_declaraciones' %}" onclick="window.open(this.href, '_blank', 'width=800,height=600'); return false;">
+                <i class="fa-solid fa-chart-simple"></i>
+                Reporte
+            </a>
+            
             </td>
           </tr>
           {% include "modal_detalle_declaracion_jurada.html" %}

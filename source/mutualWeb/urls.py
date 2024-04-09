@@ -37,6 +37,8 @@ urlpatterns = [
     path('dashboard/mutual/', include('apps.mutual.urls')),
     path('dashboard/personas/', include('apps.personas.urls')),
     path('', include('apps.users.urls')),
+    path('home/app_reportes/',include('apps.reportes.urls')),
+
     path("selectable/", include("selectable.urls")),
     path('buscar_mutuales/', views.buscar_mutuales, name='buscar_mutuales'),
 ]
