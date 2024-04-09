@@ -116,7 +116,7 @@ class CustomLoginView(LoginView, View):
 class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name ='registrar_usuario_mutual.html'
     form_class = RegisterUserMutualForm
-    success_url = reverse_lazy('users:usuarios_listado')
+    success_url = reverse_lazy('users:register_U_M')
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
     
@@ -146,7 +146,7 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
                 p.save()
 
                 nombre = form.cleaned_data["mutual"]
-                e = Mutual.objects.get(nombre = nombre)
+                e = Mutual.objects.get(alias = nombre)
 
                 c = Cliente (
                     persona = p,
@@ -274,6 +274,7 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name ='listado_usuarios.html'
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
+    paginate_by = 9
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

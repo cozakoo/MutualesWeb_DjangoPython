@@ -44,6 +44,7 @@ class SessionTimeoutMiddleware:
                 print(idle_time.total_seconds)
                 if idle_time.total_seconds() > settings.SESSION_INACTIVITY:
                     # Si el tiempo de inactividad supera la duración de la sesión, cerrar la sesión
+                    ActualizarUltimaActividad(request.user)
                     logout(request)
                     return redirect('users:login')
 
