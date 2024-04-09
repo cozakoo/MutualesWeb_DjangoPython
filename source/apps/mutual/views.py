@@ -10,6 +10,8 @@ from typing import Any
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import get_object_or_404, render, redirect
 from django.views.generic import CreateView , TemplateView , DetailView , UpdateView
+
+from apps.mutual.lookups import PeriodoLookup
 from .models import DeclaracionJuradaDetalles, DetalleMutual, Mutual , DeclaracionJurada, Periodo
 from .forms import *
 from django.urls import reverse_lazy
@@ -908,18 +910,16 @@ def descargarArchivo(request, pk):
 
 from django.db.models import Q
 
-
 class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     login_url = "/login/"
     model = Mutual
     template_name = "mutuales_listado.html"
-    paginate_by = 10  # Número de elementos por página
+    paginate_by = 9  # Número de elementos por página
     permission_required = "empleadospublicos.permission_empleado_publico"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Mutuales'
-        # context["mutuales"] = Mutual.objects.all().order_by('alias')
         context['filter_form'] = MutualFilterForm(self.request.GET)  # Agrega el formulario al contexto
         return context
     
@@ -928,11 +928,13 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
         filter_form = MutualFilterForm(self.request.GET)
 
         if filter_form.is_valid():
+            alias = filter_form.cleaned_data.get('alias')
             concepto = filter_form.cleaned_data.get('concepto')
             estado = filter_form.cleaned_data.get('estado')
             cuit = filter_form.cleaned_data.get('cuit')
-            print(concepto)
 
+            if alias:
+                queryset = queryset.filter(alias__icontains=alias)
             if estado == '2':
                 queryset = queryset.filter(activo=True)
             elif estado == '3':
@@ -941,22 +943,10 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
             if cuit:
                 queryset = queryset.filter(cuit=cuit)
 
-            mutual_id = self.request.GET.get('enc_mutual')
-            try:
-                mutual_id = int(mutual_id)
-
-                if mutual_id != 0: 
-                    queryset = queryset.filter(pk=mutual_id)
-
-            except (ValueError, TypeError):
-                mutual_id = None
-
-            finally:
-                if concepto is not None:
-                    print("ESTOY AQUI")
-                    queryset = queryset.filter(
-                    Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
-                    )
+            if concepto is not None:
+                queryset = queryset.filter(
+                Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
+                )
         return queryset
 
 def obtenerPeriodosFinalizados():
@@ -966,17 +956,15 @@ def obtenerPeriodosFinalizados():
 class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMixin,ListView):
     model = DeclaracionJurada
     template_name = "dj_declarados_list.html"
-    paginate_by = 10  # Número de elementos por página
+    paginate_by = 10 
     login_url = "/login/"
     permission_required = "empleadospublicos.permission_empleado_publico"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
-        context['mutuales'] = Mutual.objects.all().order_by('alias')
-        context['periodos'] = obtenerPeriodosFinalizados()
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
-
+        context['periodos'] = obtenerPeriodosFinalizados()
         return context
 
     def get_queryset(self):
@@ -1016,11 +1004,17 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         return queryset
 
 class DeclaracionJuradaFilterForm(forms.Form):
+    alias = AutoCompleteSelectField(
+        lookup_class=MutualLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(MutualLookup, attrs={'class': 'form-control', 'placeholder': 'Alias'})  # Agregar 'placeholder' aquí
+    )
+    periodo = AutoCompleteSelectField(
+        lookup_class=PeriodoLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
+    )
     es_borrador = forms.BooleanField(required=False)
-
-
-
-    
 
 @login_required(login_url="/login/")
 @permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
@@ -1155,16 +1149,23 @@ class PeriodoCreateView(LoginRequiredMixin, PermissionRequiredMixin, CreateView)
         return super().form_invalid(form)
 
 class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
+    alias = AutoCompleteSelectField(
+        lookup_class=MutualLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(MutualLookup, attrs={'class': 'form-control'})  # Proporcionar 'lookup_class' y 'attrs'
+    )
     es_leida = forms.BooleanField(
         required=False,
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         label='Leídos'  # Set the custom label here
     )
-
     class Meta:
         model = DeclaracionJurada
         fields = ['es_leida']
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['alias'].widget.attrs.update({'placeholder': 'Alias'})
 
 @login_required(login_url="/login/")
 @permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
@@ -1183,27 +1184,17 @@ def periodoVigenteDetalle(request):
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
     declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False)
 
-    # Obtenemos las mutuales asociadas a esas declaraciones juradas
-    mutuales_en_declaraciones = declaraciones.values_list('mutual', flat=True).distinct()
-
-    # Luego, puedes obtener los objetos de las mutuales correspondientes
-    mutuales_presentes = Mutual.objects.filter(id__in=mutuales_en_declaraciones)
-
-    # mutuales = [declaracion.mutual for declaracion in page_obj]
     if request.method == 'POST':
         form = PeriodoVigenteDeclaracionFilterForm(request.POST)
         if form.is_valid():
             es_leida_value = form.cleaned_data['es_leida']
-            mutual_id = request.POST.get('enc_mutual')
-            try:
-                mutual_id = int(mutual_id)
-                if mutual_id != 0: 
-                    declaraciones = declaraciones.filter(mutual__pk=mutual_id)
-            except (ValueError, TypeError):
-                mutual_id = None
-            finally:
-                if es_leida_value:
-                    declaraciones = declaraciones.filter(es_leida=es_leida_value)
+            alias = form.cleaned_data['alias']
+
+            if alias:
+                declaraciones = declaraciones.filter(mutual__alias__icontains=alias)
+
+            if es_leida_value:
+                declaraciones = declaraciones.filter(es_leida=es_leida_value)
     else:
         form = PeriodoVigenteDeclaracionFilterForm()
 
@@ -1220,7 +1211,6 @@ def periodoVigenteDetalle(request):
     context = {
         'periodo': periodo,
         'page_obj': page_obj,
-        'mutuales': mutuales_presentes,
         'titulo': titulo,
         'form': form,
     }

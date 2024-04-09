@@ -11,6 +11,32 @@
   <h3 class="text-center titulo">{{ titulo }}</h3>
   <hr>
 
+  <form method="get">
+    {% csrf_token %}
+    <div class="container">
+      <div class="row">
+        <div class="col">
+            {{ filter_form.username }}
+        </div>
+
+        <div class="col">
+          {{ filter_form.email }}
+        </div>
+
+        <div class="col">
+          {{ filter_form.is_active }}
+        </div>
+
+        <div class="col">
+          <button type="submit" class="btn btn-sm btn-primary btn-circle">
+          <i class="fa-solid fa-filter"></i>
+        </button>
+      </div>
+    </div>
+    <hr>
+  </form>
+
+
   <div class=" table-responsive">
     <table class="table table-sm  table-striped table-hover ">
       <thead>
@@ -73,5 +99,9 @@
     </table>
     {% include "pagination_listado.html" %}
   </div>
+  <link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet">
+  <script type="text/javascript" src="{% static 'Libs/js/jquery-1.11.2.min.js' %}"></script>
+  <script type="text/javascript" src="{% static 'Libs/js/jquery-iu.js' %}"></script>
+  <script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
 
 {% endblock %}

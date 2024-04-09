@@ -14,26 +14,10 @@
     <div class="container">
       <hr>
       <div class="row">
-        {% comment %} <div class="col d-flex align-items-center"> {% endcomment %}
-          <div class="col">
-
-          {% comment %} <select name="enc_mutual" id="enc_mutual" class="form-control">
-            <option value="">Todas las mutuales</option>
-          </select> {% endcomment %}
-          {% comment %} <select name="enc_mutual" id="enc_mutual" style="width: 100%;">
-            <option value="0"> Todas las mutuales </option>
-            {% for mutual in mutuales %}
-            <option value="{{mutual.id}}">{{mutual.alias}} </option>
-            {% endfor %}
-          </select> {% endcomment %}
+        <div class="col">
             {{ filter_form.alias }}
-
         </div>
 
-        {% comment %} <div class="col"> {% endcomment %}
-          {% comment %} {{ filter_form.mutuales }} {% endcomment %}
-        {% comment %} </div>        {% endcomment %}
-         
         <div class="col">
           {{ filter_form.cuit }}
         </div>
@@ -44,10 +28,8 @@
         <div class="col">
           {{ filter_form.estado }}
         </div>
+        <div class="col">
 
-
-        
-        <div class="col text-end">
           <button type="submit" class="btn btn-sm btn-primary btn-circle">
           <i class="fa-solid fa-filter"></i>
         </button>
@@ -108,12 +90,9 @@
     </div>
 </div>
 
-
-
-<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/themes/base/jquery-ui.css" type="text/css">
-    <link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.js"></script>
-    <script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
+<link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet">
+<script type="text/javascript" src="{% static 'Libs/js/jquery-1.11.2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'Libs/js/jquery-iu.js' %}"></script>
+<script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
 
 {% endblock %}

@@ -5,36 +5,11 @@ from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
 
 
 
-# class MutualFormSearch(forms.Form):
-#     alias = AutoCompleteSelectField(
-#         lookup_class=MutualLookup,
-#         label='buscar mutual',
-#         required=False,
-#         widget=AutoComboboxSelectWidget
-#     )
-    # state = USStateField(widget=USStateSelect, required=False)
-
 class FormDetalle(forms.Form):
     origen = forms.CharField(max_length=100,initial='', required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     destino = forms.CharField(max_length=100,initial='', required=False, widget=forms.TextInput(attrs={'class': 'form-control'}))
     concep1 = forms.IntegerField(initial=1, widget=forms.NumberInput(attrs={'class': 'form-control'}))
     concep2 = forms.IntegerField(initial=0, required=False, widget=forms.NumberInput(attrs={'class': 'form-control'}))
-    
-    # def __init__(self, *args, **kwargs):
-    #     # Obtener los datos del contexto pasados como argumentos
-    #     contexto = kwargs.pop('context', None)
-    #     if contexto == None :
-    #         print("no econtre context")
-    #     else: 
-    #         print("si encontre")
-    #         super(FormDetalle, self).__init__(*args, **kwargs)
-    #         if contexto:
-    #         # Usar los datos del contexto para inicializar el formulario
-    #             self.fields['origen'] = forms.CharField(initial=contexto['origen'])
-    #             self.fields['destino'] = forms.CharField(initial=contexto['destino'])
-    #             self.fields['concep1'] = forms.IntegerField(initial=contexto['concep1'])
-    #             self.fields['concep2'] = forms.IntegerField(initial=contexto['concep2'])      
-
     
     def clean_origen(self):
         origen = self.cleaned_data['origen']
@@ -100,16 +75,7 @@ class FormularioMutual(forms.ModelForm):
           raise forms.ValidationError('Existe una mutual con el mismo nombre')
         else:
           return nombre
-      
-      
-        # # raise forms.ValidationError('Existe una mutual con el mismo nombre')
-        # try:
-        #     m = Mutual.objects.filter(nombre = nombre).exists()
-        #     raise forms.ValidationError('Existe una mutual con el mismo nombre')
-        # except:
-            # return nombre
-    
-    
+
     def clean_cuit(self):
         cuit = self.cleaned_data['cuit']
         if len(cuit) != 11 or not cuit.isdigit():
@@ -120,8 +86,6 @@ class FormularioMutual(forms.ModelForm):
         else:
             return cuit
         
-        
-       
 from django import forms
 from datetime import datetime
 
@@ -183,9 +147,8 @@ class MutualFilterForm(forms.Form):
     cuit = forms.CharField(label='CUIT', required=False)
     alias = AutoCompleteSelectField(
         lookup_class=MutualLookup,
-        label='buscar mutual',
         required=False,
-        widget=AutoComboboxSelectWidget
+        widget=AutoComboboxSelectWidget(MutualLookup, attrs={'class': 'form-control'})  # Proporcionar 'lookup_class' y 'attrs'
     )
     
     def __init__(self, *args, **kwargs):
@@ -193,4 +156,4 @@ class MutualFilterForm(forms.Form):
         self.fields['concepto'].widget.attrs.update({'placeholder': 'Concepto', 'class': 'form-control'})
         self.fields['estado'].widget.attrs.update({'class': 'form-select'})
         self.fields['cuit'].widget.attrs.update({'placeholder': 'CUIT', 'class': 'form-control'})
-        # self.fields['mutuales'].widget.attrs.update({'class': 'form-select'})
+        self.fields['alias'].widget.attrs.update({'placeholder': 'Alias'})

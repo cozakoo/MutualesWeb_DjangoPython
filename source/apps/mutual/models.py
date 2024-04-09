@@ -95,9 +95,22 @@ class Periodo(models.Model):
         # Devuelve una cadena que incluye el nombre del mes en español y el año
         return f"{nombre_mes_espanol.capitalize()} {año}"  # Capitaliza la primera letra del mes
     
-    def __str__(self):
-        return self.obtener_nombre_mes()
     
+    def __str__(self):
+        return self.obtener_periodo_numerico()
+    
+    def __str__YYYYMM__(self):
+        return self.obtener_periodo_numerico()
+    
+
+    def obtener_periodo_numerico(self):
+        # Obtén el año y el mes como cadenas
+        año = str(self.mes_anio.year)
+        mes = str(self.mes_anio.month).zfill(2)  # Asegura que el mes tenga 2 dígitos (con ceros a la izquierda si es necesario)
+        
+        # Devuelve el año y el mes concatenados en formato YYYYMM
+        print("AÑO + MES", año + mes)
+        return año + mes
 
 
 class DeclaracionJurada(models.Model):

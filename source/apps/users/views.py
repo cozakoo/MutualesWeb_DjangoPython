@@ -3,6 +3,7 @@ from pyexpat.errors import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.views import View
+from mutualWeb import forms
 from mutualWeb.utils.mensajes import mensaje_error, mensaje_exito
 from ..administradores.models import Administrador
 from .forms import CustomLoginForm, CustomPasswordChangeForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
@@ -146,7 +147,7 @@ class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateV
                 p.save()
 
                 nombre = form.cleaned_data["mutual"]
-                e = Mutual.objects.get(nombre = nombre)
+                e = Mutual.objects.get(alias = nombre)
 
                 c = Cliente (
                     persona = p,
@@ -266,18 +267,54 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
                   mensaje_error(self.request, f'No se pudo crear el usuario')
                   return super().form_invalid(form)
               
+
+
+# from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
+
+# class UserFilterForm(forms.Form):
+#     username = forms.CharField(label='Nombre de usuario', required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}))
+
+#     # username = AutoCompleteSelectField(
+#     #     lookup_class=UsernameLookup,
+#     #     required=False,
+#     #     widget=AutoComboboxSelectWidget(UsernameLookup, attrs={'class': 'form-control', 'placeholder': 'Alias'})  # Agregar 'placeholder' aquí
+#     # )
+
+#     email = forms.EmailField(label='Correo electrónico', required=False, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico'}))
+#     is_active = forms.BooleanField(label='Activo', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
+
+#     def __init__(self, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['username'].widget.attrs['placeholder'] = 'Nombre de usuario'
+#         self.fields['email'].widget.attrs['placeholder'] = 'Correo electrónico'
+
         
-
-
 class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
+    login_url = '/login/'
     model = User
     template_name ='listado_usuarios.html'
-    login_url = '/login/'
+    paginate_by = 12
     permission_required = "administradores.permission_administrador"
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        username = self.request.GET.get('username')
+        email = self.request.GET.get('email')
+        is_active = self.request.GET.get('is_active')
+
+        if username:
+            queryset = queryset.filter(username__icontains=username)
+        if email:
+            queryset = queryset.filter(email__icontains=email)
+        if is_active:
+            queryset = queryset.filter(is_active=True)
+
+        return queryset
+    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Listado de usuarios'
+        context['titulo'] = 'Listado de Usuarios'
+        # context['filter_form'] = UserFilterForm(self.request.GET)
         return context
 
 @login_required(login_url="/login/")

@@ -3,11 +3,36 @@ from __future__ import unicode_literals
 from selectable.base import ModelLookup
 from selectable.registry import registry
 
-from .models import Mutual
+from .models import Mutual, Periodo
+
 
 
 class MutualLookup(ModelLookup):
     model = Mutual
     search_fields = ('alias__icontains', )
     
+    def get_query(self, request, term):
+        queryset = super().get_query(request, term)
+        # Ordenar por alias y luego por posición, y limitar a los primeros 5 resultados
+        return queryset.order_by('alias')[:5] 
+
 registry.register(MutualLookup)
+
+class PeriodoLookup(ModelLookup):
+    model = Periodo
+    search_fields = ('mes_anio__icontains', )
+
+    def get_query(self, request, term):
+        queryset = super().get_query(request, term)
+        return queryset.order_by('fecha_inicio')[:7] 
+
+    def format_item_display(self, item):
+        print("ESTOY AQUIIII --- 1")
+        return str(item.__str__YYYYMM__())
+    
+    
+    def get_item_label(self, item):
+        print("ESTOY AQUIIII --- 2")
+        return str(item.__str__YYYYMM__())
+    
+registry.register(PeriodoLookup)

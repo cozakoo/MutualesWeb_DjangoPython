@@ -26,7 +26,7 @@
     
     <link href="{% static 'Libs/css/normalize.css' %}" rel="stylesheet" />
     <link href="{% static 'Libs/css/base.css' %}" rel="stylesheet" />
-    <link href="{% static 'Libs/css/select2.min.css' %}" rel="stylesheet" />
+    <link src="{% static 'Libs/jquery-ui-1.13.2/jquery-ui.min.css' %}" rel="stylesheet"></script>
 
     <title>
       {% block title %}
@@ -46,18 +46,13 @@
 
     {% endblock %}
     <script src="{% static 'Libs/js/jquery-3.7.1.min.js' %}"></script>
-    {% comment %} <script src="{% static 'Libs/js/jquery.min.js' %}"></script> {% endcomment %}
     <script src="{% static 'Libs/js/select2.min.js' %}"></script>
     <script src="{% static 'Libs/bootstrap-5.3.1-dist/js/bootstrap.bundle.min.js' %}"></script>
     <script src="{% static 'Libs/js/popper.min.js' %}"></script>
     <script src="{% static 'Libs/js/main.js' %}"></script>
-    <script src="{% static 'Libs/js/jquery-ui-1.13.2/jquery-ui.min.js' %}"></script>
-    <script src="{% static 'Libs/js/jquery-ui-1.13.2/jquery-ui.min.css' %}"></script>
-     
-
+    <script src="{% static 'Libs/jquery-ui-1.13.2/jquery-ui.js' %}"></script>
+    <script src="{% static 'Libs/jquery-ui-1.13.2/jquery-ui.min.js' %}"></script>
     
-    {% comment %} <script src="{% static 'Libs/DataTables/DataTables-1.13.8/js/jquery.dataTables.js' %}"></script> {% endcomment %}
-    {% comment %} <script src="https://cdn.datatables.net/v/bs5/datatables.min.js"></script> {% endcomment %}
     {% block extra_js %}
     <script src="{% static 'Libs/js/transition.js' %}"></script>
     {% endblock %}

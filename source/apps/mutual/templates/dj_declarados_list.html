@@ -15,25 +15,12 @@
     <div class="container">
       <div class="row">
 
-        <div class="col d-flex align-items-center">
-          <select name="enc_mutual" id="enc_mutual" style="width: 100%;">
-            <option value="0"> Todas las mutuales </option>
-            {% for mutual in mutuales %}
-            <option value="{{mutual.id}}">{{mutual.alias}} </option>
-            {% endfor %}
-          </select>
+        <div class="col">
+          {{filter_form.alias}}
         </div>
-        
-        <div class="col d-flex align-items-center">
-
-          <select name="enc_periodo" id="enc_periodo" style="width: 100%;">
-            <option value="0"> Todos los periodos </option>
-            {% for periodo in periodos %}
-            <option value="{{ periodo.id }}">{{ periodo.mes_anio|date:'Y/m' }} | {{ periodo.mes_anio|date:'F Y' }}</option>
-            {% endfor %}
-          </select>
+        <div class="col">
+          {{filter_form.periodo}}
         </div>
-            
         <div class="col">
           <button type="submit" class="btn btn-sm btn-primary btn-circle">
             <i class="fa-solid fa-filter"></i>
@@ -89,4 +76,10 @@
   {% include "pagination_listado.html" %}
 
 </div>
+
+<link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet">
+<script type="text/javascript" src="{% static 'Libs/js/jquery-1.11.2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'Libs/js/jquery-iu.js' %}"></script>
+<script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
+
 {% endblock %}

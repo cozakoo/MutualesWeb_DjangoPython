@@ -47,7 +47,7 @@
 
                 {% for detalle in mutual.detalle.all %}
                       {% if detalle.tipo == 'P' %}
-                          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Prestamo </h1>
+                          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Prestamos </h1>
                          
                             <label>Origen:</label>
                             <input type="text" class="form-control" id="origen_p" name="origen_p" aria-describedby="emailHelp" value="{{detalle.origen}}">

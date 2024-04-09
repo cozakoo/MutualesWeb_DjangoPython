@@ -6,10 +6,6 @@ from django.contrib.auth.models import User
 from mutualWeb.utils.mensajes import mensaje_advertencia
 from ..mutual.models import Mutual
 
-
-
-
-
 class CustomPasswordChangeForm(PasswordChangeForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -72,7 +68,6 @@ class RegisterUserEmpleadoPublicoForm(UserCreationForm):
         
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        print("asdasd")
         # Validar que el correo electrónico sea único
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("Este correo electrónico ya está en uso. Por favor, elige otro.")
@@ -82,3 +77,4 @@ class RegisterUserEmpleadoPublicoForm(UserCreationForm):
             raise forms.ValidationError("El correo electrónico debe incluir un signo @.")
         
         return email
+
