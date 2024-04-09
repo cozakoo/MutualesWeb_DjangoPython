@@ -3,6 +3,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.contrib.auth.models import User
 
+from apps.users.lookups import UsernameLookup
 from mutualWeb.utils.mensajes import mensaje_advertencia
 from ..mutual.models import Mutual
 
@@ -78,3 +79,25 @@ class RegisterUserEmpleadoPublicoForm(UserCreationForm):
         
         return email
 
+
+from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
+
+class UserFilterForm(forms.Form):
+    username = AutoCompleteSelectField(
+        lookup_class=UsernameLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(UsernameLookup, attrs={'class': 'form-control', 'placeholder': 'Alias'})
+    )
+    # email = forms.EmailField(label='Correo electrónico', required=False, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico'}))
+    is_active_choices = (
+        ('1', 'Activo'),
+        ('0', 'Inactivo'),
+    )
+    is_active = forms.MultipleChoiceField(label='Estado', choices=is_active_choices, required=False, widget=forms.CheckboxSelectMultiple)
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['username'].widget.attrs['placeholder'] = 'Nombre de usuario'
+        self.fields['is_active'].widget.attrs['class'] = 'form-check-input'
+        self.fields['is_active'].widget.attrs['style'] = 'display: inline-block;'  # Para mostrar en dos columnas
+        self.fields['is_active'].widget.attrs['class'] = 'list-unstyled'  # Eliminar viñetas de la lista

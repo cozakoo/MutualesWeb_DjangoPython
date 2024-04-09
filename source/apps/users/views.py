@@ -6,7 +6,7 @@ from django.views import View
 from mutualWeb import forms
 from mutualWeb.utils.mensajes import mensaje_error, mensaje_exito
 from ..administradores.models import Administrador
-from .forms import CustomLoginForm, CustomPasswordChangeForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm
+from .forms import CustomLoginForm, CustomPasswordChangeForm, RegisterUserMutualForm, RegisterUserEmpleadoPublicoForm, UserFilterForm
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, TemplateView
 from .views import LoginView
@@ -269,24 +269,7 @@ class RegistereAdministradorView(LoginRequiredMixin, PermissionRequiredMixin, Cr
               
 
 
-# from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
 
-# class UserFilterForm(forms.Form):
-#     username = forms.CharField(label='Nombre de usuario', required=False, widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Nombre de usuario'}))
-
-#     # username = AutoCompleteSelectField(
-#     #     lookup_class=UsernameLookup,
-#     #     required=False,
-#     #     widget=AutoComboboxSelectWidget(UsernameLookup, attrs={'class': 'form-control', 'placeholder': 'Alias'})  # Agregar 'placeholder' aquí
-#     # )
-
-#     email = forms.EmailField(label='Correo electrónico', required=False, widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Correo electrónico'}))
-#     is_active = forms.BooleanField(label='Activo', required=False, widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}))
-
-#     def __init__(self, *args, **kwargs):
-#         super().__init__(*args, **kwargs)
-#         self.fields['username'].widget.attrs['placeholder'] = 'Nombre de usuario'
-#         self.fields['email'].widget.attrs['placeholder'] = 'Correo electrónico'
 
         
 class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
@@ -299,23 +282,26 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        username = self.request.GET.get('username')
-        email = self.request.GET.get('email')
-        is_active = self.request.GET.get('is_active')
+        filter_form = UserFilterForm(self.request.GET)
 
-        if username:
-            queryset = queryset.filter(username__icontains=username)
-        if email:
-            queryset = queryset.filter(email__icontains=email)
-        if is_active:
-            queryset = queryset.filter(is_active=True)
+        if filter_form.is_valid():
+            username = filter_form.cleaned_data.get('username')
+            is_active_values = filter_form.cleaned_data.get('is_active')  # Obtenemos los valores seleccionados
+
+            if username:
+                queryset = queryset.filter(username__icontains=username)
+
+            if is_active_values:
+                # Convertimos los valores seleccionados a booleanos
+                is_active_values = [bool(int(value)) for value in is_active_values]
+                queryset = queryset.filter(is_active__in=is_active_values)
 
         return queryset
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Listado de Usuarios'
-        # context['filter_form'] = UserFilterForm(self.request.GET)
+        context['filter_form'] = UserFilterForm(self.request.GET)
         return context
 
 @login_required(login_url="/login/")
