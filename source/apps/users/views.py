@@ -117,7 +117,7 @@ class CustomLoginView(LoginView, View):
 class RegisterUserMutalView(LoginRequiredMixin, PermissionRequiredMixin, CreateView):
     template_name ='registrar_usuario_mutual.html'
     form_class = RegisterUserMutualForm
-    success_url = reverse_lazy('users:usuarios_listado')
+    success_url = reverse_lazy('users:register_U_M')
     login_url = '/login/'
     permission_required = "administradores.permission_administrador"
     
@@ -295,6 +295,7 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     template_name ='listado_usuarios.html'
     paginate_by = 12
     permission_required = "administradores.permission_administrador"
+    paginate_by = 9
 
     def get_queryset(self):
         queryset = super().get_queryset()

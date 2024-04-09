@@ -553,7 +553,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} No corresponde al periodo a declarar. Línea: {line_content}")
 
             if fecha_obj_fin < periodoActual.mes_anio:
-                listErrores.append(f"Error: La FECHA FIN en la línea {line_number} es menor mayor que la fecha inicial del periodo. Línea: {line_content}")
+                listErrores.append(f"Error: La FECHA FIN en la línea {line_number} es menor que la fecha del periodo a declarar. Línea: {line_content}")
 
             if fecha_obj_inicio > fecha_obj_fin:
                listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} es mayor que la FECHA FIN. Línea: {line_content}")
