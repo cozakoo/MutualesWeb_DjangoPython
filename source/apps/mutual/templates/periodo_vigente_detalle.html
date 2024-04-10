@@ -3,6 +3,48 @@
 
 {% block extra_css_nivel %}
 <link href="{% static 'Libs/css/dj_declarados_list.css' %}" rel="stylesheet" />
+
+<style>
+  /* Estilos básicos para las pestañas */
+  .tabs {
+      overflow: hidden;
+      border: 1px solid #ccc;
+      background-color: #f1f1f1;
+      width: fit-content;
+      margin-bottom: 10px;
+  }
+
+  .tab {
+      float: left;
+      border: none;
+      outline: none;
+      cursor: pointer;
+      padding: 10px 20px;
+      transition: 0.3s;
+  }
+
+  .tab:hover {
+      background-color: #ddd;
+  }
+
+  .tabcontent {
+      {% comment %} display: none; {% endcomment %}
+      padding: 6px 12px;
+      border: 1px solid #ccc;
+      border-top: none;
+      width: 100%;
+  }
+
+  /* Mostrar la pestaña activa */
+  .active {
+      background-color: #ccc;
+  }
+
+  .active-content {
+      display: block;
+  }
+</style>
+
 {% endblock %}
 
 {% block contenedor %}
@@ -40,7 +82,7 @@
                 <i class="fa-solid fa-filter"></i>
             </button>
         </div>
-
+      
           <div align="right" class="col">
               <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
                   Finalizar periodo 
@@ -94,67 +136,119 @@
         </div>
 
         <br />
-        <div class="table-responsive">
-          <table class="table table-sm table-striped table-hover">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Mutual</th>
-                <th class="text-center">Leido</th>
-                <th>Fecha de lectura</th>
-                <th class="text-center">Rect</th>
-                <th class="text-center">Sel.</th>
-                <th class="text-center">Arch. Carg.</th>
-                <th class="text-center">DDJJ</th>
-              </tr>
-            </thead>
+        <div class="tabs">
+          <button class="tab" onclick="abrirSolapa(event, 'solapa1')">Declarados </button>
 
-            <tbody>
-              {% for declaracion in page_obj %}
-                <tr>
-                  <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
-                  
-                  <td>{{ declaracion.mutual.alias }}</td>
-                  
-                  <td class="text-center">
-                    {% if declaracion.es_leida %}
-                      <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
-                    {% else %}
-                    <i class="fa-solid fa-circle-exclamation" style="color: #ffa500;"></i>
-                    {% endif %}
-                  </td>
-
-                  <td>
-                    {% if declaracion.es_leida %}
-                      {{ declaracion.fecha_lectura }}
-                    {% else %}
-                      No ha sido leido aún
-                    {% endif %}
-                  </td>
-
-                  <td class="text-center">{{ declaracion.rectificativa }}</td>
-
-                  <td class="text-center">
-                    <input  type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />         
-                  </td>
-
-                  <td class="text-center">
-                  
-                <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
-                {% include 'detalle_declaracion_jurada.html' %}
-                  </td>
-              
-                <td class="text-center">
-                  <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
-                </td>
-              {% endfor %}
-            </tbody>
-          </table>
-          <hr>
-        </div>
+          <button class="tab" onclick="abrirSolapa(event, 'solapa2')">No Declarados</button>
       </div>
+
+
+     <div id="solapa1" class="tabcontent">
+
+        <div class="table-responsive">
+              <table class="table table-sm table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Mutual</th>
+                    <th class="text-center">Leido</th>
+                    <th>Fecha de lectura</th>
+                    <th class="text-center">Rect</th>
+                    <th class="text-center">Sel.</th>
+                    <th class="text-center">Arch. Carg.</th>
+                    <th class="text-center">DDJJ</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {% for declaracion in page_obj %}
+                    <tr>
+                      <td class="negrita">{{ page_obj.start_index|add:forloop.counter0 }}</td>
+                      
+                      <td>{{ declaracion.mutual.alias }}</td>
+                      
+                      <td class="text-center">
+                        {% if declaracion.es_leida %}
+                          <i class="fa-regular fa-circle-check" style="color: #004200;" ></i>
+                        {% else %}
+                        <i class="fa-solid fa-circle-exclamation" style="color: #ffa500;"></i>
+                        {% endif %}
+                      </td>
+
+                      <td>
+                        {% if declaracion.es_leida %}
+                          {{ declaracion.fecha_lectura }}
+                        {% else %}
+                          No ha sido leido aún
+                        {% endif %}
+                      </td>
+
+                      <td class="text-center">{{ declaracion.rectificativa }}</td>
+
+                      <td class="text-center">
+                        <input  type="checkbox" name="declaracion_leidos" value="{{ declaracion.pk }}" data-es-leida="{{ declaracion.es_leida }}" />         
+                      </td>
+
+                      <td class="text-center">
+                      
+                    <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{ declaracion.pk }}"><i class="fa-regular fa-eye"></i> </button>
+                    {% include 'detalle_declaracion_jurada.html' %}
+                      </td>
+                  
+                    <td class="text-center">
+                      <a class="btn" href="{% url 'mutual:descargarDeclaracion' declaracion.pk %}"><i class="fa-solid fa-download"></i></a>
+                    </td>
+                  {% endfor %}
+                </tbody>
+               
+              </table>
+
+                <hr>
+                {% include "pagination_listado.html" %}
+          </div>
+         </div>
+    
+
+    <div id="solapa2" class="tabcontent" style="display: none;">
+      <div class="table-responsive">
+        <table class="table table-sm table-striped table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Mutual</th>
+              <th>Cuit</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for item in mutuales_no_declaradas %}
+              <tr>
+
+                <td class="negrita">{{ forloop.counter }}</td>
+                <td>{{ item.alias }}</td>
+
+                <td>{{ item.cuit }}</td>
+
+             <tr>
+            {% endfor %}
+          </tbody>
+         
+        </table>
+
+          <hr>
+          {% comment %} {% include "pagination_listado.html" %} {% endcomment %}
+    </div>
+   </div>
+
+
+
+
+
+
+
+</div>
     </form>
-    {% include "pagination_listado.html" %}
+  
 
 </div>
 <link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet">
@@ -163,6 +257,27 @@
 <script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+<script>
+  function abrirSolapa(evt, solapaNombre) {
+    var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName("tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName("tab");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(solapaNombre).style.display = "block";
+    evt.currentTarget.className += " active";
+    evt.preventDefault(); // Evita el reenvío del formulario
+     // Evita el reenvío del formulario
+  }
+</script>
+
+
+
 
   <script>
     var jq = $.noConflict();
