@@ -1183,7 +1183,11 @@ def periodoVigenteDetalle(request):
 
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
     declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False)
+    mutualesNoDeclaradas = Mutual.objects.exclude(pk__in = declaraciones.values('mutual')).filter(activo=True) 
 
+
+    for obj in mutualesNoDeclaradas:
+        print(obj.alias)
     if request.method == 'POST':
         form = PeriodoVigenteDeclaracionFilterForm(request.POST)
         if form.is_valid():
@@ -1213,6 +1217,7 @@ def periodoVigenteDetalle(request):
         'page_obj': page_obj,
         'titulo': titulo,
         'form': form,
+        'mutuales_no_declaradas': mutualesNoDeclaradas,
     }
     return render(request, 'periodo_vigente_detalle.html', context)
 
