@@ -62,6 +62,12 @@
       <strong>Periodo:</strong>
       {{ periodo.mes_anio|date:'Y/m' }}
     </div>
+    {% comment %} <div class="col text-end">
+      <a class="btn btn-sm btn-outline-secondary" href="{% url 'mutual:mutual_no_presento' pk=periodo.pk %}" 
+        onclick="openOrFocusWindow(this.href, 'Lista de espera', 700, 400); return false;">
+        No presentaron 
+      </a>
+    </div> {% endcomment %}
   </div>
   
   
@@ -134,9 +140,6 @@
           <button type="button" id="realizarAccionBtn" class="btn btn-success btn-sm btn-detalle" data-bs-toggle="modal" data-bs-target="#exampleModal">Realizar acción</button>
           {% include 'modal_confirmacion_lectura.html' %}
         </div>
-         
-          
-
 
         <br />
         <div class="tabs">

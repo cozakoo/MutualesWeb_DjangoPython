@@ -6,5 +6,5 @@ app_name="reportes"
 
 
 urlpatterns = [
-    path('reportes/mutual/declaracionesjuradas', reporteMutualDeclaracionesJuradasView.as_view(), name="reporte_mutual_declaraciones"),
+path('reportes/mutual/declaracionesjuradas/<int:mutual_id>/', reporteMutualDeclaracionesJuradasView.as_view(), name="reporte_mutual_declaraciones"),
 ]

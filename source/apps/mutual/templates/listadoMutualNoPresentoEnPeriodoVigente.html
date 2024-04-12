@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <br>
+    <h2 class="titulo text-center">{{titulo}}</h2>
+<div class=" table-responsive">
+    <table class="table table-sm  table-striped table-hover ">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Mutual</th>
+          <th>Cuit</th>
+          <th>Ultimo periodo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mutual in mutuales_no_presentaron %}
+        <tr>
+            <td>{{ forloop.counter }}</td> <!-- Muestra el número de iteración -->
+            <td>{{ mutual.alias|truncatechars:20 }}</td>
+            <td>{{ mutual.cuit }}</td> <!-- Muestra el CUIT de la mutual -->
+            <td>{{ mutual.obtener_ultimo_periodo_presentado }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+</div>
+<div class="text-center">
+  <button type="button" class="btn btn-sm btn-secondary" onclick="cerrarVentana()">Cerrar</button>
+</div>
+<br>
+</div>
+
+<script src="{% static 'Libs/js/cerrar_ventana.js' %}"></script>
+
+{% endblock %}
+

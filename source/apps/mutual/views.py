@@ -205,72 +205,74 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
 
     def post(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         if 'confirmacion' in request.POST:
+            return self.confirmar_declaracion(request)
+        elif 'cancelar' in request.POST:
+            return self.cancelar_declaracion(request)
+        elif 'cargarDeclaracion' in request.POST:
+            return self.cargar_declaracion(request)
+        else:
+            return super().post(request, *args, **kwargs)
 
-           mutual = obtenerMutualVinculada(self)
-           nroRectificativa = 0
-           if existeBorrador(self) :
-            try:
-                periodo = obtenerPeriodoVigente(self)
-                dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = False, periodo = periodo)
-                nroRectificativa = dj.rectificativa + 1
-                dj.detalles.all().delete()
-                dj.delete()
-            except DeclaracionJurada.DoesNotExist:
-                print("omite")
-            
-            try:
-                        
-                        dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
-                        dj.es_borrador = False
-                        dj.rectificativa = nroRectificativa
-                        dj.fecha_subida = datetime.now()
-                        dj.save()
-                        messages.success(self.request, "Declaracion Jurada confirmada")
-                        return redirect('mutual:historico')
+    def confirmar_declaracion(self, request: HttpRequest) -> HttpResponse:
+        mutual = obtenerMutualVinculada(self)
+        nroRectificativa = 0
+        if existeBorrador(self):
+            nroRectificativa = self.obtener_numero_rectificativa(mutual)
+            self.eliminar_declaracion_jurada(mutual)
+            self.actualizar_declaracion_jurada(mutual, nroRectificativa)
+            messages.success(self.request, "Declaracion Jurada confirmada")
+            return redirect('mutual:historico')
+        else:
+            return redirect('dashboard')
 
-            except DeclaracionJurada.DoesNotExist:
-                    return redirect('dashboard')
-           
-           
-           return redirect('dashboard')
-               
-        if 'cancelar' in request.POST:
-            try:
-                mutual = obtenerMutualVinculada(self)
-                dj = DeclaracionJurada.objects.get(mutual = mutual , es_borrador = True)
-                dj.detalles.all().delete()
-                dj.delete()
-                print("borrado")
+    def obtener_numero_rectificativa(self, mutual):
+        try:
+            periodo = obtenerPeriodoVigente(self)
+            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=False, periodo=periodo)
+            return dj.rectificativa + 1
+        except DeclaracionJurada.DoesNotExist:
+            return 0
 
-                messages.success(self.request, "EL Borrador de Declaracion jurada se ha eliminado")
-                # return HttpResponse("exito al eliminar declaracion")
-                return redirect('dashboard')
+    def eliminar_declaracion_jurada(self, mutual):
+        try:
+            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True)
+            dj.detalles.all().delete()
+            dj.delete()
+            print("borrado")
+        except DeclaracionJurada.DoesNotExist:
+            pass
 
-            except DeclaracionJurada.DoesNotExist:
-                return redirect('dashboard')
-       
-        form = self.get_form()
-       
-        if 'cargarDeclaracion' in request.POST: 
-           # Obtén una instancia del formulario
-           
-           try:
-             DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), periodo = obtenerPeriodoVigente(self), es_borrador = True)
-             return render(request, 'dj_alta.html')
-           except DeclaracionJurada.DoesNotExist: 
-                print("sin error 1")
-                if form.is_valid():
-                    print("sin error 2")
-                    # Hacer algo si el formulario es válido
-                    return self.form_valid(form)
-                    
-                else:
-                    # Hacer algo si el formulario no es válido
-                    print("sin error 3")
-                    return self.form_valid(form)
-        
-         
-        return super().post(request, *args, **kwargs)
+    def actualizar_declaracion_jurada(self, mutual, nroRectificativa):
+        try:
+            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True)
+            dj.es_borrador = False
+            dj.rectificativa = nroRectificativa
+            dj.fecha_subida = datetime.now()
+            dj.save()
+        except DeclaracionJurada.DoesNotExist:
+            pass
+
+    def cancelar_declaracion(self, request: HttpRequest) -> HttpResponse:
+        try:
+            mutual = obtenerMutualVinculada(self)
+            self.eliminar_declaracion_jurada(mutual)
+            messages.success(self.request, "EL Borrador de Declaracion jurada se ha eliminado")
+        except:
+            pass
+        return redirect('dashboard')
+
+    def cargar_declaracion(self, request: HttpRequest) -> HttpResponse:
+        try:
+            DeclaracionJurada.objects.get(mutual=obtenerMutualVinculada(self), periodo=obtenerPeriodoVigente(self), es_borrador=True)
+            return render(request, 'dj_alta.html')
+        except DeclaracionJurada.DoesNotExist:
+            form = self.get_form()
+            if form.is_valid():
+                # Hacer algo si el formulario es válido
+                return self.form_valid(form)
+            else:
+                # Hacer algo si el formulario no es válido
+                return self.form_invalid(form)
         
     def get(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         
@@ -334,11 +336,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
 
     def presentaDetalle(self , detalle:DetalleMutual):
         return detalle.origen != "*" and detalle.destino != "*" and detalle.concepto_1 > 1 
-    
 
-    
-    
-    
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         accion = self.kwargs.get('accion')
@@ -399,7 +397,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         
         try:
             with transaction.atomic():
-                if archivoPrestamo: archivo_valido_p, importe_p, total_registros_p, listErroresPrestamo = self.validar_prestamo(form, archivoPrestamo)
+                if archivoPrestamo: archivo_valido_p, importe_p, total_registros_p, listErroresPrestamo, conceptoPresentado = self.validar_prestamo(form, archivoPrestamo)
                 else: archivo_valido_p = True
                 
                 if archivoReclamo : archivo_valido_r, importe_r, total_registros_r, listErroresReclamo = self.validar_reclamo(form, archivoReclamo)
@@ -478,24 +476,29 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         """Valida el contenido del archivo de PRESTAMO."""
         print("VALIDANDO PRESTAMO------------")
         print("")
+
         listErrores = []
         todas_las_lineas_validas = True  # Variable para rastrear si todas las líneas son válidas
         LONGITUD_P = 54
         TIPO_ARCHIVO = 'P'
         total_importe = 0  # Inicializar el total del importe
         last_line_number = 0  # Variable para almacenar el último line_number
-
+        concepto = 0
+        
         try:
-                file = archivo.open() 
-                for line_number, line_content_bytes in enumerate(file, start=1):
-                    line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
-                    print(f"Línea {line_number}: {line_content}")
-                    
-                    # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                    if len(line_content) != LONGITUD_P:
-                        print("REVISAR LINEA: ", line_number )
-                        todas_las_lineas_validas = False
-                        break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
+            file = archivo.open() 
+            for line_number, line_content_bytes in enumerate(file, start=1):
+                line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
+                print(f"Línea {line_number}: {line_content}")
+    
+                # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
+                if len(line_content) != LONGITUD_P:
+                    print("REVISAR LINEA: ", line_number )
+                    todas_las_lineas_validas = False
+                    break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
+                else:
+                    if line_number == 1:
+                        pass
                     else:
                         validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO",listErrores)
                         validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO, listErrores)
@@ -506,8 +509,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                         self.validar_fechas_prestamo(line_content, line_number, fecha_str_inicio, fecha_str_fin,listErrores)
                         validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
                         last_line_number = line_number  # Actualizar el último line_number
-                    
-                    print("")
+                print("")
             
                 if not todas_las_lineas_validas:
                     print("------------ PRESTAMO INVALIDO")
@@ -518,7 +520,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 
                 if len(listErrores) != 0:
                     return False, total_importe, last_line_number, listErrores
-                return True, total_importe, last_line_number, listErrores
+                return True, total_importe, last_line_number, listErrores, conceptoPresentado
              
 
         except Exception as e:
@@ -1182,8 +1184,8 @@ def periodoVigenteDetalle(request):
     titulo = 'Periodo Vigente'
 
     # Obtenemos todas las declaraciones juradas presentadas en el periodo
-    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False)
-    mutualesNoDeclaradas = Mutual.objects.exclude(pk__in = declaraciones.values('mutual')).filter(activo=True) 
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False).order_by('mutual__alias').order_by('mutual__alias')
+    mutualesNoDeclaradas = Mutual.objects.exclude(pk__in = declaraciones.values('mutual')).filter(activo=True).order_by('alias')
 
 
     for obj in mutualesNoDeclaradas:
@@ -1409,3 +1411,25 @@ def EditarMutal(request, pk):
 def finalizarPeriodoCrearNuevo(request, pk):
     return finalizar_periodo(request, pk, crear_nuevo=True)
 
+
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
+def periodoVigenteMutualNoPresento(request, pk):
+    periodo = get_object_or_404(Periodo, pk=pk)
+    titulo = f"No presentaron en {periodo.mes_anio.strftime('%Y-%m')}"
+
+    # Obtener todas las mutuales disponibles
+    mutuales = Mutual.objects.all()
+
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+
+    # Filtrar las mutuales que no tienen una declaración jurada para el período dado
+    mutuales_no_presentaron = mutuales.exclude(declaracionjurada__periodo=periodo).order_by('alias')
+
+    print("mutuales_no_presentaron",mutuales_no_presentaron)
+    context = { 
+        'titulo': titulo,
+        'mutuales_no_presentaron': mutuales_no_presentaron,  # Pasar las mutuales al contexto
+
+    }
+    return render(request, 'listadoMutualNoPresentoEnPeriodoVigente.html', context)
