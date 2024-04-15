@@ -224,7 +224,15 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             dj.delete()
         except DeclaracionJurada.DoesNotExist:
             pass
-
+    def eliminarBorrador(self, mutual):
+         try:
+            periodo = obtenerPeriodoVigente(self)
+            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True, periodo = periodo )
+            dj.detalles.all().delete()
+            dj.delete()
+         except DeclaracionJurada.DoesNotExist:
+            pass
+        
     def actualizar_declaracion_jurada(self, mutual, nroRectificativa):
         try:
             dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True)
@@ -234,12 +242,14 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             dj.save()
         except DeclaracionJurada.DoesNotExist:
             pass
-
+    
     def cancelar_declaracion(self, request: HttpRequest) -> HttpResponse:
         try:
+            print("entre a cancelar")
             mutual = obtenerMutualVinculada(self)
-            self.eliminar_declaracion_jurada(mutual)
+            self.eliminarBorrador(mutual)
             messages.success(self.request, "EL Borrador de Declaracion jurada se ha eliminado")
+            
         except:
             pass
         return redirect('dashboard')

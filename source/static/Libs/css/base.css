@@ -12,3 +12,9 @@
 .modal {
     opacity: 1; /* Asegúrate de que el modal tenga una opacidad completa */
 }
+
+.container {
+    margin-top: 20px; /* Puedes ajustar el valor según sea necesario */
+    width: 100vw; /* Esto hará que el contenedor tenga el ancho completo de la ventana del navegador */
+    box-sizing: content-box;
+  }
