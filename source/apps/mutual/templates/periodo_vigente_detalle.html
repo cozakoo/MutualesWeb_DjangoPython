@@ -43,6 +43,11 @@
   .active-content {
       display: block;
   }
+
+
+  .checks {
+    display: block;
+}
 </style>
 
 {% endblock %}
@@ -79,10 +84,15 @@
         <div class="col">
           {{ form.alias }}
         </div>
-            <div class="col" style="min-width: 150px;"> <!-- Establece el ancho mínimo aquí -->
+            <div align="right" class="col" style="min-width: 150px;"> <!-- Establece el ancho mínimo aquí -->
                 <label >{{ form.es_leida.label }}</label>
                 {{ form.es_leida }}
             </div>
+            <div align="left" class="col" style="min-width: 150px;"> <!-- Establece el ancho mínimo aquí -->
+                <label >{{ form.no_leidos.label }}</label>
+                 {{ form.no_leidos }}
+            </div>
+        
         <div class="col">
             <button type="submit" class="btn btn-sm btn-primary btn-circle">
                 <i class="fa-solid fa-filter"></i>
