@@ -47,7 +47,7 @@
       {% if d_reclamo %}
       <li><strong>Archivo:</strong> {{ d_reclamo.archivo }}</li>
       <li><strong>N° registros:</strong> {{ d_reclamo.total_registros }}</li>
-      <li><strong>Total:</strong> ${{ d_reclamo.importe }}</li>
+      <li><strong>Total:</strong> ${{ d_reclamo.obtenerImporteConMillares }}</li>
       <li><strong>Concepto:</strong> {{ d_reclamo.concepto }}</li>
       {% else %}
       <li><strong>Archivo:</strong> No se ha cargado ningun archivo</li>
