@@ -36,7 +36,23 @@
     <div />
 </div>
 
+ <script>
+ document.addEventListener('DOMContentLoaded', function() {
+    // Obtener todos los contenedores
+    var containers = document.querySelectorAll('.container');
 
+    // Iterar sobre cada contenedor y agregar la clase 'fade-in'
+    setTimeout(mostrarMensaje, 2000);
+
+    document.body.classList.add('mi-clase');
+    containers.forEach(function(container) {
+        container.classList.remove('.animate__fadeIn');
+        container.classList.remove('.animate__animated') // Mostrar el contenedor
+       // Agregar animación de fade in
+    });
+
+});
+ </script>
   {% endblock %}
 
   

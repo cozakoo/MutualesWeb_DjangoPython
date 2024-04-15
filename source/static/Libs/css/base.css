@@ -6,3 +6,9 @@
 .titulo {
     font-family: 'Satoshi Medium', sans-serif;
 } */
+
+
+
+.modal {
+    opacity: 1; /* Asegúrate de que el modal tenga una opacidad completa */
+}

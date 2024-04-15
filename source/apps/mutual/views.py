@@ -192,12 +192,15 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             return self.cargar_declaracion(request)
         else:
             return super().post(request, *args, **kwargs)
+        
+        
 
     def confirmar_declaracion(self, request: HttpRequest) -> HttpResponse:
         mutual = obtenerMutualVinculada(self)
         nroRectificativa = 0
         if existeBorrador(self):
             nroRectificativa = self.obtener_numero_rectificativa(mutual)
+            print(nroRectificativa)
             self.eliminar_declaracion_jurada(mutual)
             self.actualizar_declaracion_jurada(mutual, nroRectificativa)
             messages.success(self.request, "Declaracion Jurada confirmada")
@@ -215,7 +218,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
 
     def eliminar_declaracion_jurada(self, mutual):
         try:
-            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True)
+            periodo = obtenerPeriodoVigente(self)
+            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=False, periodo = periodo )
             dj.detalles.all().delete()
             dj.delete()
         except DeclaracionJurada.DoesNotExist:
@@ -252,6 +256,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             else:
                 # Hacer algo si el formulario no es válido
                 return self.form_invalid(form)
+            
+   
         
     def get(self, request: HttpRequest, *args: str, **kwargs: Any) -> HttpResponse:
         
