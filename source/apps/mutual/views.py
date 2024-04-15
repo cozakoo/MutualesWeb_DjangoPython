@@ -450,17 +450,17 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
                     last_line_number = line_number  # Actualizar el último line_number
 
-                if not todas_las_lineas_validas:
-                    print("------------ PRESTAMO INVALIDO")
-                    listErrores.append(f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres.")
-                    # messages.warning(self.request, mensaje_error)
-                    return False, 0, last_line_number, listErrores # Devolver False y total_importes como 0 si hay líneas inválidas
+            if not todas_las_lineas_validas:
+                print("------------ PRESTAMO INVALIDO")
+                listErrores.append(f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres.")
+                # messages.warning(self.request, mensaje_error)
+                return False, 0, last_line_number, listErrores, concepto # Devolver False y total_importes como 0 si hay líneas inválidas
                 print("------------ PRESTAMO VALIDO")
                 
-                if len(listErrores) != 0:
-                    return False, total_importe, last_line_number, listErrores, concepto
-                return True, total_importe, last_line_number, listErrores, concepto
-             
+            if len(listErrores) != 0:
+                return False, total_importe, last_line_number, listErrores, concepto
+            return True, total_importe, last_line_number, listErrores, concepto
+            
 
         except Exception as e:
             listErrores.append(f"Archivo invalido no puede ser leido: {e}")
@@ -524,7 +524,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         LONGITUD_R = 57
         total_importe = 0  # Inicializar el total del importe
         last_line_number = 0  # Variable para almacenar el último line_number
-
+        concepto = 0
         try:
             file = archivo.open()
             for line_number, line_content_bytes in enumerate(file, start=1):
@@ -557,7 +557,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 listErrores.append(f"Error: Todas las líneas del archivo deben tener {LONGITUD_R} caracteres.")
                 
                 # messages.warning(self.request, mensaje_error)
-                return False, 0, last_line_number, listErrores
+                return False, 0, last_line_number, listErrores, concepto
             print("RECLAMO VALIDO------------")
             if len(listErrores) != 0:
                 return False, total_importe, last_line_number, listErrores, concepto
