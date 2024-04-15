@@ -341,7 +341,3 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     def form_valid(self, form):
         mensaje_exito(self.request, f'Contraseña cambiada con exito.')
         return super().form_valid(form)
-
-
-
-

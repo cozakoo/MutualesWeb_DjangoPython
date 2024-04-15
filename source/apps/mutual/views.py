@@ -947,6 +947,11 @@ class MutualesListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                 queryset = queryset.filter(
                 Q(detalle__concepto_1=concepto) | Q(detalle__concepto_2=concepto)
                 )
+        
+        cantidad_elementos = self.request.GET.get('cantidad_elementos')
+        if cantidad_elementos:
+            self.paginate_by = int(cantidad_elementos)    
+            
         return queryset
 
 def obtenerPeriodosFinalizados():
@@ -1159,6 +1164,13 @@ class PeriodoVigenteDeclaracionFilterForm(forms.ModelForm):
         widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         label='Leídos'  # Set the custom label here
     )
+    
+    no_leidos = forms.BooleanField(
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        label='No Leídos'  # Set the custom label here
+    )
+    
     class Meta:
         model = DeclaracionJurada
         fields = ['es_leida']
@@ -1192,6 +1204,8 @@ def periodoVigenteDetalle(request):
         form = PeriodoVigenteDeclaracionFilterForm(request.POST)
         if form.is_valid():
             es_leida_value = form.cleaned_data['es_leida']
+            No_leidos_value = form.cleaned_data['no_leidos']
+          
             alias = form.cleaned_data['alias']
 
             if alias:
@@ -1199,6 +1213,10 @@ def periodoVigenteDetalle(request):
 
             if es_leida_value:
                 declaraciones = declaraciones.filter(es_leida=es_leida_value)
+                
+            if No_leidos_value:
+                declaraciones = declaraciones.filter(es_leida=False)
+           
     else:
         form = PeriodoVigenteDeclaracionFilterForm()
 
@@ -1257,30 +1275,28 @@ def finalizar_periodo(request, pk, crear_nuevo=False):
 def finalizarPeriodo(request, pk):
     return finalizar_periodo(request, pk)
 
-@login_required(login_url="/login/")
-@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
-def EditarMutal(request, pk):
-     if request.method == 'POST':
-        data = request.POST
-        # print(data)
-        m = Mutual.objects.get(pk = pk)
-        
+
+def actualizarMutual(m:Mutual, data, request):
+    # return -1 si hay errores
         nombre = data.get('nombre')
         cuit = data.get('cuit')
         alias = data.get('alias')
         
-
-        if len(cuit) != 11:
-            messages.warning(request, "Cuit invalido, debe tener 11 caracteres")
-            return redirect('mutual:listado_mutual')
-        else:
-            m.cuit = cuit
+        if m.cuit != cuit :
+            if len(cuit) != 11:
+                messages.warning(request, "Cuit invalido, debe tener 11 caracteres")
+                return -1
+            else:
+                if Mutual.objects.filter(cuit = cuit).exists():
+                   messages.error(request, "El CUIT ingresado ya lo posee otra mutual ")
+                   return -1
+                m.cuit = cuit
           
         if m.nombre != nombre:
             try: 
                Mutual.objects.get(nombre = nombre)
                messages.warning(request, "El Nombre de mutual ya existe")
-               return redirect('mutual:listado_mutual')
+               return -1
             except Mutual.DoesNotExist:
                m.nombre = nombre
                
@@ -1288,19 +1304,10 @@ def EditarMutal(request, pk):
             try: 
                Mutual.objects.get(alias = alias)
                messages.warning(request, "El alias de mutual ya existe")
-               return redirect('mutual:listado_mutual')
+               return -1 
             except Mutual.DoesNotExist:
                m.alias = alias
-       
-      
-            
-         
-        origenr = data.get('origen_r')
-        destinor = data.get('destino_r')
-        concep1r = data.get('concep1_r')
-        concep2r = data.get('concep2_r')
         
-  
         if data.get('activo') == "on":
             activo = True
         else: 
@@ -1308,8 +1315,11 @@ def EditarMutal(request, pk):
         
         if m.activo != activo:
            m.activo = activo
-        
-        if data.get('origen_r') :
+       
+       
+def actualizarDetalles(m:Mutual, data, request):
+# retorna -1 si hay errores
+    if data.get('origen_r') :
            print("entre")
            try:
               reclamo = m.detalle.all().get(tipo = 'R')
@@ -1319,16 +1329,17 @@ def EditarMutal(request, pk):
                   
               concepto = int(data.get('concep1_r'))    
               if reclamo.concepto_1 != concepto:
-                 print(" soy distinto") 
-                 print( reclamo.concepto_1.object )
-                 print(concepto.object)
+                 print(" soy distinto concepto 1 reclamo") 
+              
                  if concepto > 1:
-                    if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
+                    if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists():
+                        print("exite concepto en base")
                         messages.error(request, "concepto 1 de detll.reclamo ingresado pertecene a otra mutual")
-                        return redirect('mutual:listado_mutual')
-                 reclamo.concepto_1 = concepto    
+                        return -1
+                    reclamo.concepto_1 = concepto    
+                    print("preguarde conep1")
               else:
-                  print("soy igual")      
+                  print("soy igual, concepto 1 reclamo")      
                  
               concepto = int(data.get('concep2_r'))
               if reclamo.concepto_2 != concepto:
@@ -1337,25 +1348,26 @@ def EditarMutal(request, pk):
                  
                  if concepto == reclamo.concepto_1:
                      messages.error(request, "Concepto 2 de detalle reclamo no puede ser igual a concepto 1")
-                     return redirect('mutual:listado_mutual')
+                     return -1
                  
                  
                  if concepto > 1:
                     if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
                         messages.error(request, "Edicion cancelada, el concepto 2 ingresado  detalle reclamo Pertenece a una mutual")
-                        return redirect('mutual:listado_mutual')
+                        return -1
                  reclamo.concepto_2 = concepto
               else:
                 print("soy igual concepto2 reclamo")
                                  
             
              
-              
+              print("no pinche antes save")
               reclamo.save()
+              print("no pinche despues save")
            except:
-              print("exept 1") 
+              print("exept 1 reclamo") 
         
-        if data.get('origen_p') :
+    if data.get('origen_p') :
            print("entre")
            try:
               prestamo = m.detalle.all().get(tipo = 'P')
@@ -1365,11 +1377,10 @@ def EditarMutal(request, pk):
               
               concepto = int(data.get('concep1_p')) 
               if prestamo.concepto_1 != concepto:
-                 concepto = data.get('concep1_p')
                  if concepto > 1:
                     if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
                         messages.error(request, "Edicion cancelada, el concepto 1 ingresado en detalle reclamo Pertenece a una mutual")
-                        return redirect('mutual:listado_mutual')
+                        return -1
                  prestamo.concepto_1 = concepto    
                  
                  
@@ -1379,26 +1390,48 @@ def EditarMutal(request, pk):
                  
                  if concepto == prestamo.concepto_1:
                      messages.error(request, "Edicion cancelada, el concepto 2 ingresado en detalle prestamo Pertenece a una mutual")
-                     return redirect('mutual:listado_mutual')
+                     return -1
                  if concepto > 1:
                     print("entre a buscar en filtro")
                     if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
                         messages.error(request, "Concepto 2 de detalle prestamo ingresado pertecene a otra mutual")
-                        return redirect('mutual:listado_mutual')
-                 prestamo.concepto_2 = concepto
+                        return -1
+              prestamo.concepto_2 = concepto
               
               prestamo.save()
+              
            except Exception:
-               print("except")
+               print("except prestamo")
                print(Exception)
                
-              
-            
+         
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
+def EditarMutal(request, pk):
+     if request.method == 'POST':
+        data = request.POST
+        # print(data)
+        m = Mutual.objects.get(pk = pk)
         
-        m.save()
-        print("llegue aqui")
-        messages.success(request, "Mutual actualizada éxitosamente")
-        return redirect('mutual:listado_mutual')
+        errores =  actualizarMutual(m, data, request) 
+        
+        if errores :
+           print("ENTRE MESSAGES ERROR")
+           return redirect('mutual:listado_mutual')
+           
+ 
+        errores = actualizarDetalles(m, data, request)  
+       
+        
+        if errores :
+           print("ENTRE MESSAGES ERROR")
+           return redirect('mutual:listado_mutual')
+        
+        else:
+            m.save()
+            print("llegue aqui")
+            messages.success(request, "Mutual actualizada éxitosamente")
+            return redirect('mutual:listado_mutual')    
             
          
 
