@@ -9,12 +9,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="Martín Arcos Vargas ('https://www.linkedin.com/in/martin-arcos/)" />
-    <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/carlos-lucero-programador/)" />
+    <meta name="author" content="Carlos Lucero (https://www.linkedin.com/in/lucerocarlos/)" />
 
     <link href="{% static 'images/escudo.ico' %}" rel='shortcut icon' type='image/png' />
 
     {% comment %} ANIMACIONES {% endcomment %}
-     {% comment %} <link href="{% static 'Libs/css/animate.css' %}" rel="stylesheet" /> {% endcomment %}
+     <link href="{% static 'Libs/css/animate.css' %}" rel="stylesheet" />
 
     {% comment %} BOOSTRAP {% endcomment %}
     
@@ -59,5 +59,21 @@
     {% block extra_js %}
     <script src="{% static 'Libs/js/transition.js' %}"></script>
     {% endblock %}
+
+    <script>
+            function quitar(){
+                var elementos = document.querySelectorAll('.container');
+                elementos.forEach(function(elemento) {
+                  elemento.classList.remove('animate__fadeIn');
+                  elemento.classList.remove('animate__animated');
+                  })
+            };
+              document.addEventListener('DOMContentLoaded', function() {
+
+            
+              setTimeout(quitar, 980);
+            });
+    </script>
+
   </body>
 </html>
