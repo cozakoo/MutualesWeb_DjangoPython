@@ -311,21 +311,15 @@ def PasswordChangeAdmnistrador(request, pk):
     if request.method == 'POST':
            data = request.POST  
            password = data.get('password')
-           print(password)
-           print(str(password))
            try:
-               
                 user = User.objects.get(pk = pk)   
-                print("soy user:"+ user.username)
                 user.set_password(password)
-                print("cambio con exito")
                 user.save()
                 messages.success(request,"contraseña cambiada correctamente")
                 
            except User.DoesNotExist:
                messages.error(request,"no se pude completar operacion")
-               ("NO encontrado")
-            
+
     return redirect('users:usuarios_listado')
     
 

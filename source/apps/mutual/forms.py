@@ -69,7 +69,6 @@ class FormularioMutual(forms.ModelForm):
         
     
     def clean_nombre(self):
-        print(self.cleaned_data)
         nombre = self.cleaned_data['nombre']
         if Mutual.objects.filter(nombre__iexact = nombre).exists():
           raise forms.ValidationError('Existe una mutual con el mismo nombre')

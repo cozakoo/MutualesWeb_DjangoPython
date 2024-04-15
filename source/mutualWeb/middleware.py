@@ -17,7 +17,6 @@ def ActualizarUltimaActividad(user):
 def obtenerUltimaActividad(user):
     try:
         u = UserRol.objects.get(user = user)
-        print("devolvi info")
         return u.ultimaActividad
       
     except UserRol.DoesNotExist:
@@ -28,20 +27,15 @@ class SessionTimeoutMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        print("midelware")
         response = self.get_response(request)
         user = request.user
         # Verificar si el usuario está autenticado
         if user.is_authenticated and not user.is_superuser:
             # Obtener la última actividad de la sesión
             last_activity = obtenerUltimaActividad(request.user)
-            print(last_activity)
-            print("IF")
             if last_activity:
                 # Calcular el tiempo transcurrido desde la última actividad
                 idle_time = timezone.now() - last_activity
-                print("PASE")
-                print(idle_time.total_seconds)
                 if idle_time.total_seconds() > settings.SESSION_INACTIVITY:
                     # Si el tiempo de inactividad supera la duración de la sesión, cerrar la sesión
                     ActualizarUltimaActividad(request.user)
@@ -50,6 +44,5 @@ class SessionTimeoutMiddleware:
 
             # Actualizar la última actividad en la sesión            
             ActualizarUltimaActividad(request.user)
-        else:
-            print("no entre")
+
         return response

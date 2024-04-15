@@ -33,7 +33,6 @@ def registrar_usuario(request):
             # username = form.cleaned_data.get('username')
             codigo_verificacion = str(random.randint(100000, 999999))
             
-            print("INICIO DE MENSAJE")
             remitente = "martinarcosvargas2@gmail.com"  # Cambia esto a tu dirección de correo electrónico de Gmail
             contraseña = "nwaetrcbveunziac"
             #Partes del correo

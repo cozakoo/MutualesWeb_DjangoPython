@@ -32,6 +32,7 @@
       <li><strong>Archivo:</strong> {{ d_prestamo.archivo.name }}</li>
       <li><strong>N° registros:</strong> {{ d_prestamo.total_registros }}</li>
       <li><strong>Total:</strong> ${{ d_prestamo.importe }}</li>
+      <li><strong>Concepto:</strong> {{ d_prestamo.concepto }}</li>
       {% else %}
       <li><strong>Archivo:</strong> No se ha cargado ningun archivo</li>
       <li><strong>N° registros:</strong> 0</li>
@@ -47,6 +48,7 @@
       <li><strong>Archivo:</strong> {{ d_reclamo.archivo }}</li>
       <li><strong>N° registros:</strong> {{ d_reclamo.total_registros }}</li>
       <li><strong>Total:</strong> ${{ d_reclamo.importe }}</li>
+      <li><strong>Concepto:</strong> {{ d_reclamo.concepto }}</li>
       {% else %}
       <li><strong>Archivo:</strong> No se ha cargado ningun archivo</li>
       <li><strong>N° registros:</strong> 0</li>
@@ -55,7 +57,7 @@
     </ul>
     <form method="post" class="text-center">
       <br />
-      <p><strong> Posees una borrador de Declaracion Jurada generada el {{dj.fecha_creacion}}, realice una accion </strong> </p>
+      <p><strong> Posees una borrador de Declaracion Jurada generada el {{dj.fecha_creacion}}, realice una acción </strong> </p>
       <br />
       {% csrf_token %}
       <div class="row justify-content-center">

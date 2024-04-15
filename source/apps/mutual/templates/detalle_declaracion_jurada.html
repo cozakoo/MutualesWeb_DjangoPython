@@ -25,6 +25,9 @@
                         <li>
                             Registros: {{ detalle.total_registros }}
                         </li>
+                        <li>
+                          Concepto: {{ detalle.concepto }}
+                      </li>
                     </ul>
                     <a class="btn" href="{% url 'mutual:descargarArchivo' detalle.pk %}"><i class="fa-solid fa-download"></i> Descargar</a>
                 </div>

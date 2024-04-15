@@ -27,12 +27,10 @@ class PeriodoLookup(ModelLookup):
         return queryset.order_by('fecha_inicio')[:7] 
 
     def format_item_display(self, item):
-        print("ESTOY AQUIIII --- 1")
         return str(item.__str__YYYYMM__())
     
     
     def get_item_label(self, item):
-        print("ESTOY AQUIIII --- 2")
         return str(item.__str__YYYYMM__())
     
 registry.register(PeriodoLookup)

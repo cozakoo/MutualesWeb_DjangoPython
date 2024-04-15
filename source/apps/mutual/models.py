@@ -35,7 +35,6 @@ class Mutual(models.Model):
     
     def obtener_ultimo_periodo_presentado(self):
         declaracionesPresentadas = DeclaracionJurada.objects.all().filter(mutual=self)
-        print("declaracionesPresentadas", declaracionesPresentadas)
 
         if declaracionesPresentadas.exists():
             ultimo_periodo_presentado = declaracionesPresentadas.last().periodo
@@ -54,8 +53,7 @@ class DetalleDeclaracionJurada(models.Model):
     importe = models.DecimalField(max_digits=30, decimal_places=2, null=True)
     archivo = models.FileField(upload_to='documentos/')
     total_registros= models.IntegerField(default=0)  # Nuevo campo
-    es_concepto1 = models.BooleanField(default=False)
-    es_concepto2 = models.BooleanField(default=False)
+    concepto = models.IntegerField(null = True , blank=True)
 
     def obtenerImporteConMillares(self):
         miles_translator = str.maketrans(".,", ",.")
@@ -122,9 +120,7 @@ class Periodo(models.Model):
         # Obtén el año y el mes como cadenas
         año = str(self.mes_anio.year)
         mes = str(self.mes_anio.month).zfill(2)  # Asegura que el mes tenga 2 dígitos (con ceros a la izquierda si es necesario)
-        
         # Devuelve el año y el mes concatenados en formato YYYYMM
-        print("AÑO + MES", año + mes)
         return año + mes
 
 

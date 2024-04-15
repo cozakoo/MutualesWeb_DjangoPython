@@ -36,14 +36,10 @@ def pagina_no_encontrada(request, exception):
 
 
 def buscar_mutuales(request):
-    print("-----------")
     term = request.GET.get('q')  # Obtener el término de búsqueda de la solicitud GET
-
     # Realizar la búsqueda en la base de datos
     mutuales = Mutual.objects.filter(nombre__icontains=term)
-
     # Construir una lista de resultados JSON con datos completos de Mutual
     results = [{'id': mutual.id, 'alias': mutual.alias, 'cuit': mutual.cuit, 'nombre': mutual.nombre} for mutual in mutuales]
-
     # Devolver los resultados como una respuesta JSON
     return JsonResponse(results, safe=False)

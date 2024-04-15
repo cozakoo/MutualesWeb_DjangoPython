@@ -20,7 +20,6 @@ class UserRol(models.Model):
 
 @receiver(user_logged_in, sender=User)
 def user_logged_in_callback(sender, request, user, **kwargs):
-    print("actualice estado")
     try:
         u = UserRol.objects.get(user = user)
         u.ultimaActividad = timezone.now()

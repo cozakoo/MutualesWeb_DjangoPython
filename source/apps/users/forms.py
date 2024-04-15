@@ -40,14 +40,12 @@ class RegisterUserMutualForm(UserCreationForm):
         
         username = self.cleaned_data.get('username')
         if User.objects.filter(username = username).exists():
-            print("existo")
             raise forms.ValidationError("Este nombre de usuario ya esta en uso. Por favor, elige otro.")
         return username    
 
     
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        print("asdasd")
         # Validar que el correo electrónico sea único
         if User.objects.filter(email=email).exists():
             raise forms.ValidationError("Este correo electrónico ya está en uso. Por favor, elige otro.")
