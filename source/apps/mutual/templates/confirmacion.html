@@ -31,7 +31,7 @@
       {% if d_prestamo %}
       <li><strong>Archivo:</strong> {{ d_prestamo.archivo.name }}</li>
       <li><strong>N° registros:</strong> {{ d_prestamo.total_registros }}</li>
-      <li><strong>Total:</strong> ${{ d_prestamo.importe }}</li>
+      <li><strong>Total:</strong> ${{ d_prestamo.obtenerImporteConMillares }}</li>
       <li><strong>Concepto:</strong> {{ d_prestamo.concepto }}</li>
       {% else %}
       <li><strong>Archivo:</strong> No se ha cargado ningun archivo</li>

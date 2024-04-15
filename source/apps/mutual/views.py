@@ -555,7 +555,6 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
                     validar_numero(self,line_content, line_number, 54, 57, "CUOTA", listErrores)
                     last_line_number = line_number  # Actualizar el último line_number
-                print("")
 
             #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
             if not todas_las_lineas_validas:
