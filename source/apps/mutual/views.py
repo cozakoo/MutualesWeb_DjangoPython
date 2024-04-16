@@ -267,7 +267,15 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             dj.delete()
         except DeclaracionJurada.DoesNotExist:
             pass
-
+    def eliminarBorrador(self, mutual):
+         try:
+            periodo = obtenerPeriodoVigente(self)
+            dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True, periodo = periodo )
+            dj.detalles.all().delete()
+            dj.delete()
+         except DeclaracionJurada.DoesNotExist:
+            pass
+        
     def actualizar_declaracion_jurada(self, mutual, nroRectificativa):
         try:
             dj = DeclaracionJurada.objects.get(mutual=mutual, es_borrador=True)
@@ -277,12 +285,14 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             dj.save()
         except DeclaracionJurada.DoesNotExist:
             pass
-
+    
     def cancelar_declaracion(self, request: HttpRequest) -> HttpResponse:
         try:
+            print("entre a cancelar")
             mutual = obtenerMutualVinculada(self)
-            self.eliminar_declaracion_jurada(mutual)
+            self.eliminarBorrador(mutual)
             messages.success(self.request, "EL Borrador de Declaracion jurada se ha eliminado")
+            
         except:
             pass
         return redirect('dashboard')
@@ -869,7 +879,7 @@ def generate_pdf(declaracion):
 def descargarDeclaracion(request, pk):
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
     buffer = generate_pdf(declaracion)
-
+    # ruta_archivo = input("Por favor, ingresa la ruta donde deseas guardar el archivo: ")
     return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
 
 
@@ -1164,11 +1174,14 @@ def periodoVigenteDetalle(request):
             if alias:
                 declaraciones = declaraciones.filter(mutual__alias__icontains=alias)
 
-            if es_leida_value:
-                declaraciones = declaraciones.filter(es_leida=es_leida_value)
-                
-            if No_leidos_value:
-                declaraciones = declaraciones.filter(es_leida=False)
+            if not es_leida_value or not No_leidos_value:
+                if es_leida_value:
+                    declaraciones = declaraciones.filter(es_leida=es_leida_value)
+                    
+                if No_leidos_value:
+                    declaraciones = declaraciones.filter(es_leida=False)
+            
+            # if es_leida_value and No_leidos_value:
            
     else:
         form = PeriodoVigenteDeclaracionFilterForm()

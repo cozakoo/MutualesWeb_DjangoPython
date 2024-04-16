@@ -64,7 +64,8 @@ class FormularioMutual(forms.ModelForm):
         widgets = {
             'nombre': forms.TextInput(attrs={'class': 'form-control'}),
             'alias': forms.TextInput(attrs={'class': 'form-control'}),
-            'cuit': forms.NumberInput(attrs={'class': 'form-control'}),
+            'cuit': forms.TextInput(attrs={'class': 'form-control', 'maxlength': '11',
+            'minlength': '11','inputmode': 'numeric', 'pattern': '\d{11}' } ),
         }
         
     
