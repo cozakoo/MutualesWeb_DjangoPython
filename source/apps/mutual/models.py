@@ -41,6 +41,13 @@ class Mutual(models.Model):
             return ultimo_periodo_presentado.mes_anio.strftime('%Y-%m')
         else:
             return ""
+        
+        
+        
+@receiver(pre_delete, sender=Mutual)
+def delete_related_detalle_mutual(sender, instance, **kwargs):
+    instance.detalle.all().delete()
+           
 ##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DetalleDeclaracionJurada(models.Model):
     

@@ -823,7 +823,7 @@ def generate_pdf(declaracion):
 def descargarDeclaracion(request, pk):
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
     buffer = generate_pdf(declaracion)
-
+    # ruta_archivo = input("Por favor, ingresa la ruta donde deseas guardar el archivo: ")
     return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
 
 
@@ -1118,11 +1118,14 @@ def periodoVigenteDetalle(request):
             if alias:
                 declaraciones = declaraciones.filter(mutual__alias__icontains=alias)
 
-            if es_leida_value:
-                declaraciones = declaraciones.filter(es_leida=es_leida_value)
-                
-            if No_leidos_value:
-                declaraciones = declaraciones.filter(es_leida=False)
+            if not es_leida_value or not No_leidos_value:
+                if es_leida_value:
+                    declaraciones = declaraciones.filter(es_leida=es_leida_value)
+                    
+                if No_leidos_value:
+                    declaraciones = declaraciones.filter(es_leida=False)
+            
+            # if es_leida_value and No_leidos_value:
            
     else:
         form = PeriodoVigenteDeclaracionFilterForm()

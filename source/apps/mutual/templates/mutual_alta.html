@@ -33,6 +33,20 @@
       {% include "modal_detalle_prestamo.html" %}
        {% include "modal_detalle_reclamo.html" %}
     </form>
+
+  <script>
+          document.addEventListener("DOMContentLoaded", function() {
+            var input = document.getElementById("id_cuit");
+            input.addEventListener("keypress", function(event) {
+              var charCode = event.which ? event.which : event.keyCode;
+              if (charCode > 31 && (charCode < 48 || charCode > 57)) {
+                event.preventDefault();
+              }
+            });
+          });
+  </script>
+
+
 </div>
 
 {% endblock %}
