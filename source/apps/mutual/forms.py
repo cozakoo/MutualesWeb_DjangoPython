@@ -1,5 +1,5 @@
 from django import forms
-from apps.mutual.lookups import MutualLookup
+from apps.mutual.lookups import MutualLookup, PeriodoLookup
 from apps.mutual.models import DetalleDeclaracionJurada, DetalleMutual, Mutual, Periodo
 from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
 
@@ -156,3 +156,11 @@ class MutualFilterForm(forms.Form):
         self.fields['estado'].widget.attrs.update({'class': 'form-select'})
         self.fields['cuit'].widget.attrs.update({'placeholder': 'CUIT', 'class': 'form-control'})
         self.fields['alias'].widget.attrs.update({'placeholder': 'Alias'})
+
+
+class ProfesorFilterForm(forms.Form):
+    periodo = AutoCompleteSelectField(
+        lookup_class=PeriodoLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
+    )

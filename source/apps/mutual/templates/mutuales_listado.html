@@ -74,7 +74,7 @@
                 <i class="fa-solid fa-pen-to-square"></i>
                 Editar
               </button>
-              <a class="btn btn-sm btn-outline-success" href="{% url 'reportes:reporte_mutual_declaraciones' mutual.pk %}" onclick="window.open(this.href, '_blank', 'width=800,height=600'); return false;">
+              <a class="btn btn-sm btn-outline-success" href="{% url 'reportes:reporte_mutual_declaraciones' mutual.pk %}" onclick="var width = 800; var height = 400; var left = (screen.availWidth - width) / 2; var top = (screen.height - height) / 2; window.open(this.href, '_blank', 'width=' + width + ',height=' + height + ',top=' + top + ',left=' + left); return false;">
                 <i class="fa-solid fa-chart-simple"></i>
                 Reporte
               </a>

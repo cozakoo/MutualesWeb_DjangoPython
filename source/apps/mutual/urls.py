@@ -18,9 +18,6 @@ urlpatterns = [
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),
     path('DeclaracionJurada/archivo/<int:pk>/', descargarArchivo, name="descargarArchivo"),
 
-    # path('declararReclamo/',DeclaracionJuradaReclamo.as_view(), name="declarar_reclamo"),
-    # path('crearDj/',DeclaracionJuradaCreateView.as_view(), name="dj_crear"),
-
     path('periodos/periodo/crear', PeriodoCreateView.as_view(), name="periodo_crear"),
     path('periodos/periodo/vigente', periodoVigenteDetalle , name="periodo_vigente_detalle"),
     path('periodos/periodo/vigente/<int:pk>/mutuales/nopresentaron', periodoVigenteMutualNoPresento , name="mutual_no_presento"),
@@ -33,7 +30,6 @@ urlpatterns = [
     path('confirmacion/', ConfirmacionView.as_view(), name='confirmacion'),
     path('visualizar_errores/', VisualizarErroresView.as_view(), name='visualizarE'),
     path('msj_informativo/', MsjInformativo.as_view(), name='msj_info'),
-    # path('dj_confirmacion/', , name='t_vista'),
     path('actualizar/<int:pk>/', MutualUpdateView.as_view(), name='actualizar'),
 
 ]

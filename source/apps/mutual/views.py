@@ -691,19 +691,23 @@ class HistoricoView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     login_url = '/login/'
     model = DeclaracionJurada
     template_name = "dj_list.html"
-    paginate_by = 10# Número de elementos por página
+    paginate_by = 10 # Número de elementos por página
     permission_required =  "clientes.permission_cliente_mutual"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
+        context['filter_form'] = ProfesorFilterForm(self.request.GET)  # Agrega el formulario al contexto
         return context
     
     def get_queryset(self):
+
+        periodo = self.request.GET.get('periodo', None)
+
+        print("periodo",periodo)
         # Filtrar los objetos según tu lógica
         mutual = obtenerMutualVinculada(self)
-        queryset = DeclaracionJurada.objects.filter(es_borrador = False, mutual = mutual)
-
+        queryset = DeclaracionJurada.objects.filter(es_borrador = False, mutual=mutual)
         # Devolver el queryset filtrado
         return queryset
 
@@ -786,14 +790,24 @@ def generate_pdf(declaracion):
         nombre_archivo_prestamo_sin_extension, extension_prestamo = os.path.splitext(nombre_archivo_prestamo)
         nombre_archivo_prestamo_sin_guion_bajo = nombre_archivo_prestamo_sin_extension.split('_')[0]
         nombre_final_prestamo = f"{nombre_archivo_prestamo_sin_guion_bajo}{extension_prestamo}"
-        agregar_detalle(pdf, 'DETALLE PRÉSTAMO:', 545, nombre_final_prestamo, detalles_prestamo.total_registros, detalles_prestamo.importe, detalles_prestamo.concepto)
+
+        importe =  detalles_prestamo.obtenerImporteConMillares()
+        total_registros =  detalles_prestamo.total_registros
+        concepto = detalles_prestamo.concepto
+
+        agregar_detalle(pdf, 'DETALLE PRÉSTAMO:', 545, nombre_final_prestamo, total_registros, importe, concepto)
 
     if detalles_reclamo:
         nombre_archivo_reclamo = os.path.basename(detalles_reclamo.archivo.path) if detalles_reclamo else ""
         nombre_archivo_reclamo_sin_extension, extension_reclamo = os.path.splitext(nombre_archivo_reclamo)
         nombre_archivo_reclamo_sin_guion_bajo = nombre_archivo_reclamo_sin_extension.split('_')[0]
         nombre_final_reclamo = f"{nombre_archivo_reclamo_sin_guion_bajo}{extension_reclamo}"
-        agregar_detalle(pdf, 'DETALLE RECLAMO:', 435, nombre_final_reclamo, detalles_reclamo.total_registros, detalles_reclamo.importe, detalles_prestamo.concepto)
+
+        importe =  detalles_reclamo.obtenerImporteConMillares()
+        total_registros =  detalles_reclamo.total_registros
+        concepto = detalles_reclamo.concepto
+
+        agregar_detalle(pdf, 'DETALLE RECLAMO:', 435, nombre_final_reclamo, total_registros, importe, concepto)
 
     agregar_pie_de_pagina(pdf)
     locale.setlocale(locale.LC_TIME, '')
@@ -813,25 +827,12 @@ def descargarDeclaracion(request, pk):
     return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
 
 
-
-
-
-# def obtenerNombreDestino(self, tipo):
-#     if tipo = "P"
-#        m = obtenerMutualVinculada(self)
-    
-    
 def descargarArchivo(request, pk):
     detalle = get_object_or_404(DetalleDeclaracionJurada, pk=pk)
-    
-    
     declaracion_jurada = get_object_or_404(DeclaracionJurada, detalles = detalle)
-    
     mutual = declaracion_jurada.mutual
- 
     detalleMutual = mutual.detalle.get(tipo = detalle.tipo)
     nombre = detalleMutual.destino + ".txt"
-
     # nombre = obtenerNombreDestino(request, detalle.tipo)
     with detalle.archivo.open('rb') as archivo:
         response = HttpResponse(archivo.read(), content_type='application/octet-stream')
