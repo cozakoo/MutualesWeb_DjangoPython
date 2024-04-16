@@ -3,76 +3,29 @@
 
 {% block extra_css_nivel %}
   <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
-  <style>
-    {% comment %} .detalle {
-        list-style: none;
-        padding: 0;
-    }
-
-    .detalle li strong {
-        display: inline-block;
-        width: 140px; /* Ajusta el ancho según sea necesario */
-    } {% endcomment %}
-
-</style>
 {% endblock %}
 
 {% block contenedor %}
 
-<div class="container cuadrado-background" align="center" style="width: 40rem;">
-  <h4> Errores encontrados en los siguientes Archivos</h4>
-
-  {% if erroresPrestamo %}
-  <br>
-  <div class="card text-center">
-    <div class="card-body">
-      <h5 class="card-title">Prestamo</h5>
-      <p class="card-text">Cantidad de Errores: {{ cantErrorPrestamo }}</p>
-      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Visualizar Errores</button>
+<div class="container cuadrado-background" style="width: 40rem;">
+  <h4> {{titulo}}</h4>
+  <div class="text-center">
+    {% if erroresPrestamo %}
+      <hr>
+      <h5>Prestamo</h5>
+      <p>Cantidad de Errores: {{ cantErrorPrestamo }}</p>
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Visualizar errores</button>
+    {% endif %}
+      
+    {% if not erroresReclamo %}
+      <hr>
+      <h5>Reclamo</h5>
+      <p>Cantidad Errores: {{ cantErrorReclamo }}</p>
+      <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalReclamo"> Visualizar Errores </button>
+    {% endif %}
     </div>
-  </div>
-  {% endif %}
 
-  {% if erroresReclamo %}
-  <br>
-  <div class="card text-center">
-    <div class="card-body">
-      <h5 class="card-title">Reclamo</h5>
-      <p class="card-text">Cantidad Errores: {{ cantErrorReclamo }}</p>
-       <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalReclamo"> Visualizar Errores </button>
-    </div>
-  </div>
-  {% endif %}
-
-  <br>
-
-  {% comment %} <a class="btn btn-primary" href="{% url 'mutual:declaracion_jurada' accion='declaracion' %}"> Volver a intentar</a> {% endcomment %}
-
-  </div>
-
-  <!-- MODAL PRESTAMO -->
-  <div class="modal fade" id="modalPrestamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="detallePrestamo">Errores en el archivo Prestamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div id="bodyPrestamo" class="modal-body">
-          <div style="height: 300px; overflow-y: auto;">
-            {% for item in erroresPrestamo %}
-            <p>{{ item }}</p>
-            </br>
-            {% endfor %}
-          </div>
-        </div>
-        <div class="modal-footer">
-          <!-- Botón para descargar el contenido del modal -->
-          <button id="downloadButtonPrestamo" onclick="descargarContenido('prestamo')" type="button" class="btn btn-success">Descargar</button>
-        </div>
-      </div>
-    </div>
-  </div>       
+    {% include "modal_errores_prestamo.html" %}
    
     <div class="modal fade" id="modalReclamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -95,7 +48,7 @@
       </div>
     </div>
   </div>   
-
+</div>
  <script>
  var mutual = "{{mutual}}";
  function descargarContenido(tipo) {

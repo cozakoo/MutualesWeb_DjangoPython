@@ -1,0 +1,42 @@
+<td class="negrita">{{error.fila}}</td>
+{% if error.error_documento %}
+  <td class="table-danger">{{error.documento}}</td>
+{% else %}
+  <td>{{error.documento}}</td>
+{% endif %}
+
+{% if error.error_concepto %}
+  <td class="table-danger">{{error.concepto}}</td>
+{% else %}
+  <td>{{error.concepto}}</td>
+{% endif %}
+
+{% if error.error_importe %}
+{% else %}
+  <td>{{error.importe}}</td>
+{% endif %}
+
+{% if error.error_fechaInicio and error.error_fechaFin %}
+  <td class="table-danger">{{error.fechaInicio}}</td>
+  <td class="table-warning">{{error.fechaFin}}</td>
+{% else %}
+  {% if error.error_fechaInicio %}
+    <td class="table-danger">{{error.fechaInicio}}</td>
+  {% else %}
+    <td>{{error.fechaInicio}}</td>
+  {% endif %}
+
+  {% if error.error_fechaFin %}
+    <td class="table-danger">{{error.fechaFin}}</td>
+  {% else %}
+    <td>{{error.fechaFin}}</td>
+    {% endif %}
+{% endif %}
+
+{% if error.error_cupon %}
+<td class="table-danger">{{error.cupon}}</td>
+{% else %}
+<td>{{error.cupon}}</td>
+{% endif %}
+
+

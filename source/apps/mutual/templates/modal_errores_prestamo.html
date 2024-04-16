@@ -1,0 +1,33 @@
+<!-- MODAL PRESTAMO -->
+<div class="modal fade" id="modalPrestamo" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="detallePrestamo">Errores en el archivo Prestamo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div id="bodyPrestamo" class="modal-body">
+        <table class="table table-sm table-striped table-hover">
+          <thead>
+            <tr>
+              {% include 'cabecera_table_columna_archivo.html' %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for error in erroresPrestamo %}
+              <tr>
+                {% include 'cuerpo_table_columna_archivo.html' %}
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% include 'mostrar_detalle_error.html' %}
+      </div>
+
+      <div class="modal-footer">
+        <button id="downloadButtonPrestamo" onclick="descargarContenido('prestamo')" type="button" class="btn btn-success">Descargar</button>
+      </div>
+    </div>
+  </div>
+</div>
