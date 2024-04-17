@@ -40,3 +40,22 @@
 {% endif %}
 
 
+<td>
+  <a class="btn" data-bs-toggle="collapse" href="#multiCollapseExample1{{ forloop.counter }}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">
+  <i class="fa fa-eye" aria-hidden="true"></i>
+  </a>
+
+<div class="row">
+  <div class="col">
+    <div class="collapse multi-collapse" id="multiCollapseExample1{{ forloop.counter }}">
+      <div class="card card-body">
+                     <li>
+                        Linea {{ error.fila }}: {{ error.detalle }}
+                    </li>
+                  
+      </div>
+    </div>
+  </div>
+</td>
+
+          

@@ -4,6 +4,7 @@ from .views import *
 app_name = "mutual"
 
 urlpatterns = [
+    
     path('crearMutual/',MutualCreateView.as_view(), name="mutual_crear"),
     path('mutuales/listado', MutualesListView.as_view(), name="listado_mutual"),
     path('mutuales/editar/<int:pk>', EditarMutal, name="editar_mutual"),

@@ -33,6 +33,7 @@ from django.http import JsonResponse
 from django.db.models import Q
 
 
+from django.http import HttpResponse
 
 
 def tu_vista(request):
@@ -542,8 +543,13 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             try: 
                 fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
                 periodoActual = obtenerPeriodoVigente(self)
-
-                if fecha_obj_inicio.month > periodoActual.mes_anio.month and fecha_obj_inicio.year >= periodoActual.mes_anio.year :
+                
+                 #fechas formateadas mes año
+                fechaInicio_mes_anio = fecha_obj_inicio.strftime('%Y-%m')
+                fechaPeriodo_mes_anio = periodoActual.mes_anio.strftime('%Y-%m')
+                
+                if fechaInicio_mes_anio > fechaPeriodo_mes_anio:
+                 
                     inserto_error[0] = True
                     error['detalle'] = 'La fecha no corresponde al periodo a declarar'
                     error['error_fechaInicio'] = True
@@ -575,6 +581,7 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             fecha_obj_inicio = datetime.strptime(fecha_inicio, "%d%m%Y").date()
             fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
             periodoActual = obtenerPeriodoVigente(self)
+            
 
             if fecha_obj_inicio >= periodoActual.mes_anio:
                 listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} Fecha de inicio del reclamo no es válida. Debe ser anterior al período declarativo actual. Línea: {line_content}")
