@@ -40,8 +40,8 @@
           <tr>
             <th>#</th>
             <th>Período</th>
-            <th>Cuit</th>
             <th>Mutual</th>
+            <th>Cuit</th>
             <th>Fecha lectura</th>
             <th class="text-center">Rectificativa</th>
             <th></th>
@@ -52,11 +52,11 @@
           <tr>
             <td class="negrita"> {{ page_obj.start_index|add:forloop.counter0 }}</td>
             <td> {{ declaracion.periodo.mes_anio|date:'Y/m' }}</td>
+            <td> {{ declaracion.mutual.alias }}</td>
             <td> {{ declaracion.mutual.cuit }}</td>
-            <td> {{ declaracion.mutual.nombre }}</td>
-            <td> {{ declaracion.fecha_lectura }}</td>
+            <td> {{ declaracion.fecha_lectura|date:'Y/m/d' }}</td>
             <td class="text-center"> {{ declaracion.rectificativa }}</td>
-            
+
             <td class="text-end">
               <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modalDetalle_{{declaracion.pk}}">
                 <i class="fa-regular fa-eye"></i> ver

@@ -1,0 +1,41 @@
+<!-- MODAL PRESTAMO -->
+<div class="modal fade" id="modalReclamo" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center" id="detalleReclamo">Errores en el archivo de reclamo</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div id="bodyReclamo" class="modal-body">
+        <table class="table table-sm table-striped table-hover">
+          <thead>
+              <tr class="text-center">
+                  {% include 'cabecera_table_columna_archivo.html' %}
+                  <th>CUOTA</th>
+              </tr>
+          </thead>
+          <tbody>
+              {% for error in erroresReclamo %}
+              <tr class="text-center">
+                {% include 'cuerpo_table_columna_archivo.html' %}
+
+                {% if error.error_cuota %}
+                <td class="table-danger">{{error.cuota}}</td>
+                {% else %}
+                <td class="table-success">{{error.cuota}}</td>
+                {% endif %}
+                                
+                {% include 'mostrar_error_detalle_boton.html' %}
+              </tr>
+              {% include 'mostrar_error_detalle_mensaje.html' %}
+              {% endfor %}
+          </tbody>
+      </table>
+      </div>
+      <div class="modal-footer">
+        <button id="downloadButtonPrestamo" onclick="descargarContenido('reclamo')" type="button" class="btn btn-success">Descargar</button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -79,20 +79,20 @@ def desglozarLinea(line_content):
 def validarDocumento(self, documento, error, inserto_error):
     if not es_numerico(documento):
         inserto_error[0] = True
-        error['detalle'] = 'El Documento no es numerico'
+        error['error_detalle_documento'] = 'El Documento no es numerico'
         error['error_documento'] = True
 
 def validarImporte(self, importe, error, inserto_error):
     if not es_numerico(importe):
         inserto_error[0] = True
-        error['detalle'] = 'El Importe no es numerico'
+        error['error_detalle_importe'] = 'El Importe no es numerico'
         error['error_importe'] = True
 
 def validarConcepto(self, concepto, error, inserto_error, tipo_archivo):
     if not es_numerico(concepto):
-        print("NO ES NUMERICO")
         error['error_concepto'] = True
-        error['detalle'] = 'El concepto no es numerico'
+
+        error['error_detalle_concepto'] = 'El concepto no es numerico'
         inserto_error[0] = True
     else:
         concepto = int(concepto)
@@ -100,13 +100,19 @@ def validarConcepto(self, concepto, error, inserto_error, tipo_archivo):
             print("NO EXISTE EL CONCEPTO VINCULADO A LA MUTUAL")
             inserto_error[0] = True
             error['error_concepto'] = True
-            error['detalle'] = 'El concepto no esta vinculado a su Mutual'
+            error['error_detalle_concepto'] = 'El concepto no esta vinculado a su Mutual'
 
 def validarCupon(self, cupon, error, inserto_error):
     if not es_numerico(cupon):
         inserto_error[0] = True
-        error['detalle'] = 'El cupón no es numerico'
+        error['error_detalle_cupon'] = 'El cupón no es numerico'
         error['error_cupon'] = True
+
+def validarCuota(self, cuota, error, inserto_error):
+    if not es_numerico(cuota):
+        inserto_error[0] = True
+        error['error_detalle_cuota'] = 'La cuota no es numerico'
+        error['error_cuota'] = True
 
 def longitudValida(line_content, LONGITUD_P):
     return len(line_content) == LONGITUD_P
@@ -126,7 +132,6 @@ def validar_concepto(self, line_content, line_number, inicio, fin, tipo_numero, 
 #------------------------ OINTENGO EL TOTAL DEL IMPORTE ------------------------
 def obtenerImporte(self, importe):
     importe_str = importe.lstrip('0')  # Remove leading zeros
-    print("importe_str", importe_str)
     if not importe_str:
         importe_str = '0'
     importe_formatted = float(importe_str) /100 
@@ -455,8 +460,14 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             return self.form_invalid(form,listErroresPrestamo,listErroresReclamo)
 
     def form_invalid(self, form, listErroresPrestamo, listErroresReclamo):
+
+        if listErroresPrestamo and listErroresReclamo:
+            titulo = "Errores encontrados en los siguientes archivos:"
+        else:
+            titulo = "Errores encontrados en el siguiente archivo:"
+
         contexto = {
-            'titulo': "Errores encontrados en los siguientes archivos",
+            'titulo': titulo,
             'mutual': obtenerMutualVinculada(self),
             'erroresPrestamo': listErroresPrestamo,
              'cantErrorPrestamo': len(listErroresPrestamo),
@@ -479,7 +490,6 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         try:
             file = archivo.open() 
             for line_number, line_content_bytes in enumerate(file, start=1):
-
                 inserto_error = [False]  # Lista con un solo elemento
                 line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
 
@@ -508,7 +518,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     error['error_fechaInicio'] = True
                     error['error_fechaFin'] = True
                     error['error_cupon'] = True
-                    error['detalle'] = f"Error: Todas las líneas del archivo deben tener {LONGITUD_P} caracteres."
+                    error['error_longitud'] = True
+                    error['error_detalle_longitud'] = f"Todas las líneas del archivo deben tener {LONGITUD_P} caracteres."
 
                 if inserto_error[0]: 
                     error['documento'] = documento
@@ -551,17 +562,17 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 if fechaInicio_mes_anio > fechaPeriodo_mes_anio:
                  
                     inserto_error[0] = True
-                    error['detalle'] = 'La fecha no corresponde al periodo a declarar'
+                    error['error_detalle_fechaInicio'] = 'La fecha no corresponde al periodo a declarar'
                     error['error_fechaInicio'] = True
 
                 if fecha_obj_fin < periodoActual.mes_anio:
                     inserto_error[0] = True
-                    error['detalle'] = 'La fecha es menor que la fecha del periodo a declarar'
+                    error['error_detalle_fechaFin'] = 'La fecha es menor que la fecha del periodo a declarar'
                     error['error_fechaFin'] = True
 
                 if fecha_obj_inicio > fecha_obj_fin:
                     inserto_error[0] = True
-                    error['detalle'] = 'La fecha de inicio es mayor que la fecha de finalizacion'
+                    error['error_detalle_fechaInicio'] = 'La fecha de inicio es mayor que la fecha de finalizacion'
                     error['error_fechaInicio'] = True
                     error['error_fechaFin'] = True
 
@@ -569,79 +580,114 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             except ValueError as e:
                 inserto_error[0] = True
                 error['error_fechaFin'] = True
-                error['detalle'] = 'La fecha de fin no es válida'
+                error['error_detalle_fechaFin'] = 'La fecha de fin no es válida'
         except ValueError as e:
             inserto_error[0] = True
             error['error_fechaInicio'] = True
-            error['detalle'] = 'La fecha de inicio no es válida'
+            error['error_detalle_fechaInicio'] = 'La fecha de inicio no es válida'
 
-    def validar_fechas_reclamo(self, line_content, line_number, fecha_inicio, fecha_fin, listErrores):
+    def validar_fechas_reclamo(self, fecha_inicio, fecha_fin, error, inserto_error):
+
         try:
-            # Convertir la cadena de fecha a un objeto de fecha
             fecha_obj_inicio = datetime.strptime(fecha_inicio, "%d%m%Y").date()
-            fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
-            periodoActual = obtenerPeriodoVigente(self)
-            
+            try: 
+                fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
+                periodoActual = obtenerPeriodoVigente(self)
+                
+                #fechas formateadas mes año
+                # fechaInicio_mes_anio = fecha_obj_inicio.strftime('%Y-%m')
+                # fechaPeriodo_mes_anio = periodoActual.mes_anio.strftime('%Y-%m')
+                
+                if fecha_obj_inicio >= periodoActual.mes_anio:
+                    inserto_error[0] = True
+                    error['error_detalle_fechaInicio'] = 'La fecha debe ser anterior al período declarativo actual'
+                    error['error_fechaInicio'] = True
+                
+                if fecha_obj_inicio > fecha_obj_fin:
+                    inserto_error[0] = True
+                    error['error_detalle_fechaInicio'] = 'La fecha de inicio es mayor que la fecha fin'
+                    error['error_fechaInicio'] = True
+                    error['error_fechaFin'] = True
 
-            if fecha_obj_inicio >= periodoActual.mes_anio:
-                listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} Fecha de inicio del reclamo no es válida. Debe ser anterior al período declarativo actual. Línea: {line_content}")
-            if fecha_obj_inicio > fecha_obj_fin:
-               listErrores.append(f"Error: La FECHA INICIO en la línea {line_number} es mayor que la FECHA FIN. Línea: {line_content}")
-        except ValueError:
-            mensaje_error = f"Error: La FECHA en la línea {line_number} no es válida. Línea: {line_content}"
-            listErrores.append(mensaje_error)
+            except ValueError as e:
+                inserto_error[0] = True
+                error['error_fechaFin'] = True
+                error['error_detalle_fechaFin'] = 'La fecha de fin no es válida'
+        except ValueError as e:
+            inserto_error[0] = True
+            error['error_fechaInicio'] = True
+            error['error_detalle_fechaInicio'] = 'La fecha de inicio no es válida'
 
     def validar_reclamo(self, form, archivo):
         """Valida el contenido del archivo de RECLAMO."""
         print("VALIDANDO RECLAMO------------")
-        TIPO_ARCHIVO = 'R'
-        listErrores = []
-        longitud_valida = True  # Variable para rastrear si todas las líneas son válidas
         LONGITUD_R = 57
+        TIPO_ARCHIVO = 'R'
+
+        lista_errores = []
         total_importe = 0  # Inicializar el total del importe
         last_line_number = 0  # Variable para almacenar el último line_number
         concepto = 0
+
         try:
             file = archivo.open()
             for line_number, line_content_bytes in enumerate(file, start=1):
+                inserto_error = [False]  # Lista con un solo elemento
                 line_content = line_content_bytes.decode('utf-8').rstrip('\r\n')
-                # Verificar la longitud de la línea incluyendo espacios en blanco y caracteres de nueva línea
-                if len(line_content) != LONGITUD_R:
-                    longitud_valida = False
-                    break  # Salir del bucle tan pronto como encuentres una línea con longitud incorrecta
-                else:
-                    if line_number == 1:
-                        concepto = int(line_content[16:20])
 
-                    validar_numero(self, line_content, line_number, 3, 16, "DOCUMENTO",listErrores)
-                    validar_concepto(self, line_content, line_number, 16, 20, "CONCEPTO", TIPO_ARCHIVO, listErrores)
-                    validar_numero(self, line_content, line_number, 20, 31, "IMPORTE",listErrores)
-                    total_importe += obtenerImporte(self, line_content, 20, 31)
-                    fecha_str_inicio = line_content[31:39]
-                    fecha_str_fin = line_content[39:47]
-                    self.validar_fechas_reclamo(line_content, line_number, fecha_str_inicio, fecha_str_fin,listErrores)
-                    
-                    
-                    validar_numero(self, line_content, line_number, 47, 54, "CUPON", listErrores)
-                    validar_numero(self,line_content, line_number, 54, 57, "CUOTA", listErrores)
-                    last_line_number = line_number  # Actualizar el último line_number
+                documento, concepto, importe, fecha_str_inicio, fecha_str_fin, cupon = desglozarLinea(line_content)
 
-            #   Después de procesar todas las líneas, mostrar el mensaje correspondiente
-            if not longitud_valida:
-                print("RECLAMO INVALIDO------------")
-                listErrores.append(f"Error: Todas las líneas del archivo deben tener {LONGITUD_R} caracteres.")
+                error={
+                    'fila': line_number,
+                    'linea':line_content,
+                }
+
+                if longitudValida(line_content, LONGITUD_R):
+                    validarDocumento(self, documento, error, inserto_error)
+                    validarConcepto(self, concepto, error, inserto_error, TIPO_ARCHIVO)
+                    validarImporte(self, importe, error, inserto_error)
+                    self.validar_fechas_reclamo(fecha_str_inicio, fecha_str_fin, error, inserto_error)
+                    validarCupon(self, cupon, error, inserto_error)
+                    cuota = line_content[54:57]
+
+                    validarCuota(self, cuota, error, inserto_error)
+                    if line_number == 1: concepto = int(line_content[16:20])
                 
-                # messages.warning(self.request, mensaje_error)
-                return False, 0, last_line_number, listErrores, concepto
-            print("RECLAMO VALIDO------------")
-            if len(listErrores) != 0:
-                return False, total_importe, last_line_number, listErrores, concepto
-            return True, total_importe, last_line_number, listErrores, concepto
+                else:
+                    cuota = line_content[54:]
+                    inserto_error = [True]
+                    error['error_documento'] = True
+                    error['error_concepto'] = True
+                    error['error_importe'] = True
+                    error['error_fechaInicio'] = True
+                    error['error_fechaFin'] = True
+                    error['error_cupon'] = True
+                    error['error_cuota'] = True
+                    error['error_longitud'] = True
+                    error['error_detalle_longitud'] = f"Todas las líneas del archivo deben tener {LONGITUD_R} caracteres."
+                
+                if inserto_error[0]: 
+                    error['documento'] = documento
+                    error['concepto'] = concepto
+                    error['importe'] = importe
+                    error['fechaInicio'] = fecha_str_inicio
+                    error['fechaFin'] = fecha_str_fin
+                    error['cupon'] = cupon
+                    error['cuota'] = cuota
+                    lista_errores.append(error)
+
+                else:
+                    total_importe += obtenerImporte(self, importe)
+            
+            # Comprobar si hay errores
+            if not lista_errores:
+                return True, total_importe, last_line_number, lista_errores, concepto
+            else:
+                return False, total_importe, last_line_number, lista_errores, concepto
 
         except Exception as e:
-          listErrores.append(f"Archivo invalido no puede ser leido {e}")
-          return False, 0, last_line_number, concepto
-
+            lista_errores.append(f"Archivo invalido no puede ser leido: {e}")
+            return False, 0, last_line_number, lista_errores, concepto, lista_errores
 
 
 class DetalleMutualView(LoginRequiredMixin,PermissionRequiredMixin, DetailView):
@@ -757,22 +803,21 @@ class HistoricoView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
-        context['filter_form'] = ProfesorFilterForm(self.request.GET)  # Agrega el formulario al contexto
+        context['filter_form'] = PeriodoFilterForm(self.request.GET)  # Agrega el formulario al contexto
         return context
     
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('periodo')
-        filter_form = ProfesorFilterForm(self.request.GET)
+        queryset = super().get_queryset().order_by('periodo__mes_anio')
+        filter_form = DeclaracionJuradaFilterForm(self.request.GET)
+        
         if filter_form.is_valid():
-            periodo_obj = filter_form.cleaned_data.get('periodo')
-            if periodo_obj: 
-                queryset = queryset.filter(periodo=periodo_obj)
+            periodo = filter_form.cleaned_data.get('periodo')
+            mutual = obtenerMutualVinculada(self)
 
-        # Filtrar los objetos según tu lógica
-        mutual = obtenerMutualVinculada(self)
-        queryset = DeclaracionJurada.objects.filter(es_borrador = False, mutual=mutual)
-        # Devolver el queryset filtrado
-        return queryset
+            if periodo:
+                return queryset.filter(periodo__mes_anio=periodo.mes_anio, mutual=mutual, es_borrador = False)
+
+        return DeclaracionJurada.objects.filter(es_borrador = False, mutual=mutual)
 
 def registrar_fuentes():
     pdfmetrics.registerFont(TTFont('Calibri', 'calibri.ttf'))
@@ -965,42 +1010,19 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         context = super().get_context_data(**kwargs)
         context['titulo'] = 'Histórico'
         context['filter_form'] = DeclaracionJuradaFilterForm(self.request.GET)
-        context['periodos'] = obtenerPeriodosFinalizados()
         return context
 
     def get_queryset(self):
-
-        # Filtrar el queryset de DeclaracionJurada basado en los periodos sin fecha de fin
-        queryset = DeclaracionJurada.objects.filter(periodo__in=obtenerPeriodosFinalizados())
-
-        # Obtener los datos del formulario enviado por el usuario
+        queryset = super().get_queryset().order_by('periodo__mes_anio')
         filter_form = DeclaracionJuradaFilterForm(self.request.GET)
         
-        mutual_id = self.request.GET.get('enc_mutual')
-        periodo_id = self.request.GET.get('enc_periodo')
-
-        # Convertir mutual_id a entero si es posible
-        try:
-            mutual_id = int(mutual_id)
-            periodo_id = int(periodo_id)
-
-            if mutual_id != 0: 
-                queryset = queryset.filter(mutual__pk=mutual_id)
-            
-            if periodo_id != 0:
-                queryset = queryset.filter(periodo__pk=periodo_id)
-
-        except (ValueError, TypeError):
-            mutual_id = None
-
-        
-        if filter_form.is_valid() :
-            es_borrador = filter_form.cleaned_data.get('es_borrador')
-
-            if es_borrador is not None:
-                queryset = queryset.filter(es_borrador=es_borrador)
-
-            queryset = queryset.order_by('periodo__mes_anio', 'mutual__cuit', 'fecha_lectura')
+        if filter_form.is_valid():
+            alias = filter_form.cleaned_data.get('alias')
+            periodo = filter_form.cleaned_data.get('periodo')
+            if alias:
+                queryset = queryset.filter(mutual__alias__icontains=alias)
+            if periodo:
+                queryset = queryset.filter(periodo__mes_anio=periodo.mes_anio)
 
         return queryset
 

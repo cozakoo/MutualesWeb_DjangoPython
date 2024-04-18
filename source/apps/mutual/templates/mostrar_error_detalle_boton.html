@@ -1,0 +1,18 @@
+<td colspan="100%"> <!-- Usar un número grande para asegurar que ocupe toda la fila -->
+    <a class="btn" data-bs-toggle="collapse" href="#multiCollapseExample1{{ forloop.counter }}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1" onclick="toggleIcon('icon{{ forloop.counter }}')">
+        <i id="icon{{ forloop.counter }}" class="fa fa-eye" aria-hidden="true"></i>
+    </a>
+</td>
+
+<script>
+    function toggleIcon(iconId) {
+        var icon = document.getElementById(iconId);
+        if (icon.classList.contains('fa-eye')) {
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+</script>

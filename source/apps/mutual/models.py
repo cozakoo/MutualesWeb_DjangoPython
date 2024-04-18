@@ -76,7 +76,11 @@ def eliminar_archivo(sender, instance, **kwargs):
 
 
 
+
+
 #-------------------- PERIODO ---------------------
+from datetime import datetime
+
 class Periodo(models.Model):
     """
     Antes de crear un nuevo periodo se revisa si el periodo anterior tiene fecha de fin
@@ -85,51 +89,10 @@ class Periodo(models.Model):
     fecha_fin = models.DateField(null = True , blank=True)      # tiene que estar dentro del mes
     mes_anio = models.DateField()       # mes y año del periodo. EJ: 01/01/2024 corresponde a ENERO
     
-    def obtener_nombre_mes(self):
-        # Utiliza el atributo month de mes_anio para obtener el número del mes
-        numero_mes = self.mes_anio.month
-        # Utiliza el atributo year de mes_anio para obtener el año
-        año = self.mes_anio.year
-        # Utiliza el módulo calendar para obtener el nombre del mes en inglés
-        nombre_mes_ingles = calendar.month_name[numero_mes]
-        
-        # Traducción simple a español
-        traducciones_meses = {
-            'january': 'enero',
-            'february': 'febrero',
-            'march': 'marzo',
-            'april': 'abril',
-            'may': 'mayo',
-            'june': 'junio',
-            'july': 'julio',
-            'august': 'agosto',
-            'september': 'septiembre',
-            'october': 'octubre',
-            'november': 'noviembre',
-            'december': 'diciembre',
-        }
-        
-        # Obtén el nombre del mes en español desde el diccionario de traducciones
-        nombre_mes_espanol = traducciones_meses.get(nombre_mes_ingles.lower(), nombre_mes_ingles.lower())
-        
-        # Devuelve una cadena que incluye el nombre del mes en español y el año
-        return f"{nombre_mes_espanol.capitalize()} {año}"  # Capitaliza la primera letra del mes
-    
-    
+
     def __str__(self):
-        return self.obtener_periodo_numerico()
+        return datetime.strftime(self.mes_anio, "%Y%m")
     
-    def __str__YYYYMM__(self):
-        return self.obtener_periodo_numerico()
-    
-
-    def obtener_periodo_numerico(self):
-        # Obtén el año y el mes como cadenas
-        año = str(self.mes_anio.year)
-        mes = str(self.mes_anio.month).zfill(2)  # Asegura que el mes tenga 2 dígitos (con ceros a la izquierda si es necesario)
-        # Devuelve el año y el mes concatenados en formato YYYYMM
-        return año + mes
-
 
 class DeclaracionJurada(models.Model):
     mutual = models.ForeignKey(Mutual, on_delete=models.CASCADE)
