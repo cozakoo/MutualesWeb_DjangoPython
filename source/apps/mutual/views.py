@@ -341,8 +341,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
         contexto = {}
         try:
          dj = DeclaracionJurada.objects.get(mutual = obtenerMutualVinculada(self), es_borrador = True )
-         contexto['dj'] = dj 
-          
+         contexto['dj'] = dj
+         
          try:
           contexto['d_prestamo'] = dj.detalles.get(tipo = 'P') 
          except DetalleDeclaracionJurada.DoesNotExist:
@@ -533,6 +533,8 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 else:
                     total_importe += obtenerImporte(self, importe)
 
+            # Actualizar el número de la última línea procesada
+            last_line_number = line_number
 
             # Comprobar si hay errores
             if not lista_errores:
@@ -679,6 +681,9 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                 else:
                     total_importe += obtenerImporte(self, importe)
             
+            # Actualizar el número de la última línea procesada
+            last_line_number = line_number
+                  
             # Comprobar si hay errores
             if not lista_errores:
                 return True, total_importe, last_line_number, lista_errores, concepto
