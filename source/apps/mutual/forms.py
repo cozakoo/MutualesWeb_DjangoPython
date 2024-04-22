@@ -159,7 +159,7 @@ class MutualFilterForm(forms.Form):
         self.fields['alias'].widget.attrs.update({'placeholder': 'Alias'})
 
 
-class ProfesorFilterForm(forms.Form):
+class PeriodoFilterForm(forms.Form):
     periodo = AutoCompleteSelectField(
         lookup_class=PeriodoLookup,
         required=False,

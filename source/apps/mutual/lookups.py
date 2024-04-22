@@ -24,13 +24,6 @@ class PeriodoLookup(ModelLookup):
 
     def get_query(self, request, term):
         queryset = super().get_query(request, term)
-        return queryset.order_by('fecha_inicio')[:7] 
+        return queryset.order_by('mes_anio')[:7] 
 
-    def format_item_display(self, item):
-        return str(item.__str__YYYYMM__())
-    
-    
-    def get_item_label(self, item):
-        return str(item.__str__YYYYMM__())
-    
 registry.register(PeriodoLookup)

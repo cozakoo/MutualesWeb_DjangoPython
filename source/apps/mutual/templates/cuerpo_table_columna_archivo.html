@@ -2,18 +2,19 @@
 {% if error.error_documento %}
   <td class="table-danger">{{error.documento}}</td>
 {% else %}
-  <td>{{error.documento}}</td>
+  <td class="table-success">{{error.documento}}</td>
 {% endif %}
 
 {% if error.error_concepto %}
   <td class="table-danger">{{error.concepto}}</td>
 {% else %}
-  <td>{{error.concepto}}</td>
+  <td class="table-success">{{error.concepto}}</td>
 {% endif %}
 
 {% if error.error_importe %}
+<td class="table-danger">{{error.importe}}</td>
 {% else %}
-  <td>{{error.importe}}</td>
+<td class="table-success">{{error.importe}}</td>
 {% endif %}
 
 {% if error.error_fechaInicio and error.error_fechaFin %}
@@ -23,39 +24,21 @@
   {% if error.error_fechaInicio %}
     <td class="table-danger">{{error.fechaInicio}}</td>
   {% else %}
-    <td>{{error.fechaInicio}}</td>
+    <td class="table-success">{{error.fechaInicio}}</td>
   {% endif %}
 
   {% if error.error_fechaFin %}
     <td class="table-danger">{{error.fechaFin}}</td>
   {% else %}
-    <td>{{error.fechaFin}}</td>
+    <td class="table-success">{{error.fechaFin}}</td>
     {% endif %}
 {% endif %}
 
 {% if error.error_cupon %}
 <td class="table-danger">{{error.cupon}}</td>
 {% else %}
-<td>{{error.cupon}}</td>
+<td class="table-success">{{error.cupon}}</td>
 {% endif %}
 
-
-<td>
-  <a class="btn" data-bs-toggle="collapse" href="#multiCollapseExample1{{ forloop.counter }}" role="button" aria-expanded="false" aria-controls="multiCollapseExample1">
-  <i class="fa fa-eye" aria-hidden="true"></i>
-  </a>
-
-<div class="row">
-  <div class="col">
-    <div class="collapse multi-collapse" id="multiCollapseExample1{{ forloop.counter }}">
-      <div class="card card-body">
-                     <li>
-                        Linea {{ error.fila }}: {{ error.detalle }}
-                    </li>
-                  
-      </div>
-    </div>
-  </div>
-</td>
 
           

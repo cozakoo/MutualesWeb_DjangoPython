@@ -1,0 +1,63 @@
+<tr>
+    <td colspan="100%" style="padding-left: 10%;"> <!-- Otra vez, un número grande -->
+        <div class="collapse multi-collapse" id="multiCollapseExample1{{ forloop.counter }}">
+            Linea <strong>{{ error.fila }}</strong>: 
+        <ul>
+            {% if error.error_longitud %}
+            <li>
+                {{ error.error_detalle_longitud }}
+            </li>
+            {% else %}
+
+                {% if error.error_documento %}
+                <li>
+                    {{ error.error_detalle_documento }}
+                </li>
+                {% endif %}
+        
+                {% if error.error_concepto %}
+                <li>
+                    {{ error.error_detalle_concepto }}
+                </li>
+                {% endif %}
+
+                {% if error.error_importe %}
+                <li>
+                    {{ error.error_detalle_importe }}
+                </li>
+                {% endif %}
+
+                {% if error.error_fechaInicio and error.error_fechaFin %}
+                <li>
+                    {{ error.error_detalle_fechaInicio }}
+                </li>
+                {% else %}
+                    {% if error.error_fechaInicio %}
+                    <li>
+                        {{ error.error_detalle_fechaInicio }}
+                    </li>
+                    {% endif %}
+                    
+                    {% if error.error_fechaFin %}
+                    <li>
+                        {{ error.error_detalle_fechaFin }}
+                    </li>
+                    {% endif %}
+                {% endif %}
+
+                {% if error.error_cupon %}
+                <li>
+                    {{ error.error_detalle_cupon }}
+                </li>
+                {% endif %}
+                
+                {% if error.error_cuota %}
+                <li>
+                    {{ error.error_detalle_cuota }}
+                </li>
+                {% endif %}
+            {% endif %}
+        </ul>
+        </div>
+    </td>
+</tr>

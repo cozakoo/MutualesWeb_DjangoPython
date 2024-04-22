@@ -10,20 +10,22 @@
       <div id="bodyPrestamo" class="modal-body">
         <table class="table table-sm table-striped table-hover">
           <thead>
-            <tr>
+            <tr class="text-center">
               {% include 'cabecera_table_columna_archivo.html' %}
             </tr>
           </thead>
           <tbody>
             {% for error in erroresPrestamo %}
-              <tr>
-                {% include 'cuerpo_table_columna_archivo.html' %}
+            <tr class="text-center">
+              {% include 'cuerpo_table_columna_archivo.html' %}
+                {% include 'mostrar_error_detalle_boton.html' %}
               </tr>
+              {% include 'mostrar_error_detalle_mensaje.html' %}
+
             {% endfor %}
             
           </tbody>
         </table>
-        {% include 'mostrar_detalle_error.html' %}
       </div>
 
       <div class="modal-footer">

@@ -8,8 +8,7 @@
 {% block contenedor %}
   <div class="container cuadrado-background animate__animated animate__fadeIn">
     <h2 class="text-center">Mutual</h2>
-    <br />
-    
+    <hr>
     <div class="row">
       <div class="col-md-4 col-sm-5">Mutual:</div>
       <div class="col-md-8 col-sm-12 negrita">{{ mimutual.nombre }}</div>
@@ -32,7 +31,7 @@
     </div>
     
     <br>
-      <h3>Archivos asociados</h3>
+      <h4>Archivos asociados</h4>
       {% for detalle in mimutual.detalle.all %}
       {% if detalle.origen != "*" and detalle.concepto_1 != 1 %}
       <h5>{{ detalle.get_tipo_display|capfirst }}</h5>

@@ -17,7 +17,7 @@
       <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#modalPrestamo">Visualizar errores</button>
     {% endif %}
       
-    {% if not erroresReclamo %}
+    {% if erroresReclamo %}
       <hr>
       <h5>Reclamo</h5>
       <p>Cantidad Errores: {{ cantErrorReclamo }}</p>
@@ -26,30 +26,10 @@
     </div>
 
     {% include "modal_errores_prestamo.html" %}
-   
-    <div class="modal fade" id="modalReclamo" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="detalleReclamo">Errores en el archivo Reclamo</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div id="bodyReclamo" class="modal-body">
-          <div style="height: 300px; overflow-y: auto;">
-            {% for item in erroresReclamo %}
-            <p>{{ item }}</p>
-            {% endfor %}
-          </div>
-        </div>
-        <div class="modal-footer">
-          <!-- Botón para descargar el contenido del modal -->
-          <button id="downloadButtonReclamo" onclick="descargarContenido('reclamo')" type="button" class="btn btn-success">Descargar</button>
-        </div>
-      </div>
-    </div>
-  </div>   
+    {% include "modal_errores_reclamo.html" %}
 </div>
- <script>
+
+<script>
  var mutual = "{{mutual}}";
  function descargarContenido(tipo) {
     // Suponiendo que tu contenido está en una variable llamada 'contenido'
@@ -79,7 +59,5 @@
     window.URL.revokeObjectURL(url);
 }
  </script> 
-
-
 
 {% endblock %}

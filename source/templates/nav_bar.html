@@ -41,11 +41,12 @@
              <a class="dropdown-item" href="{% url 'users:cambiar_password' %}">
              <i class="fa fa-key" aria-hidden="true"></i>
               Cambiar contraseña </a>
-          </li>
-            <a class="dropdown-item" href="{% url 'users:cerrar_session' %}">
-              <i class="fa-solid fa-lock"></i>
-              Cerrar Sesión</a>
-          </li>
+              <li id="cerrar-session">
+                <a class="dropdown-item" href="{% url 'users:cerrar_session' %}">
+                  <i class="fa-solid fa-lock" id="lock-icon"></i>
+                  Cerrar Sesión
+                </a>
+              </li>
 
         </ul>
       </div>
