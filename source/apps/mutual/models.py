@@ -4,6 +4,7 @@ from django.core.validators import MaxValueValidator
 import uuid
 from django.db.models.signals import pre_delete
 from django.dispatch import receiver
+from django.utils.timezone import now
 import os
 
 # class AcuseRecibo(models.Model):
@@ -47,6 +48,18 @@ class Mutual(models.Model):
 @receiver(pre_delete, sender=Mutual)
 def delete_related_detalle_mutual(sender, instance, **kwargs):
     instance.detalle.all().delete()
+
+
+def archivo_path(instance, filename):
+    # Obtén la extensión del archivo
+    base, extension = filename.rsplit('.', 1)
+    # Obtén la fecha actual en el formato deseado
+    fecha_actual = now().strftime('%Y%m%d')
+    # Construye el nuevo nombre del archivo
+    nuevo_nombre = f"{base}_({fecha_actual}).{extension}"
+    return f'documentos/{nuevo_nombre}'
+
+
            
 ##-------------------- DECLARACION JURADA Y DETALLE ---------------------
 class DetalleDeclaracionJurada(models.Model):
@@ -58,7 +71,7 @@ class DetalleDeclaracionJurada(models.Model):
     
     tipo = models.CharField(max_length=1, choices=TIPO)
     importe = models.DecimalField(max_digits=30, decimal_places=2, null=True)
-    archivo = models.FileField(upload_to='documentos/')
+    archivo = models.FileField(upload_to=archivo_path)
     total_registros= models.IntegerField(default=0)  # Nuevo campo
     concepto = models.IntegerField(null = True , blank=True)
 
