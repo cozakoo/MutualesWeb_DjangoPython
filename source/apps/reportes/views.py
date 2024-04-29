@@ -5,13 +5,15 @@ from datetime import datetime
 from collections import Counter
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
-
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from apps.mutual.models import DeclaracionJurada, Mutual
 from django.db.models import Sum
 from django.utils import formats
 
-class reporteMutualDeclaracionesJuradasView(TemplateView):
+class reporteMutualDeclaracionesJuradasView(LoginRequiredMixin,PermissionRequiredMixin,TemplateView):
     template_name = 'reporte_mutuales_declaraciones.html'
+    login_url = "/login/"
+    permission_required = "empleadospublicos.permission_empleado_publico"
     
     def get_graph_mutual(self, mutual):
         declaraciones = DeclaracionJurada.objects.filter(mutual=mutual)

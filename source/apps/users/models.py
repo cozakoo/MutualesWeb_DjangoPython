@@ -6,6 +6,7 @@ from django.contrib.auth.models import Permission
 from django.contrib.auth.signals import user_logged_in
 from django.utils import timezone
 from django.dispatch import receiver
+from django.db.models.signals import pre_delete
 # Este model define el usuario y el Rol que ocupa
 
 
@@ -26,4 +27,11 @@ def user_logged_in_callback(sender, request, user, **kwargs):
         u.save()
     except UserRol.DoesNotExist:
        print("no tengo userrol")
-    
+
+@receiver(pre_delete, sender=User)
+def delete_related_user_rol(sender, instance, **kwargs):
+    try:
+     u = UserRol.objects.get(id = instance.id)
+     u.delete()
+    except UserRol.DoesNotExist:
+        print("DELETE: no tengo userrol")

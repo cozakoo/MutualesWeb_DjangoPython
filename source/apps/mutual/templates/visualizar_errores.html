@@ -31,33 +31,72 @@
 
 <script>
  var mutual = "{{mutual}}";
- function descargarContenido(tipo) {
-    // Suponiendo que tu contenido está en una variable llamada 'contenido'
-   var reclamo;
-   if(tipo == "reclamo") {
-    reclamo = "soy reclamo";
-   }
-    cabecera = "Mutual: "+ mutual +"\n" + "Tipo Archivo: " + tipo + "\n \n";
-   
 
-    if(tipo == "reclamo") {
+ 
+ function deslErroresThread(){
+  // Obtener todos los elementos con la clase 'multi-collapse'
+    var collapses = document.querySelectorAll('.multi-collapse');
+
+    // Recorrer cada elemento y mostrarlo
     
-    var contenido = document.getElementById('bodyReclamo').innerText;
-   }else{
-    var contenido = document.getElementById('bodyPrestamo').innerText;
-   }
-    
-    // Crear un Blob con el contenido
-    var blob = new Blob([cabecera+contenido], {type: "text/plain;charset=utf-8"});
-    // Crear una URL para el Blob
-    var url = window.URL.createObjectURL(blob);
-    // Crear un enlace temporal y descargar el archivo
-    var tempLink = document.createElement('a');
-    tempLink.href = url;
-    tempLink.setAttribute('download','Errores_'+tipo+'_'+mutual+'.txt');
-    tempLink.click();
-    window.URL.revokeObjectURL(url);
-}
+        collapses.forEach(function(collapse, accion) {
+          setTimeout(() => {
+            var collapseInstance = new bootstrap.Collapse(collapse, {
+                toggle: false // Para no alternar, solo abrir
+            });
+              
+                  collapseInstance.show(); // Abrir el collapse
+           
+          },);
+        }) ;   
+
+ };
+
+ function descargarContenido(tipo) {
+
+    //deslErroresThread()
+    // Suponiendo que tu contenido está en una variable llamada 'contenido'
+
+          var reclamo;
+          if(tipo == "reclamo") {
+            reclamo = "soy reclamo";
+          }
+            cabecera = "Mutual: "+ mutual +"\n" + "Tipo Archivo: " + tipo + "\n \n";
+          
+
+            if(tipo == "reclamo") {
+            
+            var contenido = document.getElementById('bodyReclamo').innerText;
+          }else{
+            var contenido = document.getElementById('bodyPrestamo').innerText;
+          }
+            
+            
+            var collapses = document.querySelectorAll('.multi-collapse');
+            var collapseText = "";
+            collapses.forEach(function(collapse) {
+              collapseText += collapse.innerText;  // Añade un salto de línea entre cada texto
+            });
+
+            // Crear un Blob con el contenido, incluyendo los textos de multi-collapse
+            var blob = new Blob([cabecera + contenido + "\n" + collapseText], {type: "text/plain;charset=utf-8"});
+
+            // Crear una URL para el Blob
+            var url = window.URL.createObjectURL(blob);
+
+            // Crear un enlace temporal y descargar el archivo
+            var tempLink = document.createElement('a');
+            tempLink.href = url;
+            tempLink.setAttribute('download', 'Errores_' + tipo + '_' + mutual + '.txt');
+            tempLink.click();
+
+            // Limpiar la URL del objeto Blob después de la descarga
+            window.URL.revokeObjectURL(url);
+                
+ }
  </script> 
+
+
+
 
 {% endblock %}

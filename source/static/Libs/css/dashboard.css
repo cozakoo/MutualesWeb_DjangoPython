@@ -1,5 +1,5 @@
 body {
-  background: url("../../images/montaña.jpg") center center fixed;
+  background: url("../../images/montania.jpg") center center fixed;
   background-size: cover;
   margin: 0;
   height: 100%;
@@ -33,7 +33,7 @@ body::before {
   width: 100%;
   height: 100%;
   z-index: -1;
-  background: url("../../images/montaña.jpg") center center fixed;
+  background: url("../../images/montania.jpg") center center fixed;
   background-size: cover;
   filter: blur(10px);
 }

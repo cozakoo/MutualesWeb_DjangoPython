@@ -31,6 +31,12 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.contrib.auth.decorators import permission_required, login_required
 from django.http import JsonResponse
 from django.db.models import Q
+from dateutil.relativedelta import relativedelta
+import datetime
+from datetime import datetime
+from django.http import HttpResponse
+from openpyxl import Workbook
+
 
 
 from django.http import HttpResponse
@@ -159,9 +165,6 @@ def obtenerPeriodoVigente(self):
   except Periodo.DoesNotExist: 
          return None
 
-from dateutil.relativedelta import relativedelta
-import datetime
-from datetime import datetime
 
 def fecha_es_mayor_por_meses(fecha2):
     MESES = 2
@@ -707,17 +710,7 @@ class DetalleMutualView(LoginRequiredMixin,PermissionRequiredMixin, DetailView):
       id = userRol.rol.cliente.mutual.id
       return Mutual.objects.get(id = id)
         
-        
-        
-        
-class MutualUpdateView(UpdateView):
-    model = Mutual
-    fields = ['nombre', 'cuit' ,'activo']
-    template_name = 'mutual_update_form.html'  
-    success_url="/dashboard/"   
-        
-        
-        
+    
         
         
         
@@ -1018,16 +1011,23 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         return context
 
     def get_queryset(self):
-        queryset = super().get_queryset().order_by('periodo__mes_anio')
+        
+        periodo = Periodo.objects.filter(fecha_fin__isnull = False).last()
+        queryset = super().get_queryset().filter(periodo=periodo).order_by('periodo__mes_anio', 'mutual__alias')
+
+        # queryset = queryset.filter(periodo__fecha_fin__isnull = False)
         filter_form = DeclaracionJuradaFilterForm(self.request.GET)
         
+
         if filter_form.is_valid():
-            alias = filter_form.cleaned_data.get('alias')
-            periodo = filter_form.cleaned_data.get('periodo')
-            if alias:
-                queryset = queryset.filter(mutual__alias__icontains=alias)
-            if periodo:
-                queryset = queryset.filter(periodo__mes_anio=periodo.mes_anio)
+                print("ESOTY EN EL IF")
+                alias = filter_form.cleaned_data.get('alias')
+                periodo = filter_form.cleaned_data.get('periodo')
+                if alias:
+                    queryset = queryset.filter(mutual__alias__icontains=alias)
+                if periodo:
+                    queryset = queryset.filter(periodo__mes_anio=periodo)
+                print("NO ENTRE EN EL IF")
 
         return queryset
 
@@ -1037,11 +1037,12 @@ class DeclaracionJuradaFilterForm(forms.Form):
         required=False,
         widget=AutoComboboxSelectWidget(MutualLookup, attrs={'class': 'form-control', 'placeholder': 'Alias'})  # Agregar 'placeholder' aquí
     )
-    periodo = AutoCompleteSelectField(
-        lookup_class=PeriodoLookup,
-        required=False,
-        widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
-    )
+    periodo = MonthYearField()
+    # periodo = AutoCompleteSelectField(
+    #     lookup_class=PeriodoLookup,
+    #     required=False,
+    #     widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
+    # )
     es_borrador = forms.BooleanField(required=False)
 
 @login_required(login_url="/login/")
@@ -1246,6 +1247,9 @@ def validar_declaraciones_leidas(request, declaraciones, redirect_url):
             return False
     return True
 
+
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def finalizar_periodo(request, pk, crear_nuevo=False):
     periodo = get_object_or_404(Periodo, pk=pk)
     declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
@@ -1272,8 +1276,12 @@ def finalizar_periodo(request, pk, crear_nuevo=False):
         return redirect('mutual:periodo_vigente_detalle')
 
 
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def finalizarPeriodo(request, pk):
     return finalizar_periodo(request, pk)
+
+
 
 def actualizarMutual(m:Mutual, data, request):
     # return -1 si hay errores
@@ -1314,6 +1322,9 @@ def actualizarMutual(m:Mutual, data, request):
         
         if m.activo != activo:
            m.activo = activo
+
+
+
 
 def actualizarDetalles(m:Mutual, data, request):
 # retorna -1 si hay errores
@@ -1449,3 +1460,43 @@ def periodoVigenteMutualNoPresento(request, pk):
 
     }
     return render(request, 'listadoMutualNoPresentoEnPeriodoVigente.html', context)
+
+
+
+
+def generar_reporte_excel(request, pk):
+    # Crear un nuevo libro de trabajo
+    
+    try:
+       print(pk)
+       
+       periodo = Periodo.objects.get(pk = pk)
+       declaraciones = DeclaracionJurada.objects.filter(periodo = periodo)
+       
+       wb = Workbook()
+        
+       # Seleccionar la hoja activa
+       ws = wb.active
+       ws.append(["Mutual ", "concepto", "archivo", "tipo declaracion", "importe", "total de registros"])
+       for declaracion in declaraciones:
+           declaracion.objects.order_by(Mutual)
+           for detalle in declaracion.detalles.all():
+               ws.append([declaracion.mutual, detalle.tipo, detalle.concepto, detalle.importe, detalle.total_registros])
+
+       ws.append(["John Doe", 30, "john@example.com"])
+       ws.append(["Jane Smith", 25, "jane@example.com"])
+
+        # Crear la respuesta HTTP con el contenido del archivo Excel
+       response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+       response['Content-Disposition'] = 'attachment; filename="archivo.xlsx"'
+
+        # Guardar el contenido del libro de trabajo en la respuesta HTTP
+       wb.save(response)
+
+       return response
+       
+    except Periodo.DoesNotExist :
+        print("no existe periodo")
+    
+    
+    

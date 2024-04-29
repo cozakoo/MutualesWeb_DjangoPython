@@ -18,6 +18,7 @@ urlpatterns = [
     path('declaracionjurada/historico',HistoricoView.as_view(), name="historico"),
     path('DeclaracionJurada/<int:pk>/', descargarDeclaracion, name="descargarDeclaracion"),
     path('DeclaracionJurada/archivo/<int:pk>/', descargarArchivo, name="descargarArchivo"),
+    path('descargarInforme/<int:pk>',generar_reporte_excel, name="generar_reporte"),
 
     path('periodos/periodo/crear', PeriodoCreateView.as_view(), name="periodo_crear"),
     path('periodos/periodo/vigente', periodoVigenteDetalle , name="periodo_vigente_detalle"),
@@ -31,6 +32,5 @@ urlpatterns = [
     path('confirmacion/', ConfirmacionView.as_view(), name='confirmacion'),
     path('visualizar_errores/', VisualizarErroresView.as_view(), name='visualizarE'),
     path('msj_informativo/', MsjInformativo.as_view(), name='msj_info'),
-    path('actualizar/<int:pk>/', MutualUpdateView.as_view(), name='actualizar'),
 
 ]

@@ -159,6 +159,69 @@ class MutualFilterForm(forms.Form):
         self.fields['alias'].widget.attrs.update({'placeholder': 'Alias'})
 
 
+
+from datetime import datetime
+from django import forms
+from django.forms.widgets import Select
+
+MONTHS = {
+    1: "Enero", 2: "Febrero", 3: "Marzo",
+    4: "Abril", 5: "Mayo", 6: "Junio",
+    7: "Julio", 8: "Agosto", 9: "Septiembre",
+    10: "Octubre", 11: "Noviembre", 12: "Diciembre"
+}
+
+
+class SelectMonthYearWidget(forms.MultiWidget):
+    def __init__(self, attrs=({'class': 'form-control tipoFecha', 'type': 'date'}),  id=None, css_class=None, years=None):
+        # Opcionalmente, puedes pasar años para limitar los años disponibles
+        self.years = years or range(datetime.today().year - 5, datetime.today().year +2 )
+        # Dos widgets internos: uno para el mes y otro para el año
+        widgets = [
+            Select(choices=self.month_choices()),
+            Select(choices=self.year_choices()),
+        ]
+        super().__init__(widgets, attrs)
+        
+        
+    def month_choices(self):
+        return [(i, MONTHS[i]) for i in range(1, 13)]
+
+    def year_choices(self):
+        return [(year, year) for year in self.years]
+
+    def decompress(self, value):
+            if value:
+               return [value.month, value.year]
+            periodo = Periodo.objects.filter(fecha_fin__isnull = False).last()
+            if periodo:
+               print("entre form")
+               return [periodo.mes_anio.month, periodo.mes_anio.year]
+            
+          
+
+
+    def format_output(self, rendered_widgets):
+        return '<div class="month-year-select">%s %s</div>' % (rendered_widgets[0], rendered_widgets[1])
+
+    def value_from_datadict(self, data, files, name):
+        month = int(data.get(name + '_0', 1))
+        year = int(data.get(name + '_1', datetime.today().year))
+        return datetime(year, month, 1)
+    
+
+
+class MonthYearField(forms.DateField):
+    
+    widget = SelectMonthYearWidget()
+    
+    
+
+
+class FechasMesForm(forms.Form):
+    fecha = forms.DateField(widget=SelectMonthYearWidget())
+
+
 class PeriodoFilterForm(forms.Form):
     periodo = AutoCompleteSelectField(
         lookup_class=PeriodoLookup,

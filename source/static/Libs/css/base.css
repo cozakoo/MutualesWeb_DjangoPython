@@ -16,5 +16,12 @@
 .container {
     margin-top: 20px; /* Puedes ajustar el valor según sea necesario */
     width: 100vw; /* Esto hará que el contenedor tenga el ancho completo de la ventana del navegador */
-    box-sizing: content-box;
+    max-width: 100%;
+    box-sizing: border-box;
   }
+
+.table {
+    width: 100%;
+    max-width: 100%; /* Asegura que la tabla no exceda el contenedor*/
+    overflow-x: auto; /* Permite desplazamiento horizontal si es necesario*/
+}
