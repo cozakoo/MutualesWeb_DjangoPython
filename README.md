@@ -3,12 +3,15 @@
 ## Descripción
 El siguiente proyecto tiene como objetivo migrar código de Java a Python. Este proyecto surge de la necesidad de aprovechar las ventajas y la popularidad del lenguaje de programación Python, así como la demanda de convertir un sistema existente escrito en Java.
 
+
+<img src="logo.png" alt="Descripción de la imagen" width="500">
+
 ## Autores
 - Arcos Vargas Martín
 - Lucero Carlos
 
 ## Proyecto
-- [Tablero](https://trello.com/b/mDFuTlw0/mutuales-web-django)
+- [Tablero](logo.png://trello.com/b/mDFuTlw0/mutuales-web-django)
 
 ## Elementos
 
