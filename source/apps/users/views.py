@@ -110,7 +110,9 @@ class CustomLoginView(LoginView, View):
         return super().get(request, *args, **kwargs)
     
     def form_invalid(self, form):
-        mensaje_error(self.request, '')
+        if not self.request.user.is_active :
+           messages.error(self.request, 'Usuario Inactivo, loggeo no permitido')
+           return redirect('users:login')
         return super().form_invalid(form)
     
     
