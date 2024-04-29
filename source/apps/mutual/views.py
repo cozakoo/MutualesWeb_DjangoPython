@@ -1026,7 +1026,7 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
                 if alias:
                     queryset = queryset.filter(mutual__alias__icontains=alias)
                 if periodo:
-                    queryset = queryset.filter(periodo__mes_anio=periodo)
+                    queryset = queryset.filter(periodo__mes_anio=periodo.mes_anio)
                 print("NO ENTRE EN EL IF")
 
         return queryset
@@ -1037,12 +1037,12 @@ class DeclaracionJuradaFilterForm(forms.Form):
         required=False,
         widget=AutoComboboxSelectWidget(MutualLookup, attrs={'class': 'form-control', 'placeholder': 'Alias'})  # Agregar 'placeholder' aquí
     )
-    periodo = MonthYearField()
-    # periodo = AutoCompleteSelectField(
-    #     lookup_class=PeriodoLookup,
-    #     required=False,
-    #     widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
-    # )
+    # periodo = MonthYearField()
+    periodo = AutoCompleteSelectField(
+        lookup_class=PeriodoLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
+    )
     es_borrador = forms.BooleanField(required=False)
 
 @login_required(login_url="/login/")
@@ -1196,8 +1196,6 @@ def periodoVigenteDetalle(request):
     mutualesNoDeclaradas = Mutual.objects.exclude(pk__in = declaraciones.values('mutual')).filter(activo=True).order_by('alias')
 
 
-    for obj in mutualesNoDeclaradas:
-        print(obj.alias)
     if request.method == 'POST':
         form = PeriodoVigenteDeclaracionFilterForm(request.POST)
         if form.is_valid():
