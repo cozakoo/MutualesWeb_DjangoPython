@@ -195,7 +195,6 @@ class SelectMonthYearWidget(forms.MultiWidget):
                return [value.month, value.year]
             periodo = Periodo.objects.filter(fecha_fin__isnull = False).last()
             if periodo:
-               print("entre form")
                return [periodo.mes_anio.month, periodo.mes_anio.year]
             
           
