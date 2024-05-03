@@ -14,7 +14,7 @@ import os
 class DetalleMutual(models.Model):
     TIPO_DECLARACION = [
         ('R', 'reclamo'),
-        ('P', 'prestamo'),
+        ('P', 'préstamo'),
     ]
     tipo = models.CharField(max_length=1 , choices=TIPO_DECLARACION)
     origen = models.CharField(max_length=100)
@@ -65,7 +65,7 @@ def archivo_path(instance, filename):
 class DetalleDeclaracionJurada(models.Model):
     
     TIPO = [
-        ('P', 'prestamo'),
+        ('P', 'préstamo'),
         ('R', 'reclamo'),
     ]
     

@@ -58,7 +58,7 @@ def obtenerPermiso(name):
         content_type = ContentType.objects.get_for_model(EmpleadoPublico)
         permiso, creado = Permission.objects.get_or_create(
             codename='permission_empleado_publico',
-            name='Control total empleado publico',
+            name='Control total empleado público',
             content_type=content_type,
         )
         return permiso
@@ -183,7 +183,7 @@ class RegistereEmpleadoPublicoView(LoginRequiredMixin, PermissionRequiredMixin ,
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['titulo'] = 'Registro de Usuario Empleado Publico'
+        context['titulo'] = 'Registro de Usuario Empleado Público'
         return context
     
    

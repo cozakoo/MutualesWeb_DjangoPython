@@ -47,8 +47,8 @@
 
                 {% for detalle in mutual.detalle.all %}
                       {% if detalle.tipo == 'P' %}
-                          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Prestamo </h1>
-                            <small class="form-text text-muted">Si origen o destino posee "*", la mutual no posee Detalle prestamo.</small>
+                          <h1 class="modal-title fs-5" id="exampleModalLabel">Detalle Préstamo </h1>
+                            <small class="form-text text-muted">Si origen o destino posee "*", la mutual no posee Detalle préstamo.</small>
                             </br>
                             <label>Origen:</label>
                             <input type="text" class="form-control" id="origen_p" name="origen_p" aria-describedby="emailHelp" value="{{detalle.origen}}">

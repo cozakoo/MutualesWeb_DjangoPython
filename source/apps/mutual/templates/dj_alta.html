@@ -17,7 +17,7 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          Ya se ha generado un archivo de prestamo previamente. ¿Desea reemplazar dicho archivo?
+          Ya se ha generado un archivo de préstamo previamente. ¿Desea reemplazar dicho archivo?
         </div>
         <div class="modal-footer">
           <a href="{% url 'dashboard' %}" class="btn btn-primary">Salir</a>
@@ -40,7 +40,7 @@
         </button>
       </div>
       <div class="modal-body">
-        <p>Y ESE PRESTAMO HA SIDO LEÍDO</p>
+        <p>Y ESE PRéSTAMO HA SIDO LEÍDO</p>
       </div>
       <div class="modal-footer">
         <!-- Puedes agregar botones adicionales o acciones aquí si es necesario -->
@@ -72,7 +72,7 @@
       {% csrf_token %}
       {% if existe_prestamo %}
       <div class="mb-3">
-          <h5>Prestamo</h5>
+          <h5>Préstamo</h5>
           <input class="form-control" type="file" name="{{ form.archivo_p.name }}" id="{{ form.archivo_p.id_for_label }}" />
         </div>
       {% endif %}

@@ -1390,11 +1390,11 @@ def actualizarDetalles(m:Mutual, data, request):
               if prestamo.concepto_2 != concepto:
 
                  if concepto == prestamo.concepto_1:
-                     messages.error(request, "Edicion cancelada, el concepto 2 ingresado en detalle prestamo Pertenece a una mutual")
+                     messages.error(request, "Edicion cancelada, el concepto 2 ingresado en detalle préstamo Pertenece a una mutual")
                      return -1
                  if concepto > 1:
                     if DetalleMutual.objects.filter(concepto_2 = concepto).exists() or  DetalleMutual.objects.filter(concepto_1 = concepto).exists() :
-                        messages.error(request, "Concepto 2 de detalle prestamo ingresado pertecene a otra mutual")
+                        messages.error(request, "Concepto 2 de detalle préstamo ingresado pertecene a otra mutual")
                         return -1
               prestamo.concepto_2 = concepto
               

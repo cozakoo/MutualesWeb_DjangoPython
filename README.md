@@ -1,22 +1,20 @@
-# Mutuales en sistema web
+# 💻 Sistema Gestión de Mutuales 💻 
 
-## Descripción
-El siguiente proyecto tiene como objetivo migrar código de Java a Python. Este proyecto surge de la necesidad de aprovechar las ventajas y la popularidad del lenguaje de programación Python, así como la demanda de convertir un sistema existente escrito en Java.
+📝 El proyecto tiene como objetivo migrar código de Java a Python. Este proyecto surge de la necesidad de aprovechar las ventajas y la popularidad del lenguaje de programación Python, así como la demanda de convertir un sistema existente escrito en Java.
 
+<div align="center"> 
+  <img src="logo.png" alt="Descripción de la imagen" width="300">
+</div>
 
-<img src="logo.png" alt="Descripción de la imagen" width="500">
-
-## Autores
+## Autores 🖋️
 - Arcos Vargas Martín
 - Lucero Carlos
 
-## Proyecto
-- [Tablero](logo.png://trello.com/b/mDFuTlw0/mutuales-web-django)
+## Documentacion y Guías
+- 📖 [Link de acceso](https://drive.google.com/drive/folders/1Jvz5RIItJmNVQSpdEZ8e01b3On_3ktvf?usp=sharing)
 
 ## Elementos
-
 - Python 3.10.7
-
 - Django versión 5.0.1
 
 ##### Páginas de ayuda:
