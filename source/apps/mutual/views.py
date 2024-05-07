@@ -42,6 +42,8 @@ from openpyxl import Workbook
 from django.http import HttpResponse
 
 
+
+
 def tu_vista(request):
     data = Mutual.objects.all()
     return render(request, 'tu_vista.html', {'data': data})
@@ -1464,40 +1466,6 @@ def periodoVigenteMutualNoPresento(request, pk):
 
 
 
-
-def generar_reporte_excel(request, pk):
-    # Crear un nuevo libro de trabajo
-    
-    try:
-       print(pk)
-       
-       periodo = Periodo.objects.get(pk = pk)
-       declaraciones = DeclaracionJurada.objects.filter(periodo = periodo)
-       
-       wb = Workbook()
-        
-       # Seleccionar la hoja activa
-       ws = wb.active
-       ws.append(["Mutual ", "concepto", "archivo", "tipo declaracion", "importe", "total de registros"])
-       for declaracion in declaraciones:
-           declaracion.objects.order_by(Mutual)
-           for detalle in declaracion.detalles.all():
-               ws.append([declaracion.mutual, detalle.tipo, detalle.concepto, detalle.importe, detalle.total_registros])
-
-       ws.append(["John Doe", 30, "john@example.com"])
-       ws.append(["Jane Smith", 25, "jane@example.com"])
-
-        # Crear la respuesta HTTP con el contenido del archivo Excel
-       response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-       response['Content-Disposition'] = 'attachment; filename="archivo.xlsx"'
-
-        # Guardar el contenido del libro de trabajo en la respuesta HTTP
-       wb.save(response)
-
-       return response
-       
-    except Periodo.DoesNotExist :
-        print("no existe periodo")
     
     
     

@@ -124,6 +124,16 @@ class FormularioDJ(forms.ModelForm):
 from django.forms import DateInput
 from django.utils import timezone
 
+
+
+class FormulariosFinalizados(forms.Form):
+     periodos = forms.ModelChoiceField(
+        queryset=Periodo.objects.filter(fecha_fin__isnull = False),
+        required=True,
+        help_text="Seleccione un periodo",
+        widget=forms.Select(attrs={'class': 'form-select'})) 
+     
+     
 class FormularioPeriodo(forms.ModelForm):
     class Meta:
         model = Periodo
