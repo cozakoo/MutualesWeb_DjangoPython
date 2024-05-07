@@ -86,6 +86,8 @@ Antes de comenzar, asegúrate de tener instalado Docker en tu sistema.
    ```
 2. **Construir la Imagen Docker:** Ve al directorio raíz del proyecto y ejecuta el siguiente comando para construir la imagen Docker:
    ```bash
+   cd MutualesWeb_DjangoPython/
+   cd source/
    git clone docker build -t nombre-de-tu-imagen .
    ```
 3. **Ejecutar el Contenedo:**  Una vez que se haya construido la imagen Docker, ejecuta el siguiente comando para iniciar el contenedor:

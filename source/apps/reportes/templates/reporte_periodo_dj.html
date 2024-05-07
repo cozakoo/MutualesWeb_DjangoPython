@@ -9,18 +9,22 @@
 {% block contenedor %}
   
   <div class="container cuadrado-background animate__animated animate__fadeIn">
-  <h2 class="text-center titulo">GENERACION DE REPORTE</h2>
+  <h2 class="text-center titulo">Generación de reporte</h2>
   </br>
     
     <form method="post">
     {% csrf_token %}
     <div class="form-group">
-      {{ periodos.as_p }}
-      <button align="center" type="submit" class="btn">
-      <i class="fa-solid fa-file-excel fa-2xl" style="color: #1d6f42;"></i>
-      Generar
-      </button>
-        
+      {{ periodos.periodos }}
+
+      <br>
+      
+      <div style="text-align: center;">
+        <button type="submit" class="btn btn-outline-success btn-excel">
+            <i class="fa-solid fa-file-excel fa-xl" style="color: #1d6f42;"></i>
+            Generar
+        </button>
+    </div>
     </div>
   </form>
   </div>

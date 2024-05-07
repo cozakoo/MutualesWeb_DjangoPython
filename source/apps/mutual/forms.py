@@ -127,12 +127,12 @@ from django.utils import timezone
 
 
 class FormulariosFinalizados(forms.Form):
-     periodos = forms.ModelChoiceField(
-        queryset=Periodo.objects.filter(fecha_fin__isnull = False),
+    periodos = forms.ModelChoiceField(
+        queryset=Periodo.objects.filter(fecha_fin__isnull=False),
         required=True,
-        help_text="Seleccione un periodo",
-        widget=forms.Select(attrs={'class': 'form-select'})) 
-     
+        empty_label="Seleccione el periodo",  # Esta línea agrega la opción predeterminada
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
      
 class FormularioPeriodo(forms.ModelForm):
     class Meta:
