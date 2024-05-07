@@ -298,7 +298,7 @@ class UserListView(LoginRequiredMixin, PermissionRequiredMixin, ListView):
                 is_active_values = [bool(int(value)) for value in is_active_values]
                 queryset = queryset.filter(is_active__in=is_active_values)
 
-        return queryset
+        return queryset.order_by('-is_active', 'username')
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

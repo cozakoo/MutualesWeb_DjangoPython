@@ -570,7 +570,10 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     error['error_detalle_fechaInicio'] = 'La fecha no corresponde al periodo a declarar'
                     error['error_fechaInicio'] = True
 
+
                 if fecha_obj_fin < periodoActual.mes_anio:
+                    print("fecha_obj_fin", fecha_obj_fin)
+                    print("periodoActual.mes_anio", periodoActual.mes_anio)
                     inserto_error[0] = True
                     error['error_detalle_fechaFin'] = 'La fecha es menor que la fecha del periodo a declarar'
                     error['error_fechaFin'] = True
@@ -1260,8 +1263,8 @@ def finalizar_periodo(request, pk, crear_nuevo=False):
         periodo.save()
         if crear_nuevo:
             fecha_inicio = periodo.fecha_fin
-            mes_anio = fecha_inicio + relativedelta(months=1)
-
+            # FALTA setear mes_anio DON DIA EN 1
+            mes_anio = fecha_inicio.replace(day=1) + relativedelta(months=1)
             periodo_nuevo = Periodo(fecha_inicio=fecha_inicio, mes_anio=mes_anio)
             periodo_nuevo.save()
 
