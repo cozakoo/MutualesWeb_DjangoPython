@@ -54,9 +54,9 @@ def archivo_path(instance, filename):
     # Obtén la extensión del archivo
     base, extension = filename.rsplit('.', 1)
     # Obtén la fecha actual en el formato deseado
-    fecha_actual = now().strftime('%Y%m%d')
+    fecha_actual = datetime.now().strftime('%Y%m')
     # Construye el nuevo nombre del archivo
-    nuevo_nombre = f"{base}_({fecha_actual}).{extension}"
+    nuevo_nombre = f"{fecha_actual}_{base}.{extension}"
     return f'documentos/{nuevo_nombre}'
 
 

@@ -54,10 +54,10 @@ class reporteMutualDeclaracionesJuradasView(LoginRequiredMixin,PermissionRequire
         return context
     
 from openpyxl.styles import Font, Alignment, PatternFill    
+
 def reporte_periodo_dj(request):
     if request.method == 'GET':
         # periodosFinalizados = Periodo.objects.filter(fecha_fin__isnull = False)
-        print("IN GET")
         periodosFinalizados = FormulariosFinalizados()
         return render(request, 'reporte_periodo_dj.html', {'periodos': periodosFinalizados})
     
@@ -72,7 +72,6 @@ def reporte_periodo_dj(request):
             ws = wb.active
             ws.title = "DECLARACIONES"
             
-            # Estilos para el encabezado
             # Estilos para el encabezado
             header_font = Font(bold=True, size=12)
             header_alignment = Alignment(horizontal="center", vertical="center")
@@ -111,17 +110,17 @@ def reporte_periodo_dj(request):
                     
                     
                 # Separador entre declaraciones
-                ws.append([""])
+                # ws.append([""])
                 
             # Configurar ancho de columnas
-            column_widths = [20, 20, 30, 15, 15]
+            column_widths = [20, 15,10,15, 10]
             for i, width in enumerate(column_widths, start=1):
                 ws.column_dimensions[chr(64+i)].width = width
 
             
             
-            ws2 = wb.create_sheet(title="NO DECLARADOS")
-            ws2['A1'] = "Contenido de la otra hoja"
+            # ws2 = wb.create_sheet(title="NO DECLARADOS")
+            # ws2['A1'] = "Contenido de la otra hoja"
             
             
             
@@ -130,7 +129,7 @@ def reporte_periodo_dj(request):
             # Crear la respuesta HTTP con el contenido del archivo Excel
             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
             extension = ".xlsx"
-            nombre = "Reporte_"+ periodo.mes_anio.strftime('%m %Y')+ extension
+            nombre = periodo.mes_anio.strftime('%Y%m')+ "_ReportePeriodo" + extension
             response['Content-Disposition'] = f'attachment; filename="{nombre}"'
             
 
@@ -141,41 +140,3 @@ def reporte_periodo_dj(request):
         
         except Periodo.DoesNotExist:
             print("No existe periodo")
-
-
-        
-# def generar_reporte_excel(request, pk):
-#     #Crear un nuevo libro de trabajo
-    
-#         try:
-#             print(pk)
-            
-#             periodo = Periodo.objects.get(pk = pk)
-#             declaraciones = DeclaracionJurada.objects.filter(periodo = periodo)
-            
-#             wb = Workbook()
-                
-#             # Seleccionar la hoja activa
-#             ws = wb.active
-#             ws.append(["Mutual ", "concepto", "archivo", "tipo declaracion", "importe", "total de registros"])
-#             for declaracion in declaraciones:
-#                 declaracion.objects.order_by(Mutual)
-#                 for detalle in declaracion.detalles.all():
-#                     ws.append([declaracion.mutual, detalle.tipo, detalle.concepto, detalle.importe, detalle.total_registros])
-
-#             ws.append(["John Doe", 30, "john@example.com"])
-#             ws.append(["Jane Smith", 25, "jane@example.com"])
-
-#                 # Crear la respuesta HTTP con el contenido del archivo Excel
-#             response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-#             response['Content-Disposition'] = 'attachment; filename="archivo.xlsx"'
-
-#                 # Guardar el contenido del libro de trabajo en la respuesta HTTP
-#             wb.save(response)
-
-#             return response
-        
-#         except Periodo.DoesNotExist :
-#             print("no existe periodo")
-            
-        

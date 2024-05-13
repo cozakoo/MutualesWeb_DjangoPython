@@ -603,12 +603,16 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
             try: 
                 fecha_obj_fin = datetime.strptime(fecha_fin, "%d%m%Y").date()
                 periodoActual = obtenerPeriodoVigente(self)
+
+                # Formatear las fechas como AAAA-MM
+                fecha_obj_inicio_str = fecha_obj_inicio.strftime('%Y-%m')
+                mes_anio_str = periodoActual.mes_anio.strftime('%Y-%m')
+
+                print(fecha_obj_inicio_str)
+                print(mes_anio_str)
+
                 
-                #fechas formateadas mes año
-                # fechaInicio_mes_anio = fecha_obj_inicio.strftime('%Y-%m')
-                # fechaPeriodo_mes_anio = periodoActual.mes_anio.strftime('%Y-%m')
-                
-                if fecha_obj_inicio >= periodoActual.mes_anio:
+                if fecha_obj_inicio_str >= mes_anio_str:
                     inserto_error[0] = True
                     error['error_detalle_fechaInicio'] = 'La fecha debe ser anterior al período declarativo actual'
                     error['error_fechaInicio'] = True
@@ -933,10 +937,13 @@ def generate_pdf(declaracion):
 @login_required(login_url="/login/")
 def descargarDeclaracion(request, pk):
     declaracion = get_object_or_404(DeclaracionJurada, pk=pk)
-    buffer = generate_pdf(declaracion)
-    # ruta_archivo = input("Por favor, ingresa la ruta donde deseas guardar el archivo: ")
-    return FileResponse(buffer, as_attachment=True, filename="declaracion_jurada.pdf")
+    periodo = declaracion.periodo
 
+    # Formateamos el mes y el año como un string con 6 dígitos
+    mes_anio = periodo.mes_anio.strftime('%Y%m')
+    nombre_archivo = f"{mes_anio}_DDJJ.pdf"
+    buffer = generate_pdf(declaracion)
+    return FileResponse(buffer, as_attachment=True, filename=nombre_archivo)
 
 def descargarArchivo(request, pk):
     detalle = get_object_or_404(DetalleDeclaracionJurada, pk=pk)

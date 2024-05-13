@@ -29,7 +29,7 @@
     <h4>Préstamo </h4>
     <ul class="detalle">
       {% if d_prestamo %}
-      <li><strong>Archivo:</strong> {{ d_prestamo.archivo.name }}</li>
+      <li><strong>Archivo:</strong> {{ d_prestamo.archivo}}</li>
       <li><strong>N° registros:</strong> {{ d_prestamo.total_registros }}</li>
       <li><strong>Total:</strong> ${{ d_prestamo.obtenerImporteConMillares }}</li>
       <li><strong>Concepto:</strong> {{ d_prestamo.concepto }}</li>
