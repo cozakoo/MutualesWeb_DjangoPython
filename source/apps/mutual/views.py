@@ -1,8 +1,9 @@
 from io import BytesIO
 import io
+import subprocess
 from reportlab.pdfgen import canvas
 from django.shortcuts import get_object_or_404
-from django.http import FileResponse
+from django.http import FileResponse, Http404
 from reportlab.pdfbase.ttfonts import TTFont
 from reportlab.pdfbase import pdfmetrics
 import os
@@ -1023,24 +1024,16 @@ class DeclaracionJuradaDeclaradoListView(LoginRequiredMixin,PermissionRequiredMi
         return context
 
     def get_queryset(self):
-        
-        periodo = Periodo.objects.filter(fecha_fin__isnull = False).last()
-        queryset = super().get_queryset().filter(periodo=periodo).order_by('periodo__mes_anio', 'mutual__alias')
-
-        # queryset = queryset.filter(periodo__fecha_fin__isnull = False)
+        queryset = super().get_queryset().order_by('periodo__mes_anio', 'mutual__alias')
         filter_form = DeclaracionJuradaFilterForm(self.request.GET)
-        
 
         if filter_form.is_valid():
-                print("ESOTY EN EL IF")
-                alias = filter_form.cleaned_data.get('alias')
-                periodo = filter_form.cleaned_data.get('periodo')
-                if alias:
-                    queryset = queryset.filter(mutual__alias__icontains=alias)
-                if periodo:
-                    queryset = queryset.filter(periodo__mes_anio=periodo.mes_anio)
-                print("NO ENTRE EN EL IF")
-
+            alias = filter_form.cleaned_data.get('alias')
+            periodo = filter_form.cleaned_data.get('periodo')
+            if alias:
+                queryset = queryset.filter(mutual__alias__icontains=alias)
+            if periodo:
+                queryset = queryset.filter(periodo__mes_anio=periodo.mes_anio)
         return queryset
 
 class DeclaracionJuradaFilterForm(forms.Form):
@@ -1448,6 +1441,48 @@ def EditarMutal(request, pk):
 def finalizarPeriodoCrearNuevo(request, pk):
     return finalizar_periodo(request, pk, crear_nuevo=True)
 
+import os
+from django.http import HttpResponse
+import rarfile
+from io import BytesIO
+import zipfile
+
+@login_required(login_url="/login/")
+@permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
+def comprimirPeriodo(request, pk):
+
+    periodo = get_object_or_404(Periodo, pk=pk)
+    anio_mes = periodo.mes_anio.strftime("%Y-%m")
+
+    # Nombre del archivo .zip que quieres generar
+    nombre_archivo_zip = f'{anio_mes}_periodo.zip'
+    
+    # Ruta donde guardarás el archivo .zip en el directorio actual
+    ruta_archivo_zip = os.path.join(os.getcwd(), nombre_archivo_zip)
+    
+    # Crear el archivo .zip
+    with zipfile.ZipFile(ruta_archivo_zip, 'w') as zf:
+        # Crear una carpeta llamada "Periodo"
+        zf.writestr(f'{anio_mes}_Periodo/', '')
+        agregarDeclaracionesJuradas(periodo, zf)
+    
+    # Abre el archivo .zip y envíalo como respuesta HTTP
+    with open(ruta_archivo_zip, 'rb') as f:
+        response = HttpResponse(f.read(), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename="{nombre_archivo_zip}"'
+        return response
+
+def agregarDeclaracionesJuradas(periodo, zf):
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False).order_by('mutual__alias')
+
+    for declaracion in declaraciones:
+        for detalle in declaracion.declaracionjuradadetalles_set.all():
+            # Obtener la ruta del archivo
+            archivo_ruta = detalle.detalleDeclaracionJurada.archivo.path
+            # Obtener el nombre del archivo
+            archivo_nombre = os.path.basename(archivo_ruta)
+            # Agregar el archivo al directorio de la declaración jurada en el archivo ZIP
+            zf.write(archivo_ruta, f'{periodo.mes_anio.strftime("%Y-%m")}_Periodo/{declaracion.mutual.alias}/{archivo_nombre}')
 
 @login_required(login_url="/login/")
 @permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
@@ -1472,7 +1507,32 @@ def periodoVigenteMutualNoPresento(request, pk):
     return render(request, 'listadoMutualNoPresentoEnPeriodoVigente.html', context)
 
 
-
-    
-    
-    
+def seleccionarPeriodoComprimir(request):
+    titulo = 'Descargar archivos'
+    if request.method == 'POST':
+        filter_form = PeriodoFilterForm(request.POST)
+        if filter_form.is_valid():
+            form_periodo = filter_form.cleaned_data.get('periodo')
+            try:
+                if form_periodo is None:
+                    raise Http404("El periodo no existe")
+                periodo = get_object_or_404(Periodo, pk=form_periodo.pk)
+                # Si el periodo existe, continuar con la lógica para redirigir a la URL adecuada
+                url = reverse('mutual:comprimir_periodo', kwargs={'pk': periodo.pk})
+                return redirect(url)
+            except Http404 as e:
+                messages.error(request, str(e))
+                contexto = {
+                    'titulo': titulo,
+                    'filter_form': filter_form,
+                }
+                return render(request, 'periodo_archivo_descarga.html', contexto)
+        else:
+            messages.error(request, 'Error al procesar el formulario. Por favor, verifica los datos ingresados.')
+    else:
+        filter_form = PeriodoFilterForm()
+        contexto = {
+            'titulo': titulo,
+            'filter_form': filter_form,
+        }
+        return render(request, 'periodo_archivo_descarga.html', contexto)

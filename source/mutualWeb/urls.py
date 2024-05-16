@@ -41,6 +41,11 @@ urlpatterns = [
 
     path("selectable/", include("selectable.urls")),
     path('buscar_mutuales/', views.buscar_mutuales, name='buscar_mutuales'),
+    
+    # para abir los manuales
+    path('manual_usuario_mutual/', abrirManualMutual, name="pdf_manual_mutual"),
+    path('manual_usuario_operativos/', abrirManualOperativos, name="pdf_manual_operativos"),
+    path('manual_usuario_administrador/', abrirManualAdministrador, name="pdf_manual_administrador"),
 ]
 
 handler404 = "mutualWeb.views.pagina_no_encontrada"

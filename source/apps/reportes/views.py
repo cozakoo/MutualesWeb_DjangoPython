@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import Http404, HttpResponse
 from django.shortcuts import render
 
 from django.views import View
@@ -54,89 +54,101 @@ class reporteMutualDeclaracionesJuradasView(LoginRequiredMixin,PermissionRequire
         return context
     
 from openpyxl.styles import Font, Alignment, PatternFill    
+from django.contrib import messages
 
 def reporte_periodo_dj(request):
     if request.method == 'GET':
-        # periodosFinalizados = Periodo.objects.filter(fecha_fin__isnull = False)
-        periodosFinalizados = FormulariosFinalizados()
-        return render(request, 'reporte_periodo_dj.html', {'periodos': periodosFinalizados})
+        filter_form = FormulariosFinalizados()
+        return render(request, 'reporte_periodo_dj.html', {'filter_form': filter_form})
     
     if request.method == 'POST':
         try:
-            id_periodo = request.POST.get('periodos')
-            periodo = Periodo.objects.get(pk=id_periodo)
-            declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
-            declaraciones =  declaraciones.order_by('mutual__alias')
-        
-            wb = Workbook()
-            ws = wb.active
-            ws.title = "DECLARACIONES"
-            
-            # Estilos para el encabezado
-            header_font = Font(bold=True, size=12)
-            header_alignment = Alignment(horizontal="center", vertical="center")
-            header_fill = PatternFill(start_color="77dd77", end_color="77dd77", fill_type="solid")
-            
-            ws.append(["Periodo" , "N° Declaraciones"])
-            ws.append([periodo.mes_anio, declaraciones.count()])
-            ws.append([""])
-            ws.append([""])
-            # Añadir encabezados
-            headers = ["Mutual", "Tipo Archivo", "Concepto", "Importe", "N° Registros"]
-            ws.append(headers)
-            for cell in ws[1]:
-                cell.font = header_font
-                cell.alignment = header_alignment
-                cell.fill = header_fill
-            
-            for cell in ws[5]:
-                cell.font = header_font
-                cell.alignment = header_alignment
-                cell.fill = header_fill
-            
-            # Estilos para los datos
-            data_font = Font(size=11)
-            
-            # Agregar datos
-            for declaracion in declaraciones:
-                mutual = declaracion.mutual.alias
-                for detalle in declaracion.detalles.all():
-                    tipo = "Prestamo"
-                    if detalle.tipo != 'P':
-                        tipo = "Reclamo"
-                        
-                    row = [mutual, tipo, detalle.concepto, detalle.importe, detalle.total_registros]
-                    ws.append(row)
-                    
-                    
-                # Separador entre declaraciones
-                # ws.append([""])
+            filter_form = FormulariosFinalizados(request.POST)
+            if filter_form.is_valid():
+                form_periodo = filter_form.cleaned_data.get('periodo')
+            try:
+                if form_periodo is None:
+                    raise Http404("El periodo no existe")
                 
-            # Configurar ancho de columnas
-            column_widths = [20, 15,10,15, 10]
-            for i, width in enumerate(column_widths, start=1):
-                ws.column_dimensions[chr(64+i)].width = width
+                periodo = get_object_or_404(Periodo, pk=form_periodo.pk)
 
+                declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+                declaraciones =  declaraciones.order_by('mutual__alias')
             
-            
-            # ws2 = wb.create_sheet(title="NO DECLARADOS")
-            # ws2['A1'] = "Contenido de la otra hoja"
-            
-            
-            
-            
-            
-            # Crear la respuesta HTTP con el contenido del archivo Excel
-            response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
-            extension = ".xlsx"
-            nombre = periodo.mes_anio.strftime('%Y%m')+ "_ReportePeriodo" + extension
-            response['Content-Disposition'] = f'attachment; filename="{nombre}"'
-            
+                wb = Workbook()
+                ws = wb.active
+                ws.title = "DECLARACIONES"
+                
+                # Estilos para el encabezado
+                header_font = Font(bold=True, size=12)
+                header_alignment = Alignment(horizontal="center", vertical="center")
+                header_fill = PatternFill(start_color="77dd77", end_color="77dd77", fill_type="solid")
+                
+                ws.append(["Periodo" , "N° Declaraciones"])
+                ws.append([periodo.mes_anio, declaraciones.count()])
+                ws.append([""])
+                ws.append([""])
+                # Añadir encabezados
+                headers = ["Mutual", "Tipo Archivo", "Concepto", "Importe", "N° Registros"]
+                ws.append(headers)
+                for cell in ws[1]:
+                    cell.font = header_font
+                    cell.alignment = header_alignment
+                    cell.fill = header_fill
+                
+                for cell in ws[5]:
+                    cell.font = header_font
+                    cell.alignment = header_alignment
+                    cell.fill = header_fill
+                
+                # Estilos para los datos
+                data_font = Font(size=11)
+                
+                # Agregar datos
+                for declaracion in declaraciones:
+                    mutual = declaracion.mutual.alias
+                    for detalle in declaracion.detalles.all():
+                        tipo = "Prestamo"
+                        if detalle.tipo != 'P':
+                            tipo = "Reclamo"
+                            
+                        row = [mutual, tipo, detalle.concepto, detalle.importe, detalle.total_registros]
+                        ws.append(row)
+                        
+                        
+                    # Separador entre declaraciones
+                    # ws.append([""])
+                    
+                # Configurar ancho de columnas
+                column_widths = [20, 15,10,15, 10]
+                for i, width in enumerate(column_widths, start=1):
+                    ws.column_dimensions[chr(64+i)].width = width
 
-            # Guardar el contenido del libro de trabajo en la respuesta HTTP
-            wb.save(response)
+                
+                
+                # ws2 = wb.create_sheet(title="NO DECLARADOS")
+                # ws2['A1'] = "Contenido de la otra hoja"
+                
+                
+                
+                
+                
+                # Crear la respuesta HTTP con el contenido del archivo Excel
+                response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+                extension = ".xlsx"
+                nombre = periodo.mes_anio.strftime('%Y%m')+ "_ReportePeriodo" + extension
+                response['Content-Disposition'] = f'attachment; filename="{nombre}"'
+                
 
-            return response
-        
+                # Guardar el contenido del libro de trabajo en la respuesta HTTP
+                wb.save(response)
+
+                return response
+            except Http404 as e:
+                messages.error(request, str(e))
+                filter_form = FormulariosFinalizados()
+                return render(request, 'reporte_periodo_dj.html', {'filter_form': filter_form})
+
+
         except Periodo.DoesNotExist:
             print("No existe periodo")

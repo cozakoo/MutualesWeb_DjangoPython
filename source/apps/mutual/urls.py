@@ -26,6 +26,11 @@ urlpatterns = [
     path('periodos/periodo/vigente/<int:pk>/finalizar', finalizarPeriodo , name="finalizar_periodo"),
     path('periodos/periodo/vigente/<int:pk>/finalizar_crear_nuevo', finalizarPeriodoCrearNuevo , name="finalizar_periodo_crear_nuevo"),
     
+    path('periodos/periodo/<int:pk>/comprimir', comprimirPeriodo, name="comprimir_periodo"),
+    
+    path('periodos/periodo/descargar', seleccionarPeriodoComprimir, name="comprimir_archivos_periodo"),
+    
+    
     path('exito/', mutual_exito, name='mutual_exito'),
     path('prueba/', tu_vista, name='t_vista'),
     path('datos/', DetalleMutualView.as_view(), name='detalles_mimutual'),

@@ -27,3 +27,14 @@ class PeriodoLookup(ModelLookup):
         return queryset.order_by('mes_anio')[:7] 
 
 registry.register(PeriodoLookup)
+
+class PeriodosFinalizadosLookup(ModelLookup):
+    model = Periodo
+    search_fields = ('mes_anio__icontains', )
+
+    def get_query(self, request, term):
+        queryset = super().get_query(request, term)
+        queryset = queryset.exclude(fecha_fin__isnull=True)
+        return queryset.order_by('mes_anio')[:7] 
+
+registry.register(PeriodosFinalizadosLookup)

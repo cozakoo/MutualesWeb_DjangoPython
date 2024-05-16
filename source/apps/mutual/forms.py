@@ -1,5 +1,5 @@
 from django import forms
-from apps.mutual.lookups import MutualLookup, PeriodoLookup
+from apps.mutual.lookups import MutualLookup, PeriodoLookup, PeriodosFinalizadosLookup
 from apps.mutual.models import DetalleDeclaracionJurada, DetalleMutual, Mutual, Periodo
 from selectable.forms import AutoCompleteSelectField, AutoComboboxSelectWidget
 
@@ -127,13 +127,12 @@ from django.utils import timezone
 
 
 class FormulariosFinalizados(forms.Form):
-    periodos = forms.ModelChoiceField(
-        queryset=Periodo.objects.filter(fecha_fin__isnull=False),
-        required=True,
-        empty_label="Seleccione el periodo",  # Esta línea agrega la opción predeterminada
-        widget=forms.Select(attrs={'class': 'form-select'})
+    periodo = AutoCompleteSelectField(
+        lookup_class=PeriodosFinalizadosLookup,
+        required=False,
+        widget=AutoComboboxSelectWidget(PeriodosFinalizadosLookup, attrs={'class': 'form-control', 'placeholder': 'Ej: 202405'})  # Agregar 'placeholder' aquí
     )
-     
+
 class FormularioPeriodo(forms.ModelForm):
     class Meta:
         model = Periodo
@@ -235,5 +234,10 @@ class PeriodoFilterForm(forms.Form):
     periodo = AutoCompleteSelectField(
         lookup_class=PeriodoLookup,
         required=False,
-        widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Periodo'})  # Agregar 'placeholder' aquí
+        widget=AutoComboboxSelectWidget(PeriodoLookup, attrs={'class': 'form-control', 'placeholder': 'Ej: 202405'})  # Agregar 'placeholder' aquí
     )
+
+class GenerarRarForm(forms.Form):
+    archivos = forms.FileField(label='Selecciona archivos', widget=forms.ClearableFileInput(attrs={'multiple': True}))
+    nombre_archivo_rar = forms.CharField(label='Nombre del archivo .rar', max_length=100)
+    

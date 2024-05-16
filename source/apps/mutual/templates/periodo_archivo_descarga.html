@@ -1,0 +1,37 @@
+{% extends 'dashboardEmpleadoPublico.html' %}
+{% load static %}
+
+{% block extra_css_nivel %}
+  <link href="{% static 'Libs/css/mutual_alta.css' %}" rel="stylesheet" />
+{% endblock %}
+
+
+{% block contenedor %}
+  
+  <div class="container cuadrado-background animate__animated animate__fadeIn">
+  <h2 class="text-center titulo">{{titulo}}</h2>
+  </br>
+    
+    <form method="post">
+    {% csrf_token %}
+    <div class="form-group">
+      {{ filter_form }}
+
+      <br>
+      
+      <div style="text-align: center;">
+        <button type="submit" class="btn btn-outline-success">
+          <i class="fa-solid fa-file-arrow-down"></i>
+          Descargar
+        </button>
+    </div>
+    </div>
+  </form>
+  </div>
+
+<link href="{% static 'selectable/css/dj.selectable.css' %}" type="text/css" media="all" rel="stylesheet">
+<script type="text/javascript" src="{% static 'Libs/js/jquery-1.11.2.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'Libs/js/jquery-iu.js' %}"></script>
+<script type="text/javascript" src="{% static 'selectable/js/jquery.dj.selectable.js' %}"></script>
+
+{% endblock %}

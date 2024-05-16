@@ -25,10 +25,18 @@
             {% endblock %}
           </ul>
         </li>
+
         {% block dropdown_adicional %}
         {% endblock %}
 
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Ayuda</a>
+          <ul class="dropdown-menu">
+            {% block opcion_ayuda %}
 
+            {% endblock %}
+          </ul>
+        </li>
       </ul>
       <!-- Botón collapsable alineado a la derecha -->
       <div class="dropdown-center" style="margin-right: 4%;">
