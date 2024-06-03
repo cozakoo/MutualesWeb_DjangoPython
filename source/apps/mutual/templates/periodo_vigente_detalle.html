@@ -98,17 +98,18 @@
                 <i class="fa-solid fa-filter"></i>
             </button>
         </div>
-      
-          <div align="center" class="col">
-              <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
-                  Finalizar periodo 
-              </butto>
-              
-            </div>
-            {% include 'modal_confirmar_fin_periodo.html'%}
-          </div>
+        
+        <div align="center" class="col">
+          <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+            Finalizar periodo 
+          </button>
+          <br>
+          <br>
+          <a href="{% url 'mutual:comprimir_periodo' pk=periodo.pk %}" class="btn btn-sm btn-outline-success"> Descargar periodo </a>
         </div>
-        <a href="{% url 'mutual:comprimir_periodo' pk=periodo.pk %}" class="btn btn-outline-success"> Descargar Periodo </a>
+        {% include 'modal_confirmar_fin_periodo.html'%}
+      </div>
+    </div>
   </form>
   
   
