@@ -1255,18 +1255,28 @@ def validar_declaraciones_leidas(request, declaraciones, redirect_url):
 @permission_required('empleadospublicos.permission_empleado_publico', raise_exception=True)
 def finalizar_periodo(request, pk, crear_nuevo=False):
     periodo = get_object_or_404(Periodo, pk=pk)
-    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo)
+    declaraciones = DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=False)
 
     todas_leidas = validar_declaraciones_leidas(request, declaraciones, 'mutual:periodo_vigente_detalle')
 
-
     if todas_leidas:
+        # Eliminar las declaraciones juradas que están como borrador
+        DeclaracionJurada.objects.filter(periodo=periodo, es_borrador=True).delete()
+
         periodo.fecha_fin = datetime.today()
         periodo.save()
         if crear_nuevo:
             fecha_inicio = periodo.fecha_fin
-            # FALTA setear mes_anio DON DIA EN 1
-            mes_anio = fecha_inicio.replace(day=1) + relativedelta(months=1)
+
+            # Inicializar mes_anio como el primer día del mes de fecha_inicio
+            mes_anio = fecha_inicio.replace(day=1)
+
+            # Verificar si ya existe un periodo con el mismo mes_anio
+            while Periodo.objects.filter(mes_anio=mes_anio).exists():
+                # Incrementar mes_anio al mes siguiente si ya existe
+                mes_anio += relativedelta(months=1)
+
+            # Crear el nuevo periodo
             periodo_nuevo = Periodo(fecha_inicio=fecha_inicio, mes_anio=mes_anio)
             periodo_nuevo.save()
 
