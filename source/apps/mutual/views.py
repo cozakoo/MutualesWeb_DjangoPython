@@ -574,12 +574,12 @@ class DeclaracionJuradaCreateView(LoginRequiredMixin,PermissionRequiredMixin, Cr
                     error['error_fechaInicio'] = True
 
 
-                if fecha_obj_fin < periodoActual.mes_anio:
-                    print("fecha_obj_fin", fecha_obj_fin)
-                    print("periodoActual.mes_anio", periodoActual.mes_anio)
-                    inserto_error[0] = True
-                    error['error_detalle_fechaFin'] = 'La fecha es menor que la fecha del periodo a declarar'
-                    error['error_fechaFin'] = True
+                # if fecha_obj_fin < periodoActual.mes_anio:
+                #     print("fecha_obj_fin", fecha_obj_fin)
+                #     print("periodoActual.mes_anio", periodoActual.mes_anio)
+                #     inserto_error[0] = True
+                #     error['error_detalle_fechaFin'] = 'La fecha es menor que la fecha del periodo a declarar'
+                #     error['error_fechaFin'] = True
 
                 if fecha_obj_inicio > fecha_obj_fin:
                     inserto_error[0] = True
